@@ -245,7 +245,7 @@ for t_ems in range(T_ems):
 
 plt.figure(figsize=(6, 12), dpi=80, facecolor='w')
 plt.subplot(4, 1, 1)
-plt.plot(time_ems, market.prices_import)
+plt.plot(time_ems, market.import_prices_in_pounds_per_kWh)
 plt.grid(True, alpha=0.5)
 plt.ylabel('Price (£/kWh)')
 plt.xlabel('Time (h)')

@@ -45,7 +45,7 @@ G_wye_nondispatch = np.zeros([3*(N_buses-1),N_nondispatch])
 G_del_nondispatch = np.zeros([3*(N_buses-1),N_nondispatch])
 for i in range(N_nondispatch):
     asset_N_phases = nondispatch_assets[i].phases.size
-    bus_id = nondispatch_assets[i].bus_id
+    bus_id = nondispatch_assets[i].network_bus_id
     wye_flag = network.bus_df[network.bus_df['number']==bus_id]['connect'].values[0]=='Y' #check if Wye connected
     for ph in nondispatch_assets[i].phases:
         bus_ph_index = 3*bus_id + ph
@@ -58,7 +58,7 @@ G_wye_ES = np.zeros([3*(N_buses-1),N_ES])
 G_del_ES = np.zeros([3*(N_buses-1),N_ES])   
 for i in range(N_ES):
     asset_N_phases = storage_assets[i].phases.size
-    bus_id = storage_assets[i].bus_id
+    bus_id = storage_assets[i].network_bus_id
     wye_flag = network.bus_df[network.bus_df['number']==bus_id]['connect'].values[0]=='Y' #check if Wye connected
     for ph in storage_assets[i].phases:
         bus_ph_index = 3*bus_id + ph
@@ -87,7 +87,7 @@ Q_lin_buses = np.zeros([T_mpc,N_buses,N_phases])
 for t in range(T_mpc):
     #Setup linear power flow model:
     for i in range(N_nondispatch):
-        bus_id = nondispatch_assets[i].bus_id
+        bus_id = nondispatch_assets[i].network_bus_id
         phases_i = nondispatch_assets[i].phases
         for ph_i in phases_i:
             bus_ph_index = 3*bus_id + ph_i
@@ -115,16 +115,16 @@ for t in range(T_mpc):
 Asum = pic.new_param('Asum',np.tril(np.ones([T_mpc,T_mpc]))) #lower triangle matrix summing powers
 #linear battery model constraints
 for i in range(N_ES):
-    prob.add_constraint(P_ES[:,i] <= storage_assets[i].Pmax[T_range]) #maximum power constraint
-    prob.add_constraint(P_ES[:,i] >= storage_assets[i].Pmin[T_range]) #minimum power constraint
+    prob.add_constraint(P_ES[:,i] <= storage_assets[i].max_import_kW[T_range]) #maximum power constraint
+    prob.add_constraint(P_ES[:,i] >= storage_assets[i].min_import_kW[T_range]) #minimum power constraint
     prob.add_constraint(dt_ems*Asum*P_ES[:,i] <= storage_assets[i].Emax[T_range]-storage_assets[i].E[t0_dt]) #maximum energy constraint
     prob.add_constraint(dt_ems*Asum*P_ES[:,i] >= storage_assets[i].Emin[T_range]-storage_assets[i].E[t0_dt]) #minimum energy constraint
     prob.add_constraint(dt_ems*Asum[T_mpc-1,:]*P_ES[:,i] + E_T_min >= storage_assets[i].ET-storage_assets[i].E[t0_dt]) #final energy constraint
 #import/export constraints
 for t in range(T_mpc):
-    prob.add_constraint(P_import[t] <= market.Pmax[t0+t]) #maximum import constraint
+    prob.add_constraint(P_import[t] <= market.max_import_kW[t0 + t]) #maximum import constraint
     prob.add_constraint(P_import[t] >= 0) #maximum import constraint
-    prob.add_constraint(P_export[t] <= -market.Pmin[t0+t]) #maximum import constraint
+    prob.add_constraint(P_export[t] <= -market.min_import_kW[t0 + t]) #maximum import constraint
     prob.add_constraint(P_export[t] >= 0) #maximum import constraint
     prob.add_constraint(P_max_demand + P_max_demand_pre_t0 >= P_import[t]-P_export[t]) #maximum demand dummy variable constraint
     prob.add_constraint(P_max_demand  >= 0) #maximum demand dummy variable constraint
@@ -164,10 +164,10 @@ for t in range(T_mpc):
 #######################################
 terminal_const = 1e12 #coeff for objective terminal soft constraint
 print(E_T_min)
-prob.set_objective('min',market.demand_charge*P_max_demand+\
-                   sum(market.prices_import[t]*P_import[t]+\
-                     -market.prices_export[t]*P_export[t]\
-                     for t in range(T_mpc)) + terminal_const*E_T_min)#terminal_const*sum(E_T_min[i] for i in range(N_ES)))
+prob.set_objective('min', market.max_demand_charge_in_pounds_per_kWh * P_max_demand + \
+                   sum(market.import_prices_in_pounds_per_kWh[t] * P_import[t] + \
+                       -market.export_prices_in_pounds_per_kWh[t] * P_export[t] \
+                       for t in range(T_mpc)) + terminal_const * E_T_min)#terminal_const*sum(E_T_min[i] for i in range(N_ES)))
 #######################################
 ### STEP 5: solve the optimisation
 #######################################
