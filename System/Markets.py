@@ -73,15 +73,13 @@ class Market(ABC):
         """
         Calculate revenue according to simulation results
         """
-        imported_kilowatts = self._get_imported_kilowatts_from_the_market(total_import_kW=total_import_kW,
-                                                                          simulation_time_interval_in_minutes=
-                                                                          simulation_time_interval_in_minutes)
-        exported_kilowatts = self._get_exported_kilowatts_to_the_market(total_import_kW=total_import_kW,
-                                                                        simulation_time_interval_in_minutes=
-                                                                        simulation_time_interval_in_minutes)
-        average_imported_kilowatts = \
-            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
-        max_imported_kilowatts = np.max(average_imported_kilowatts)
+        self.average_imported_kilowatts = self._get_average_imported_kilowatts(
+            total_import_kW=total_import_kW, simulation_time_interval_in_minutes=simulation_time_interval_in_minutes)
+
+        imported_kilowatts = self._get_imported_kilowatts_from_the_market()
+        exported_kilowatts = self._get_exported_kilowatts_to_the_market()
+
+        max_imported_kilowatts = np.max(self.average_imported_kilowatts)
 
         revenue_between_import_and_export = self._get_revenue_between_import_and_export_kilowatts(
             imported_kilowatts=imported_kilowatts, exported_kilowatts=exported_kilowatts)
@@ -94,18 +92,12 @@ class Market(ABC):
 
         return float(revenue_without_frequency_response + total_frequency_response_revenue)
 
-    def _get_imported_kilowatts_from_the_market(self, total_import_kW: float,
-                                                simulation_time_interval_in_minutes: float) -> np.array:
-        average_imported_kilowatts = \
-            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
-        imported_kilowatts = average_imported_kilowatts
+    def _get_imported_kilowatts_from_the_market(self) -> np.array:
+        imported_kilowatts = self.average_imported_kilowatts
         return np.maximum(imported_kilowatts, 0)
 
-    def _get_exported_kilowatts_to_the_market(self, total_import_kW: float,
-                                              simulation_time_interval_in_minutes: float) -> np.array:
-        average_imported_kilowatts = \
-            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
-        exported_kilowatts = -average_imported_kilowatts
+    def _get_exported_kilowatts_to_the_market(self) -> np.array:
+        exported_kilowatts = -self.average_imported_kilowatts
         return np.maximum(exported_kilowatts, 0)
 
     def _get_average_imported_kilowatts(self, total_import_kW: float, simulation_time_interval_in_minutes: float):
