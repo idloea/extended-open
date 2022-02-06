@@ -196,7 +196,7 @@ def get_summer_building_case_original_results():
     time_ems = dt_ems * np.arange(T_ems)
     timeE = dt * np.arange(T + 1)
     # Print revenue generated
-    revenue = market.calculate_revenue(-Pnet_market, dt)
+    revenue = market._calculate_revenue(-Pnet_market, dt)
 
     return [revenue,
             buses_Vpu[0],

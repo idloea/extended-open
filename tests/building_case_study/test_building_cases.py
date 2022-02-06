@@ -23,7 +23,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         expected_P_demand_base = 29.218000000000004
 
         revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, buses_Vpu, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_summer_building_case_original_results()
-        self.assertAlmostEqual(expected_revenue, revenue)
+
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
         np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)
         np.testing.assert_almost_equal(expected_buses_Pnet, buses_Pnet)
@@ -35,6 +35,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         self.assertAlmostEqual(expected_P_BLDG_ems, P_BLDG_ems)
         self.assertAlmostEqual(expected_P_demand_ems, P_demand_ems)
         self.assertAlmostEqual(expected_P_demand_base, expected_P_demand_base)
+        self.assertAlmostEqual(expected_revenue, revenue)
 
     def test_winter_building_case(self):
         # Results manually obtained from the original OPEN code for summer
@@ -52,7 +53,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         expected_P_demand_base = 29.218000000000004
 
         revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, buses_Vpu, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_winter_building_case_original_results()
-        self.assertAlmostEqual(expected_revenue, revenue)
+
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
         np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)
         np.testing.assert_almost_equal(expected_buses_Pnet, buses_Pnet)
@@ -64,3 +65,4 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         self.assertAlmostEqual(expected_P_BLDG_ems, P_BLDG_ems)
         self.assertAlmostEqual(expected_P_demand_ems, P_demand_ems)
         self.assertAlmostEqual(expected_P_demand_base, expected_P_demand_base)
+        self.assertAlmostEqual(expected_revenue, revenue)

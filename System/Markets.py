@@ -13,6 +13,8 @@ with a particular set of real and reactive power profiles over the simulation
 time-series.
 
 """
+from typing import List
+
 import numpy as np
 from abc import ABC, abstractmethod
 
@@ -50,13 +52,14 @@ class Market(ABC):
                  min_frequency_response_state_of_charge=0.4,
                  frequency_response_price_in_pounds_per_kWh=5 / 1000,
                  daily_connection_charge=0.13):
+
         self.network_bus_id = network_bus_id
         self.export_prices_in_pounds_per_kWh = export_prices_in_pounds_per_kWh
         self.import_prices_in_pounds_per_kWh = import_prices_in_pounds_per_kWh
         self.max_demand_charge_in_pounds_per_kWh = max_demand_charge_in_pounds_per_kWh
         self.max_import_kW = max_import_kW
         self.min_import_kW = min_import_kW
-        self.minutes_market_interval = minutes_market_interval
+        self.market_interval_in_minutes = minutes_market_interval
         self.number_of_market_time_intervals = number_of_market_time_intervals
         self.frequency_response_active = frequency_response_active
         self.offered_kW_in_frequency_response = offered_kW_in_frequency_response
@@ -66,40 +69,75 @@ class Market(ABC):
         self.daily_connection_charge = daily_connection_charge
         self.total_frequency_response_earnings = 0  # Initiate as 0
 
-    def calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
+    def _calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
         """
         Calculate revenue according to simulation results
         """
-        # convert import power to the market time-series
-        import_market_kW_time_series = np.zeros(self.number_of_market_time_intervals)
-        for time_interval in range(self.number_of_market_time_intervals):
-            t_indexes = (time_interval * self.minutes_market_interval / simulation_time_interval_in_minutes +
-                         np.arange(0, self.minutes_market_interval / simulation_time_interval_in_minutes)).astype(int)
-            import_market_kW_time_series[time_interval] = np.mean(total_import_kW[t_indexes])
-        # calculate the revenue
-        import_kW = np.maximum(import_market_kW_time_series, 0)
-        export_kW = np.maximum(-import_market_kW_time_series, 0)
-        max_kW_demand = np.max(import_market_kW_time_series)
+        imported_kilowatts = self._get_imported_kilowatts_from_the_market(total_import_kW=total_import_kW,
+                                                                          simulation_time_interval_in_minutes=
+                                                                          simulation_time_interval_in_minutes)
+        exported_kilowatts = self._get_exported_kilowatts_to_the_market(total_import_kW=total_import_kW,
+                                                                        simulation_time_interval_in_minutes=
+                                                                        simulation_time_interval_in_minutes)
+        average_imported_kilowatts = \
+            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
+        max_imported_kilowatts = np.max(average_imported_kilowatts)
 
-        export_import_revenues = []
-        for time_interval in range(self.number_of_market_time_intervals):
-            import_revenue = self.import_prices_in_pounds_per_kWh[time_interval] * import_kW[time_interval] *\
-                             self.minutes_market_interval
-            export_revenue = self.export_prices_in_pounds_per_kWh[time_interval] * export_kW[time_interval] *\
-                             self.minutes_market_interval
-            export_import_revenue = export_revenue - import_revenue
-            export_import_revenues.append(export_import_revenue)
+        revenue_between_import_and_export = self._get_revenue_between_import_and_export_kilowatts(
+            imported_kilowatts=imported_kilowatts, exported_kilowatts=exported_kilowatts)
+        revenue_between_import_and_export_sum = sum(revenue_between_import_and_export)
 
-        export_import_revenue_sum = sum(export_import_revenues)
-        max_demand_cost = self.max_demand_charge_in_pounds_per_kWh * max_kW_demand
-        revenue_without_frequency_response = export_import_revenue_sum - max_demand_cost
+        max_imported_kilowatts_cost = self.max_demand_charge_in_pounds_per_kWh * max_imported_kilowatts
+        revenue_without_frequency_response = revenue_between_import_and_export_sum - max_imported_kilowatts_cost
 
-        if self.frequency_response_active:
-            total_frequency_response_revenue = self.frequency_response_price_in_pounds_per_kWh * \
-                                                self.offered_kW_in_frequency_response * \
-                                                np.count_nonzero(self.frequency_response_active) *\
-                                                self.minutes_market_interval
-        else:
-            total_frequency_response_revenue = 0
+        total_frequency_response_revenue = self._get_total_frequency_response_revenue()
 
         return float(revenue_without_frequency_response + total_frequency_response_revenue)
+
+    def _get_imported_kilowatts_from_the_market(self, total_import_kW: float,
+                                                simulation_time_interval_in_minutes: float) -> np.array:
+        average_imported_kilowatts = \
+            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
+        imported_kilowatts = average_imported_kilowatts
+        return np.maximum(imported_kilowatts, 0)
+
+    def _get_exported_kilowatts_to_the_market(self, total_import_kW: float,
+                                              simulation_time_interval_in_minutes: float) -> np.array:
+        average_imported_kilowatts = \
+            self._get_average_imported_kilowatts(total_import_kW, simulation_time_interval_in_minutes)
+        exported_kilowatts = -average_imported_kilowatts
+        return np.maximum(exported_kilowatts, 0)
+
+    def _get_average_imported_kilowatts(self, total_import_kW: float, simulation_time_interval_in_minutes: float):
+        average_imported_kilowatts = np.zeros(self.number_of_market_time_intervals)
+        market_time_intervals_range = range(self.number_of_market_time_intervals)
+        for market_time_interval in market_time_intervals_range:
+            time_indexes = (market_time_interval * self.market_interval_in_minutes / simulation_time_interval_in_minutes
+                            + np.arange(0, self.market_interval_in_minutes /
+                                        simulation_time_interval_in_minutes)).astype(int)
+            average_imported_kilowatts[market_time_interval] = np.mean(total_import_kW[time_indexes])
+        return average_imported_kilowatts
+
+    def _get_revenue_between_import_and_export_kilowatts(self, imported_kilowatts: np.array,
+                                                         exported_kilowatts) -> List:
+        revenues = []
+        for time_interval in range(self.number_of_market_time_intervals):
+            import_revenue = self.import_prices_in_pounds_per_kWh[time_interval] * imported_kilowatts[
+                time_interval] * \
+                             self.market_interval_in_minutes
+            export_revenue = self.export_prices_in_pounds_per_kWh[time_interval] * exported_kilowatts[
+                time_interval] * \
+                             self.market_interval_in_minutes
+            revenue_difference = export_revenue - import_revenue
+            revenues.append(revenue_difference)
+        return revenues
+
+    def _get_total_frequency_response_revenue(self):
+        if self.frequency_response_active:
+            total_frequency_response_revenue = self.frequency_response_price_in_pounds_per_kWh * \
+                                               self.offered_kW_in_frequency_response * \
+                                               np.count_nonzero(self.frequency_response_active) * \
+                                               self.market_interval_in_minutes
+        else:
+            total_frequency_response_revenue = 0
+        return total_frequency_response_revenue

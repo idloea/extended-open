@@ -535,7 +535,7 @@ if run_opt ==1:
         timeE = dt*np.arange(T+1)
         
         #energy cost
-        energy_cost = market.calculate_revenue(Pnet_market,dt)
+        energy_cost = market._calculate_revenue(Pnet_market, dt)
         energy_cost_string = 'Total energy cost: £ %.2f' %(-1*energy_cost)
         print(energy_cost_string)
         
