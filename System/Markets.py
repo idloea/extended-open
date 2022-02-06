@@ -114,12 +114,10 @@ class Market(ABC):
                                                          exported_kilowatts) -> List:
         revenues = []
         for time_interval in range(self.number_of_market_time_intervals):
-            import_revenue = self.import_prices_in_pounds_per_kWh[time_interval] * imported_kilowatts[
-                time_interval] * \
-                             self.market_interval_in_minutes
-            export_revenue = self.export_prices_in_pounds_per_kWh[time_interval] * exported_kilowatts[
-                time_interval] * \
-                             self.market_interval_in_minutes
+            import_revenue = self._get_import_revenue(time_interval=time_interval,
+                                                      imported_kilowatts=imported_kilowatts)
+            export_revenue = self._get_export_revenue(time_interval=time_interval,
+                                                      exported_kilowatts=exported_kilowatts)
             revenue_difference = export_revenue - import_revenue
             revenues.append(revenue_difference)
         return revenues
@@ -133,3 +131,11 @@ class Market(ABC):
         else:
             total_frequency_response_revenue = 0
         return total_frequency_response_revenue
+
+    def _get_import_revenue(self, time_interval: int, imported_kilowatts: np.array):
+        return self.import_prices_in_pounds_per_kWh[time_interval] * imported_kilowatts[time_interval] * \
+               self.market_interval_in_minutes
+
+    def _get_export_revenue(self, time_interval: int, exported_kilowatts: np.array):
+        return self.export_prices_in_pounds_per_kWh[time_interval] * exported_kilowatts[time_interval] * \
+               self.market_interval_in_minutes
