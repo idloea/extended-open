@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -72,40 +73,62 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     ### STEP 1: setup parameters
     #######################################
-    dt = 1 / 60  # 1 minute time intervals
-    T = int(24 / dt)  # Number of intervals
-    dt_ems = 15 / 60  # 30 minute EMS time intervals
-    T_ems = int(T * dt / dt_ems)  # Number of EMS intervals
-    T0 = 8  # from 8 am to 8 am
-    Ppv_nom = 400  # power rating of the PV generation
+    time_interval_in_minutes = 1
+    time_interval_in_hours = time_interval_in_minutes / 60  # 1 minute time intervals
+    hours_per_day = 24
+    number_of_time_intervals_per_day = int(hours_per_day / time_interval_in_hours)  # Number of intervals
+
+    energy_management_system_time_interval_in_minutes = 15      # 15 minute EMS time intervals
+    energy_management_system_time_interval_in_hours = energy_management_system_time_interval_in_minutes / 60  # Number of EMS intervals
+    number_of_energy_management_system_time_intervals_per_day = int(number_of_time_intervals_per_day *
+                                                                    time_interval_in_hours /
+                                                                    energy_management_system_time_interval_in_hours)
+    building_reference_degree_celsius = 8  # from 8 am to 8 am
+    rated_photovoltaic_kilowatts = 400  # power rating of the PV generation
+
     # Electric Vehicle (EV) parameters
-    N_EVs = 120  # number of EVs
-    Emax_EV = 30  # maximum EV energy level
-    Emin_EV = 0  # minimum EV energy level
-    P_max_EV = 7  # maximum EV charging power
-    P_min_EV = 0  # minimum EV charging power
+    number_of_electric_vehicles = 120  # number of EVs
+    max_electric_vehicle_energy_level = 30  # maximum EV energy level
+    max_electric_vehicle_charging_power = 7  # maximum EV charging power
+
     np.random.seed(1000)
-    E0_EVs = Emax_EV * np.random.uniform(0, 1, N_EVs)  # random EV initial energy levels
-    ta_EVs = np.random.randint(12 * 2, 22 * 2, N_EVs) - T0 * 2  # random EV arrival times between 12pm and 10pm
-    td_EVs = np.random.randint(29 * 2, 32 * 2 + 1, N_EVs) - T0 * 2  # random EV departure times 5am and 8am
+    random_electric_vehicle_energy_levels = max_electric_vehicle_energy_level * np.random.uniform(
+        0, 1, number_of_electric_vehicles)  # random EV initial energy levels
+    electric_vehicle_arrival_time_start = 12  # 12:00 pm
+    electric_vehicle_arrival_time_end = 22  # 10:00 pm
+    random_electric_vehicle_arrival_time = np.random.randint(electric_vehicle_arrival_time_start * 2,
+                                                             electric_vehicle_arrival_time_end * 2,
+                                                             number_of_electric_vehicles) - \
+                                           building_reference_degree_celsius * 2
+    electric_vehicle_departure_time_start = 29  # 05:00 am
+    electric_vehicle_departure_time_end = 32  # 08:00 am
+    random_electric_vehicle_departure_time = np.random.randint(electric_vehicle_departure_time_start * 2,
+                                                               electric_vehicle_departure_time_end * 2 + 1,
+                                                               number_of_electric_vehicles) - \
+                                             building_reference_degree_celsius * 2
     # Ensure EVs can be feasibility charged
-    for i in range(N_EVs):
-        td_EVs[i] = np.max([td_EVs[i], ta_EVs[i]])
-        E0_EVs[i] = np.max([E0_EVs[i], Emax_EV - P_max_EV * (td_EVs[i] - ta_EVs[i])])
+    for i in range(number_of_electric_vehicles):
+        random_electric_vehicle_departure_time[i] = np.max([random_electric_vehicle_departure_time[i],
+                                                            random_electric_vehicle_arrival_time[i]])
+        random_electric_vehicle_energy_levels[i] = np.max([random_electric_vehicle_energy_levels[i],
+                                                           max_electric_vehicle_energy_level -
+                                                           max_electric_vehicle_charging_power *
+                                                           (random_electric_vehicle_departure_time[i] -
+                                                            random_electric_vehicle_arrival_time[i])])
     # Building parameters
-    max_building_degree_celsius = 18  # degree celsius
-    min_building_degree_celsius = 16  # degree celsius
-    T0 = 17  # degree centigrade
-    max_heat_kilowatts = 90  # kW Max heat supplied
-    max_cooling_kilowatts = 200  # kW Max cooling
-    heating_coefficient_of_performance = 3  # coefficient of performance - heating
-    cooling_coefficient_of_performance = 1  # coefficient of performance - cooling
+    max_building_degree_celsius = 18
+    min_building_degree_celsius = 16
+    building_reference_degree_celsius = 17  # At the beginning of the scenario
+    max_heat_kilowatts = 90
+    max_cooling_kilowatts = 200
+    hvac_heating_coefficient_of_performance = 3
+    hvac_cooling_coefficient_of_performance = 1
     # Parameters from MultiSAVES
     C = 500  # kWh/ degree celsius
     R = 0.0337  # degree celsius/kW
     # Market parameters
-    dt_market = dt_ems  # market and EMS have the same time-series
-    T_market = T_ems  # market and EMS have same length
+    dt_market = energy_management_system_time_interval_in_hours  # market and EMS have the same time-series
+    T_market = number_of_energy_management_system_time_intervals_per_day  # market and EMS have same length
     # TD: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export = 0.04  # money received of net exports
     peak_period_import_prices = 0.07
@@ -145,32 +168,32 @@ def get_building_case_original_results(is_winter: bool):
     building_assets = []
     nondispatch_assets = []
     # PV source at bus 3
-    Pnet = -photovoltaic_generation_per_unit * Ppv_nom  # 100kW PV plant
-    Qnet = np.zeros(T)
-    PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+    Pnet = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
+    Qnet = np.zeros(number_of_time_intervals_per_day)
+    PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
     nondispatch_assets.append(PV_gen_bus3)
     # Load at bus 3
     Pnet = np.sum(electric_loads, 1)  # summed load across 120 households
-    Qnet = np.zeros(T)
-    load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+    Qnet = np.zeros(number_of_time_intervals_per_day)
+    load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
     nondispatch_assets.append(load_bus3)
     # Building asset at bus 3
-    Tmax_bldg_i = max_building_degree_celsius * np.ones(T_ems)
-    Tmin_bldg_i = min_building_degree_celsius * np.ones(T_ems)
+    Tmax_bldg_i = max_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
+    Tmin_bldg_i = min_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
     Hmax_bldg_i = max_heat_kilowatts
     Cmax_bldg_i = max_cooling_kilowatts
-    T0_i = T0
+    T0_i = building_reference_degree_celsius
     C_i = C
     R_i = R
-    CoP_heating_i = heating_coefficient_of_performance
-    CoP_cooling_i = cooling_coefficient_of_performance
+    CoP_heating_i = hvac_heating_coefficient_of_performance
+    CoP_cooling_i = hvac_cooling_coefficient_of_performance
     if is_winter:
-        Ta_i = 10 * np.ones(T_ems)
+        Ta_i = 10 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     else:
-        Ta_i = 22 * np.ones(T_ems)
+        Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     bus_id_bldg_i = bus3
     bldg_i = AS.BuildingAsset(Tmax_bldg_i, Tmin_bldg_i, Hmax_bldg_i, Cmax_bldg_i, T0_i, C_i, R_i, CoP_heating_i,
-                              CoP_cooling_i, Ta_i, bus_id_bldg_i, dt, T, dt_ems, T_ems)
+                              CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours, number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours, number_of_energy_management_system_time_intervals_per_day)
     building_assets.append(bldg_i)
     N_BLDGs = len(building_assets)
     #######################################
@@ -178,7 +201,7 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     bus_id_market = bus1
     market = MK.Market(network_bus_id=bus_id_market,
-                       number_of_EMS_time_intervals=T_ems,
+                       number_of_EMS_time_intervals=number_of_energy_management_system_time_intervals_per_day,
                        export_prices_in_pounds_per_kWh=prices_export,
                        peak_period_import_prices=peak_period_import_prices,
                        peak_period_hours_per_day=peak_period_hours_per_day,
@@ -198,7 +221,7 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, dt, T, dt_ems, T_ems,
+    energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours, number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours, number_of_energy_management_system_time_intervals_per_day,
                                     building_assets)
     #######################################
     ### STEP 6: simulate the energy system:
@@ -215,7 +238,7 @@ def get_building_case_original_results(is_winter: bool):
     P_export_ems = output['P_export_ems']
     P_BLDG_ems = output['P_BLDG_ems']
     P_demand_ems = output['P_demand_ems']
-    P_demand_base = np.zeros(T)
+    P_demand_base = np.zeros(number_of_time_intervals_per_day)
     for i in range(len(nondispatch_assets)):
         bus_id = nondispatch_assets[i].bus_id
         P_demand_base += nondispatch_assets[i].Pnet
@@ -223,11 +246,11 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 7: plot results
     #######################################
     # x-axis time values
-    time = dt * np.arange(T)
-    time_ems = dt_ems * np.arange(T_ems)
-    timeE = dt * np.arange(T + 1)
+    time = time_interval_in_hours * np.arange(number_of_time_intervals_per_day)
+    time_ems = energy_management_system_time_interval_in_hours * np.arange(number_of_energy_management_system_time_intervals_per_day)
+    timeE = time_interval_in_hours * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
-    revenue = market._calculate_revenue(-Pnet_market, dt)
+    revenue = market._calculate_revenue(-Pnet_market, time_interval_in_hours)
 
     return [revenue,
             buses_Vpu[0],
