@@ -166,7 +166,7 @@ terminal_const = 1e12 #coeff for objective terminal soft constraint
 print(E_T_min)
 prob.set_objective('min', market.max_demand_charge_in_pounds_per_kWh * P_max_demand + \
                    sum(market.import_prices_in_pounds_per_kWh[t] * P_import[t] + \
-                       -market.export_prices_in_pounds_per_kWh[t] * P_export[t] \
+                       -market.export_price_time_series_in_pounds_per_kWh[t] * P_export[t] \
                        for t in range(T_mpc)) + terminal_const * E_T_min)#terminal_const*sum(E_T_min[i] for i in range(N_ES)))
 #######################################
 ### STEP 5: solve the optimisation

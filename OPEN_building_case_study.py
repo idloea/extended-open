@@ -181,14 +181,14 @@ N_BLDGs = len(building_assets)
 #######################################
 
 bus_id_market = bus1
-market = MK.Market(bus_id_market, prices_export, prices_import, demand_charge, Pmax_market, Pmin_market, dt_market,
-                   T_market)
+market = MK.Market(bus_id_market, prices_export, prices_import, 0.15, 17, 0.07, 7, Pmax_market, Pmin_market, dt_market,
+                   T_market,,,
 
-#######################################
-# STEP 5: setup the energy system
-#######################################
+         #######################################
+         # STEP 5: setup the energy system
+         #######################################
 
-energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, dt, T, dt_ems, T_ems,
+         energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, dt, T, dt_ems, T_ems,
                                 building_assets)
 
 #######################################

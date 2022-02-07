@@ -268,7 +268,7 @@ class EnergySystem:
         #######################################
         prob.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * P_max_demand + \
                            sum(self.market.import_prices_in_pounds_per_kWh[t] * P_import[t] + \
-                               -self.market.export_prices_in_pounds_per_kWh[t] * P_export[t] \
+                               -self.market.export_price_time_series_in_pounds_per_kWh[t] * P_export[t] \
                                for t in range(self.T_ems)))
         #######################################
         ### STEP 3: solve the optimisation
@@ -1340,7 +1340,7 @@ class EnergySystem:
         prices_import = pic.new_param('prices_import',
                                       self.market.import_prices_in_pounds_per_kWh)
         prices_export = pic.new_param('prices_export',
-                                      self.market.export_prices_in_pounds_per_kWh)
+                                      self.market.export_price_time_series_in_pounds_per_kWh)
 
         prob.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * \
                            (P_max_demand + P_max_demand_pre_t0) +

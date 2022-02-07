@@ -41,8 +41,11 @@ class Market(ABC):
 
     def __init__(self, network_bus_id: int,
                  number_of_EMS_time_intervals: int,
-                 export_prices_in_pounds_per_kWh: int,
-                 import_prices_in_pounds_per_kWh: np.ndarray,
+                 export_prices_in_pounds_per_kWh: float,
+                 peak_period_import_prices: float,
+                 peak_period_hours_per_day: int,
+                 valley_period_import_prices: float,
+                 valley_period_hours_per_day: int,
                  max_demand_charge_in_pounds_per_kWh: float,
                  max_import_kW: float, min_import_kW: float,
                  minutes_market_interval: float,
@@ -53,14 +56,18 @@ class Market(ABC):
                  frequency_response_price_in_pounds_per_kWh: float,
                  daily_connection_charge: float):
 
+        self.peak_period_import_prices = peak_period_import_prices
+        self.peak_period_hours_per_day = peak_period_hours_per_day
+        self.valley_period_import_prices = valley_period_import_prices
+        self.valley_period_hours_per_day = valley_period_hours_per_day
+
         self.network_bus_id = network_bus_id
-        self.export_prices_in_pounds_per_kWh = export_prices_in_pounds_per_kWh * np.ones(number_of_EMS_time_intervals)
-        self.import_prices_in_pounds_per_kWh = import_prices_in_pounds_per_kWh
+        self.number_of_EMS_time_intervals = number_of_EMS_time_intervals
+        self.number_of_market_time_intervals = number_of_market_time_intervals
         self.max_demand_charge_in_pounds_per_kWh = max_demand_charge_in_pounds_per_kWh
         self.max_import_kW = max_import_kW
         self.min_import_kW = min_import_kW
         self.market_interval_in_minutes = minutes_market_interval
-        self.number_of_market_time_intervals = number_of_market_time_intervals
         self.offered_kW_in_frequency_response = offered_kW_in_frequency_response
         self.frequency_response_active = self._is_frequency_response_active()
         self.max_frequency_response_state_of_charge = max_frequency_response_state_of_charge
@@ -68,6 +75,14 @@ class Market(ABC):
         self.frequency_response_price_in_pounds_per_kWh = frequency_response_price_in_pounds_per_kWh
         self.daily_connection_charge = daily_connection_charge
         self.total_frequency_response_earnings = 0  # Initiate as 0
+
+        self.export_price_time_series_in_pounds_per_kWh = export_prices_in_pounds_per_kWh * \
+                                                          np.ones(self.number_of_EMS_time_intervals)
+
+        peak_import_prices_in_pounds_per_kWh = self._get_peak_period_import_prices()
+        valley_import_prices_in_pounds_per_kWh = self._get_valley_period_import_prices()
+        self.import_prices_in_pounds_per_kWh = np.hstack((peak_import_prices_in_pounds_per_kWh,
+                                                          valley_import_prices_in_pounds_per_kWh))
 
     def _calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
         """
@@ -137,7 +152,7 @@ class Market(ABC):
                self.market_interval_in_minutes
 
     def _get_export_revenue(self, time_interval: int, exported_kilowatts: np.array):
-        return self.export_prices_in_pounds_per_kWh[time_interval] * exported_kilowatts[time_interval] * \
+        return self.export_price_time_series_in_pounds_per_kWh[time_interval] * exported_kilowatts[time_interval] * \
                self.market_interval_in_minutes
 
     def _is_frequency_response_active(self):
@@ -146,3 +161,16 @@ class Market(ABC):
         else:
             frequency_response_active = False
         return frequency_response_active
+
+    def _get_peak_period_import_prices(self):
+        peak_period_percentage_per_day = self.peak_period_hours_per_day / 24
+        return self.peak_period_import_prices * np.ones(int(self.number_of_market_time_intervals *
+                                                            peak_period_percentage_per_day))
+
+    def _get_valley_period_import_prices(self):
+        valley_period_percentage_per_day = self.valley_period_hours_per_day / 24
+        return self.valley_period_import_prices * np.ones(int(self.number_of_market_time_intervals *
+                                                              valley_period_percentage_per_day))
+
+    def _get_prices_in_pounds_per_kilowatts(self):
+        return np.hstack((self.peak_import_prices_in_pounds_per_kWh, self.valley_import_prices_in_pounds_per_kWh))

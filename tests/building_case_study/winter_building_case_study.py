@@ -100,9 +100,13 @@ def get_winter_building_case_original_results():
     # Market parameters
     dt_market = dt_ems  # market and EMS have the same time-series
     T_market = T_ems  # market and EMS have same length
-    prices_export = 0.04 * np.ones(T_market)  # money received of net exports
-    prices_import = np.hstack((0.07 * np.ones(int(T_market * 7 / 24)), \
-                               0.15 * np.ones(int(T_market * 17 / 24))))  # price of net imports
+    # TD: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
+    prices_export = 0.04  # money received of net exports
+    peak_period_import_prices = 0.07
+    peak_period_hours_per_day = 7
+    valley_period_import_prices = 0.15
+    valley_period_hours_per_day = 17
+
     demand_charge = 0.10  # price per kW for the maximum demand
     Pmax_market = 500 * np.ones(T_market)  # maximum import power
     Pmin_market = -500 * np.ones(T_market)  # maximum export power
@@ -167,10 +171,17 @@ def get_winter_building_case_original_results():
     ### STEP 4: setup the market
     #######################################
     bus_id_market = bus1
-    market = MK.Market(network_bus_id=bus_id_market, number_of_EMS_time_intervals=T_ems,
-                       export_prices_in_pounds_per_kWh=prices_export, import_prices_in_pounds_per_kWh=prices_import,
-                       max_demand_charge_in_pounds_per_kWh=demand_charge, max_import_kW=Pmax_market,
-                       min_import_kW=Pmin_market, minutes_market_interval=dt_market,
+    market = MK.Market(network_bus_id=bus_id_market,
+                       number_of_EMS_time_intervals=T_ems,
+                       export_prices_in_pounds_per_kWh=prices_export,
+                       peak_period_import_prices=peak_period_import_prices,
+                       peak_period_hours_per_day=peak_period_hours_per_day,
+                       valley_period_import_prices=valley_period_import_prices,
+                       valley_period_hours_per_day=valley_period_hours_per_day,
+                       max_demand_charge_in_pounds_per_kWh=demand_charge,
+                       max_import_kW=Pmax_market,
+                       min_import_kW=Pmin_market,
+                       minutes_market_interval=dt_market,
                        number_of_market_time_intervals=T_market,
                        offered_kW_in_frequency_response=offered_kW_in_frequency_response,
                        max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
