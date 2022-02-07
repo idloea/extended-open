@@ -453,8 +453,8 @@ if run_opt ==1:
     #######################################
         
     bus_id_market = bus650_num
-    market = MK.Market(bus_id_market, prices_export, prices_import, demand_charge,
-                       Pmax_market, Pmin_market, dt_market, T_market)
+    market = MK.Market(bus_id_market, prices_export, prices_import, demand_charge, Pmax_market, Pmin_market, dt_market,
+                       T_market,,
     
     #######################################
     #STEP 5: setup the energy system

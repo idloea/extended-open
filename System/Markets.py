@@ -40,29 +40,29 @@ class Market(ABC):
     """
 
     def __init__(self, network_bus_id: int,
-                 export_prices_in_pounds_per_kWh: np.ndarray,
+                 number_of_EMS_time_intervals: int,
+                 export_prices_in_pounds_per_kWh: int,
                  import_prices_in_pounds_per_kWh: np.ndarray,
                  max_demand_charge_in_pounds_per_kWh: float,
                  max_import_kW: float, min_import_kW: float,
                  minutes_market_interval: float,
                  number_of_market_time_intervals: int,
-                 frequency_response_active: bool = False,
-                 offered_kW_in_frequency_response: float = None,
-                 max_frequency_response_state_of_charge: float = 0.6,
-                 min_frequency_response_state_of_charge=0.4,
-                 frequency_response_price_in_pounds_per_kWh=5 / 1000,
-                 daily_connection_charge=0.13):
+                 offered_kW_in_frequency_response: float,
+                 max_frequency_response_state_of_charge: float,
+                 min_frequency_response_state_of_charge: float,
+                 frequency_response_price_in_pounds_per_kWh: float,
+                 daily_connection_charge: float):
 
         self.network_bus_id = network_bus_id
-        self.export_prices_in_pounds_per_kWh = export_prices_in_pounds_per_kWh
+        self.export_prices_in_pounds_per_kWh = export_prices_in_pounds_per_kWh * np.ones(number_of_EMS_time_intervals)
         self.import_prices_in_pounds_per_kWh = import_prices_in_pounds_per_kWh
         self.max_demand_charge_in_pounds_per_kWh = max_demand_charge_in_pounds_per_kWh
         self.max_import_kW = max_import_kW
         self.min_import_kW = min_import_kW
         self.market_interval_in_minutes = minutes_market_interval
         self.number_of_market_time_intervals = number_of_market_time_intervals
-        self.frequency_response_active = frequency_response_active
         self.offered_kW_in_frequency_response = offered_kW_in_frequency_response
+        self.frequency_response_active = self._is_frequency_response_active()
         self.max_frequency_response_state_of_charge = max_frequency_response_state_of_charge
         self.min_frequency_response_state_of_charge = min_frequency_response_state_of_charge
         self.frequency_response_price_in_pounds_per_kWh = frequency_response_price_in_pounds_per_kWh
@@ -139,3 +139,10 @@ class Market(ABC):
     def _get_export_revenue(self, time_interval: int, exported_kilowatts: np.array):
         return self.export_prices_in_pounds_per_kWh[time_interval] * exported_kilowatts[time_interval] * \
                self.market_interval_in_minutes
+
+    def _is_frequency_response_active(self):
+        if self.offered_kW_in_frequency_response > 0:
+            frequency_response_active = True
+        else:
+            frequency_response_active = False
+        return frequency_response_active
