@@ -106,6 +106,12 @@ def get_summer_building_case_original_results():
     demand_charge = 0.10  # price per kW for the maximum demand
     Pmax_market = 500 * np.ones(T_market)  # maximum import power
     Pmin_market = -500 * np.ones(T_market)  # maximum export power
+
+    offered_kW_in_frequency_response = 0
+    max_frequency_response_state_of_charge = 0.6
+    min_frequency_response_state_of_charge = 0.4
+    frequency_response_price_in_pounds_per_kWh = 5 / 1000
+    daily_connection_charge = 0.13
     #######################################
     ### STEP 2: setup the network
     #######################################
@@ -161,8 +167,16 @@ def get_summer_building_case_original_results():
     ### STEP 4: setup the market
     #######################################
     bus_id_market = bus1
-    market = MK.Market(bus_id_market, prices_export, prices_import, demand_charge, Pmax_market, Pmin_market, dt_market,
-                       T_market)
+    market = MK.Market(network_bus_id=bus_id_market, number_of_EMS_time_intervals=T_ems,
+                       export_prices_in_pounds_per_kWh=prices_export, import_prices_in_pounds_per_kWh=prices_import,
+                       max_demand_charge_in_pounds_per_kWh=demand_charge, max_import_kW=Pmax_market,
+                       min_import_kW=Pmin_market, minutes_market_interval=dt_market,
+                       number_of_market_time_intervals=T_market,
+                       offered_kW_in_frequency_response=offered_kW_in_frequency_response,
+                       max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
+                       min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
+                       frequency_response_price_in_pounds_per_kWh=frequency_response_price_in_pounds_per_kWh,
+                       daily_connection_charge=daily_connection_charge)
     #######################################
     # STEP 5: setup the energy system
     #######################################
