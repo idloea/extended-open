@@ -39,30 +39,36 @@ __version__ = "1.1.0"
 ###
 #######################################
 
-def get_summer_building_case_original_results():
+def get_building_case_original_results(is_winter: bool):
     path_string = normpath('Results/Building_Case_Study/')
     if not os.path.isdir(path_string):
         os.makedirs(path_string)
     #######################################
     ### STEP 0: Load Data
     #######################################
-    choice = 1  # Summer
-    PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
-    PVpu_raw_wtr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-    Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2014JAN.csv")
-    Loads_raw_wtr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
-    PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
-    PVpu_raw_smr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-    Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2013JUN.csv")
-    Loads_raw_smr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
-    PVtotal_smr = np.sum(PVpu_raw_smr, 1)
-    PVtotal_wtr = np.sum(PVpu_raw_wtr, 1)
-    winterFlag = False
-    if winterFlag == False:
-        PVpu = PVtotal_smr / np.max(PVtotal_smr)
+    winter_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
+    winter_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
+        winter_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
+
+    summer_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
+    summer_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
+        summer_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
+
+    summer_electric_load_data_path = os.path.join("Data/Building/", "Loads_1min_2013JUN.csv")
+    summer_electric_load_data = pd.read_csv(summer_electric_load_data_path, index_col=0, parse_dates=True).values
+
+    sum_of_summer_photovoltaic_electricity_generation_in_per_unit = np.sum(
+        summer_photovoltaic_electricity_generation_in_per_unit, 1)
+    sum_of_winter_photovoltaic_electricity_generation_in_per_unit = np.sum(
+        winter_photovoltaic_electricity_generation_in_per_unit, 1)
+
+    if not is_winter:
+        photovoltaic_generation_per_unit = sum_of_summer_photovoltaic_electricity_generation_in_per_unit / \
+                                           np.max(sum_of_summer_photovoltaic_electricity_generation_in_per_unit)
     else:
-        PVpu = PVtotal_wtr / np.max(PVtotal_smr)
-    Loads = Loads_raw_smr
+        photovoltaic_generation_per_unit = sum_of_winter_photovoltaic_electricity_generation_in_per_unit / \
+                                           np.max(sum_of_summer_photovoltaic_electricity_generation_in_per_unit)
+    electric_loads = summer_electric_load_data
     #######################################
     ### STEP 1: setup parameters
     #######################################
@@ -87,13 +93,13 @@ def get_summer_building_case_original_results():
         td_EVs[i] = np.max([td_EVs[i], ta_EVs[i]])
         E0_EVs[i] = np.max([E0_EVs[i], Emax_EV - P_max_EV * (td_EVs[i] - ta_EVs[i])])
     # Building parameters
-    Tmax = 18  # degree celsius
-    Tmin = 16  # degree celsius
+    max_building_degree_celsius = 18  # degree celsius
+    min_building_degree_celsius = 16  # degree celsius
     T0 = 17  # degree centigrade
-    heatmax = 90  # kW Max heat supplied
-    coolmax = 200  # kW Max cooling
-    CoP_heating = 3  # coefficient of performance - heating
-    CoP_cooling = 1  # coefficient of performance - cooling
+    max_heat_kilowatts = 90  # kW Max heat supplied
+    max_cooling_kilowatts = 200  # kW Max cooling
+    heating_coefficient_of_performance = 3  # coefficient of performance - heating
+    cooling_coefficient_of_performance = 1  # coefficient of performance - cooling
     # Parameters from MultiSAVES
     C = 500  # kWh/ degree celsius
     R = 0.0337  # degree celsius/kW
@@ -108,8 +114,8 @@ def get_summer_building_case_original_results():
     valley_period_hours_per_day = 17
 
     demand_charge = 0.10  # price per kW for the maximum demand
-    Pmax_market = 500 * np.ones(T_market)  # maximum import power
-    Pmin_market = -500 * np.ones(T_market)  # maximum export power
+    max_import_kW = 500  # maximum import power
+    min_import_kW = -500  # maximum export power
 
     offered_kW_in_frequency_response = 0
     max_frequency_response_state_of_charge = 0.6
@@ -139,26 +145,26 @@ def get_summer_building_case_original_results():
     building_assets = []
     nondispatch_assets = []
     # PV source at bus 3
-    Pnet = -PVpu * Ppv_nom  # 100kW PV plant
+    Pnet = -photovoltaic_generation_per_unit * Ppv_nom  # 100kW PV plant
     Qnet = np.zeros(T)
     PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
     nondispatch_assets.append(PV_gen_bus3)
     # Load at bus 3
-    Pnet = np.sum(Loads, 1)  # summed load across 120 households
+    Pnet = np.sum(electric_loads, 1)  # summed load across 120 households
     Qnet = np.zeros(T)
     load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
     nondispatch_assets.append(load_bus3)
     # Building asset at bus 3
-    Tmax_bldg_i = Tmax * np.ones(T_ems)
-    Tmin_bldg_i = Tmin * np.ones(T_ems)
-    Hmax_bldg_i = heatmax
-    Cmax_bldg_i = coolmax
+    Tmax_bldg_i = max_building_degree_celsius * np.ones(T_ems)
+    Tmin_bldg_i = min_building_degree_celsius * np.ones(T_ems)
+    Hmax_bldg_i = max_heat_kilowatts
+    Cmax_bldg_i = max_cooling_kilowatts
     T0_i = T0
     C_i = C
     R_i = R
-    CoP_heating_i = CoP_heating
-    CoP_cooling_i = CoP_cooling
-    if winterFlag == True:
+    CoP_heating_i = heating_coefficient_of_performance
+    CoP_cooling_i = cooling_coefficient_of_performance
+    if is_winter:
         Ta_i = 10 * np.ones(T_ems)
     else:
         Ta_i = 22 * np.ones(T_ems)
@@ -179,8 +185,8 @@ def get_summer_building_case_original_results():
                        valley_period_import_prices=valley_period_import_prices,
                        valley_period_hours_per_day=valley_period_hours_per_day,
                        max_demand_charge_in_pounds_per_kWh=demand_charge,
-                       max_import_kW=Pmax_market,
-                       min_import_kW=Pmin_market,
+                       max_import_kW=max_import_kW,
+                       min_import_kW=min_import_kW,
                        minutes_market_interval=dt_market,
                        number_of_market_time_intervals=T_market,
                        offered_kW_in_frequency_response=offered_kW_in_frequency_response,
@@ -188,6 +194,7 @@ def get_summer_building_case_original_results():
                        min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
                        frequency_response_price_in_pounds_per_kWh=frequency_response_price_in_pounds_per_kWh,
                        daily_connection_charge=daily_connection_charge)
+
     #######################################
     # STEP 5: setup the energy system
     #######################################
@@ -198,7 +205,6 @@ def get_summer_building_case_original_results():
     #######################################
     output = energy_system.simulate_network()
     # output = energy_system.simulate_network_bldg()
-    buses_Vpu = output['buses_Vpu']
     buses_Vang = output['buses_Vang']
     buses_Pnet = output['buses_Pnet']
     buses_Qnet = output['buses_Qnet']
@@ -230,7 +236,6 @@ def get_summer_building_case_original_results():
             buses_Qnet[0],
             Pnet_market[0],
             Qnet_market[0],
-            buses_Vpu[0],
             P_import_ems[0],
             P_export_ems[0],
             P_BLDG_ems[0],

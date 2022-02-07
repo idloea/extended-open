@@ -1,13 +1,13 @@
 import numpy as np
 import unittest
 
-from tests.building_case_study.summer_building_case_study import get_summer_building_case_original_results
-from tests.building_case_study.winter_building_case_study import get_winter_building_case_original_results
+from tests.building_case_study.building_case_study import get_building_case_original_results
 
 
 class OriginalOPENTestBuildingCases(unittest.TestCase):
 
     def test_summer_building_case(self):
+        is_winter = False
         # Results manually obtained from the original OPEN code for summer
         expected_revenue = 42.695890104240384
         expected_buses_Vpu = np.array([1., 0.9989054, 0.98702643])
@@ -22,7 +22,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         expected_P_demand_ems = 25.933799999999998
         expected_P_demand_base = 29.218000000000004
 
-        revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, buses_Vpu, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_summer_building_case_original_results()
+        revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_building_case_original_results(is_winter=is_winter)
 
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
         np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)
@@ -38,6 +38,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         self.assertAlmostEqual(expected_revenue, revenue)
 
     def test_winter_building_case(self):
+        is_winter = True
         # Results manually obtained from the original OPEN code for summer
         expected_revenue = 90.48279419097048
         expected_buses_Vpu = np.array([1., 0.99518916, 0.94452166])
@@ -52,7 +53,7 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         expected_P_demand_ems = 25.933799999999998
         expected_P_demand_base = 29.218000000000004
 
-        revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, buses_Vpu, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_winter_building_case_original_results()
+        revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_building_case_original_results(is_winter=is_winter)
 
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
         np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)

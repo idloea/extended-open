@@ -47,7 +47,8 @@ class Market(ABC):
                  valley_period_import_prices: float,
                  valley_period_hours_per_day: int,
                  max_demand_charge_in_pounds_per_kWh: float,
-                 max_import_kW: float, min_import_kW: float,
+                 max_import_kW: float,
+                 min_import_kW: float,
                  minutes_market_interval: float,
                  number_of_market_time_intervals: int,
                  offered_kW_in_frequency_response: float,
@@ -65,8 +66,8 @@ class Market(ABC):
         self.number_of_EMS_time_intervals = number_of_EMS_time_intervals
         self.number_of_market_time_intervals = number_of_market_time_intervals
         self.max_demand_charge_in_pounds_per_kWh = max_demand_charge_in_pounds_per_kWh
-        self.max_import_kW = max_import_kW
-        self.min_import_kW = min_import_kW
+        self.max_import_kW = max_import_kW * np.ones(number_of_market_time_intervals)
+        self.min_import_kW = min_import_kW * np.ones(number_of_market_time_intervals)
         self.market_interval_in_minutes = minutes_market_interval
         self.offered_kW_in_frequency_response = offered_kW_in_frequency_response
         self.frequency_response_active = self._is_frequency_response_active()
