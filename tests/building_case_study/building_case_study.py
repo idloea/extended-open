@@ -1,5 +1,4 @@
-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 The building energy management case study focuses on a building with a flexible
@@ -24,6 +23,8 @@ import System.Markets as MK
 import System.EnergySystem as ES
 
 import sys
+
+from System.electric_vehicles import ElectricVehicleFleet
 
 print('Code started.')
 # plt.close('all')
@@ -78,34 +79,46 @@ def get_building_case_original_results(is_winter: bool):
     hours_per_day = 24
     number_of_time_intervals_per_day = int(hours_per_day / time_interval_in_hours)  # Number of intervals
 
-    energy_management_system_time_interval_in_minutes = 15      # 15 minute EMS time intervals
+    energy_management_system_time_interval_in_minutes = 15  # 15 minute EMS time intervals
     energy_management_system_time_interval_in_hours = energy_management_system_time_interval_in_minutes / 60  # Number of EMS intervals
     number_of_energy_management_system_time_intervals_per_day = int(number_of_time_intervals_per_day *
                                                                     time_interval_in_hours /
                                                                     energy_management_system_time_interval_in_hours)
-    building_reference_degree_celsius = 8  # from 8 am to 8 am
+
     rated_photovoltaic_kilowatts = 400  # power rating of the PV generation
 
     # Electric Vehicle (EV) parameters
+    random_seed = np.random.seed(1000)
     number_of_electric_vehicles = 120  # number of EVs
     max_electric_vehicle_energy_level = 30  # maximum EV energy level
     max_electric_vehicle_charging_power = 7  # maximum EV charging power
-
-    np.random.seed(1000)
-    random_electric_vehicle_energy_levels = max_electric_vehicle_energy_level * np.random.uniform(
-        0, 1, number_of_electric_vehicles)  # random EV initial energy levels
     electric_vehicle_arrival_time_start = 12  # 12:00 pm
     electric_vehicle_arrival_time_end = 22  # 10:00 pm
-    random_electric_vehicle_arrival_time = np.random.randint(electric_vehicle_arrival_time_start * 2,
-                                                             electric_vehicle_arrival_time_end * 2,
-                                                             number_of_electric_vehicles) - \
-                                           building_reference_degree_celsius * 2
     electric_vehicle_departure_time_start = 29  # 05:00 am
     electric_vehicle_departure_time_end = 32  # 08:00 am
-    random_electric_vehicle_departure_time = np.random.randint(electric_vehicle_departure_time_start * 2,
-                                                               electric_vehicle_departure_time_end * 2 + 1,
-                                                               number_of_electric_vehicles) - \
-                                             building_reference_degree_celsius * 2
+    start_time_of_the_day = 8  # from 8 am to 8 am
+
+    electric_vehicle_fleet = ElectricVehicleFleet(random_seed=random_seed,
+                                                  number_of_electric_vehicles=number_of_electric_vehicles,
+                                                  max_electric_vehicle_energy_level=max_electric_vehicle_energy_level,
+                                                  max_electric_vehicle_charging_power=
+                                                  max_electric_vehicle_charging_power,
+                                                  electric_vehicle_arrival_time_start=
+                                                  electric_vehicle_arrival_time_start,
+                                                  electric_vehicle_arrival_time_end=electric_vehicle_arrival_time_end,
+                                                  electric_vehicle_departure_time_start=
+                                                  electric_vehicle_departure_time_start,
+                                                  electric_vehicle_departure_time_end=
+                                                  electric_vehicle_departure_time_end,
+                                                  start_time_of_the_day=start_time_of_the_day)
+
+    random_electric_vehicle_energy_levels = electric_vehicle_fleet.get_random_electric_vehicle_energy_levels()
+
+    random_electric_vehicle_arrival_time = electric_vehicle_fleet.get_random_electric_vehicle_arrival_time()
+
+    random_electric_vehicle_departure_time = electric_vehicle_fleet.get_random_electric_vehicle_departure_time()
+
+    electric_vehicle_fleet.check_electric_vehicle_charging_feasibility()
     # Ensure EVs can be feasibility charged
     for i in range(number_of_electric_vehicles):
         random_electric_vehicle_departure_time[i] = np.max([random_electric_vehicle_departure_time[i],
@@ -118,7 +131,7 @@ def get_building_case_original_results(is_winter: bool):
     # Building parameters
     max_building_degree_celsius = 18
     min_building_degree_celsius = 16
-    building_reference_degree_celsius = 17  # At the beginning of the scenario
+    start_time_of_the_day = 17  # At the beginning of the scenario
     max_heat_kilowatts = 90
     max_cooling_kilowatts = 200
     hvac_heating_coefficient_of_performance = 3
@@ -127,8 +140,10 @@ def get_building_case_original_results(is_winter: bool):
     C = 500  # kWh/ degree celsius
     R = 0.0337  # degree celsius/kW
     # Market parameters
-    dt_market = energy_management_system_time_interval_in_hours  # market and EMS have the same time-series
-    T_market = number_of_energy_management_system_time_intervals_per_day  # market and EMS have same length
+    # market and EMS have the same time-series
+    market_time_interval_in_hours = energy_management_system_time_interval_in_hours
+    # market and EMS have same length
+    number_of_market_time_intervals_per_day = number_of_energy_management_system_time_intervals_per_day
     # TD: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export = 0.04  # money received of net exports
     peak_period_import_prices = 0.07
@@ -182,7 +197,7 @@ def get_building_case_original_results(is_winter: bool):
     Tmin_bldg_i = min_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
     Hmax_bldg_i = max_heat_kilowatts
     Cmax_bldg_i = max_cooling_kilowatts
-    T0_i = building_reference_degree_celsius
+    T0_i = start_time_of_the_day
     C_i = C
     R_i = R
     CoP_heating_i = hvac_heating_coefficient_of_performance
@@ -193,7 +208,9 @@ def get_building_case_original_results(is_winter: bool):
         Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     bus_id_bldg_i = bus3
     bldg_i = AS.BuildingAsset(Tmax_bldg_i, Tmin_bldg_i, Hmax_bldg_i, Cmax_bldg_i, T0_i, C_i, R_i, CoP_heating_i,
-                              CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours, number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours, number_of_energy_management_system_time_intervals_per_day)
+                              CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours,
+                              number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
+                              number_of_energy_management_system_time_intervals_per_day)
     building_assets.append(bldg_i)
     N_BLDGs = len(building_assets)
     #######################################
@@ -210,8 +227,8 @@ def get_building_case_original_results(is_winter: bool):
                        max_demand_charge_in_pounds_per_kWh=demand_charge,
                        max_import_kW=max_import_kW,
                        min_import_kW=min_import_kW,
-                       minutes_market_interval=dt_market,
-                       number_of_market_time_intervals=T_market,
+                       minutes_market_interval=market_time_interval_in_hours,
+                       number_of_market_time_intervals=number_of_market_time_intervals_per_day,
                        offered_kW_in_frequency_response=offered_kW_in_frequency_response,
                        max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                        min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
@@ -221,7 +238,9 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours, number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours, number_of_energy_management_system_time_intervals_per_day,
+    energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours,
+                                    number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
+                                    number_of_energy_management_system_time_intervals_per_day,
                                     building_assets)
     #######################################
     ### STEP 6: simulate the energy system:
@@ -247,7 +266,8 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # x-axis time values
     time = time_interval_in_hours * np.arange(number_of_time_intervals_per_day)
-    time_ems = energy_management_system_time_interval_in_hours * np.arange(number_of_energy_management_system_time_intervals_per_day)
+    time_ems = energy_management_system_time_interval_in_hours * np.arange(
+        number_of_energy_management_system_time_intervals_per_day)
     timeE = time_interval_in_hours * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
     revenue = market._calculate_revenue(-Pnet_market, time_interval_in_hours)
