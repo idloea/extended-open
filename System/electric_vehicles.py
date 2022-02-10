@@ -13,6 +13,7 @@ class ElectricVehicleFleet:
                  electric_vehicle_departure_time_end: int,
                  start_time_of_the_day: int):
 
+        self.is_electric_vehicle_feasible = False
         self.random_seed = random_seed
         self.number_of_electric_vehicles = number_of_electric_vehicles
         self.max_electric_vehicle_energy_level = max_electric_vehicle_energy_level
@@ -40,13 +41,25 @@ class ElectricVehicleFleet:
     def get_random_electric_vehicle_energy_levels(self):
         return self.max_electric_vehicle_energy_level * np.random.uniform(0, 1, self.number_of_electric_vehicles)
 
-    def check_electric_vehicle_charging_feasibility(self):
+    def check_electric_vehicle_fleet_charging_feasibility(self):
         for electric_vehicle_number in range(self.number_of_electric_vehicles):
+            random_electric_vehicle_departure_time = self.random_electric_vehicle_departure_time[electric_vehicle_number]
+            random_electric_vehicle_arrival_time = self.random_electric_vehicle_arrival_time[electric_vehicle_number]
             self.random_electric_vehicle_departure_time[electric_vehicle_number] = \
-                np.max([self.random_electric_vehicle_departure_time[electric_vehicle_number],
-                        self.random_electric_vehicle_arrival_time[electric_vehicle_number]])
+                np.max([random_electric_vehicle_departure_time, random_electric_vehicle_arrival_time])
+
+            energy_levels = self.random_electric_vehicle_energy_levels[electric_vehicle_number]
+            time_between_departure_and_arrival = random_electric_vehicle_departure_time - random_electric_vehicle_arrival_time
+            charged_energy_between_departure_and_arrival = \
+                self.max_electric_vehicle_charging_power * time_between_departure_and_arrival
+            difference_between_max_and_charged_energy_levels = \
+                self.max_electric_vehicle_energy_level - charged_energy_between_departure_and_arrival
             self.random_electric_vehicle_energy_levels[electric_vehicle_number] =\
-                np.max([self.random_electric_vehicle_energy_levels[electric_vehicle_number],
-                        self.max_electric_vehicle_energy_level - self.max_electric_vehicle_charging_power *
-                        (self.random_electric_vehicle_departure_time[electric_vehicle_number] -
-                         self.random_electric_vehicle_arrival_time[electric_vehicle_number])])
+                np.max([energy_levels, difference_between_max_and_charged_energy_levels])
+
+        condition = all(electric_vehicle_energy_level >= 0 for electric_vehicle_energy_level
+                        in self.random_electric_vehicle_energy_levels)
+        if condition:
+            self.is_electric_vehicle_feasible = True
+        else:
+            pass

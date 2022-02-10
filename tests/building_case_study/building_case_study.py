@@ -112,22 +112,10 @@ def get_building_case_original_results(is_winter: bool):
                                                   electric_vehicle_departure_time_end,
                                                   start_time_of_the_day=start_time_of_the_day)
 
-    random_electric_vehicle_energy_levels = electric_vehicle_fleet.get_random_electric_vehicle_energy_levels()
+    electric_vehicle_fleet.check_electric_vehicle_fleet_charging_feasibility()
+    if not electric_vehicle_fleet.is_electric_vehicle_feasible:
+        return
 
-    random_electric_vehicle_arrival_time = electric_vehicle_fleet.get_random_electric_vehicle_arrival_time()
-
-    random_electric_vehicle_departure_time = electric_vehicle_fleet.get_random_electric_vehicle_departure_time()
-
-    electric_vehicle_fleet.check_electric_vehicle_charging_feasibility()
-    # Ensure EVs can be feasibility charged
-    for i in range(number_of_electric_vehicles):
-        random_electric_vehicle_departure_time[i] = np.max([random_electric_vehicle_departure_time[i],
-                                                            random_electric_vehicle_arrival_time[i]])
-        random_electric_vehicle_energy_levels[i] = np.max([random_electric_vehicle_energy_levels[i],
-                                                           max_electric_vehicle_energy_level -
-                                                           max_electric_vehicle_charging_power *
-                                                           (random_electric_vehicle_departure_time[i] -
-                                                            random_electric_vehicle_arrival_time[i])])
     # Building parameters
     max_building_degree_celsius = 18
     min_building_degree_celsius = 16
