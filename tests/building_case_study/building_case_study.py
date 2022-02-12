@@ -74,10 +74,11 @@ def get_building_case_original_results(is_winter: bool):
     rated_photovoltaic_kilowatts = 400  # power rating of the PV generation
 
     # Electric Vehicle (EV) parameters
-    random_seed = np.random.seed(1000)
-    number_of_electric_vehicles = 120  # number of EVs
-    max_electric_vehicle_energy_level = 30  # maximum EV energy level
-    max_electric_vehicle_charging_power = 7  # maximum EV charging power
+    seed = 1000  # Used by OPEN originally
+    random_seed = np.random.seed(seed)
+    number_of_electric_vehicles = 120
+    max_battery_capacity_in_kilowatts_per_hour = 30
+    max_battery_charging_power_in_kilowatts = 7
     electric_vehicle_arrival_time_start = 12  # 12:00 pm
     electric_vehicle_arrival_time_end = 22  # 10:00 pm
     electric_vehicle_departure_time_start = 29  # 05:00 am
@@ -86,9 +87,10 @@ def get_building_case_original_results(is_winter: bool):
 
     electric_vehicle_fleet = ElectricVehicleFleet(random_seed=random_seed,
                                                   number_of_electric_vehicles=number_of_electric_vehicles,
-                                                  max_electric_vehicle_energy_level=max_electric_vehicle_energy_level,
+                                                  max_battery_capacity_in_kilowatts_per_hour=
+                                                  max_battery_capacity_in_kilowatts_per_hour,
                                                   max_electric_vehicle_charging_power=
-                                                  max_electric_vehicle_charging_power,
+                                                  max_battery_charging_power_in_kilowatts,
                                                   electric_vehicle_arrival_time_start=
                                                   electric_vehicle_arrival_time_start,
                                                   electric_vehicle_arrival_time_end=electric_vehicle_arrival_time_end,

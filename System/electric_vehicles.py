@@ -5,7 +5,7 @@ class ElectricVehicleFleet:
     def __init__(self,
                  random_seed: int,
                  number_of_electric_vehicles: int,
-                 max_electric_vehicle_energy_level: int,
+                 max_battery_capacity_in_kilowatts_per_hour: int,
                  max_electric_vehicle_charging_power: int,
                  electric_vehicle_arrival_time_start: int,
                  electric_vehicle_arrival_time_end: int,
@@ -16,7 +16,7 @@ class ElectricVehicleFleet:
         self.is_electric_vehicle_feasible = False
         self.random_seed = random_seed
         self.number_of_electric_vehicles = number_of_electric_vehicles
-        self.max_electric_vehicle_energy_level = max_electric_vehicle_energy_level
+        self.max_electric_vehicle_energy_level = max_battery_capacity_in_kilowatts_per_hour
         self.max_electric_vehicle_charging_power = max_electric_vehicle_charging_power
         self.electric_vehicle_arrival_time_start = electric_vehicle_arrival_time_start
         self.electric_vehicle_arrival_time_end = electric_vehicle_arrival_time_end
