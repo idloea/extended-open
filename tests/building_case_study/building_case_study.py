@@ -79,11 +79,10 @@ def get_building_case_original_results(is_winter: bool):
     number_of_electric_vehicles = 120
     max_battery_capacity_in_kilowatts_per_hour = 30
     max_battery_charging_power_in_kilowatts = 7
-    electric_vehicle_arrival_time_start = 12  # 12:00 pm
-    electric_vehicle_arrival_time_end = 22  # 10:00 pm
-    electric_vehicle_departure_time_start = 29  # 05:00 am
-    electric_vehicle_departure_time_end = 32  # 08:00 am
-    start_time_of_the_day = 8  # from 8 am to 8 am
+    electric_vehicle_arrival_time_start = 12
+    electric_vehicle_arrival_time_end = 22
+    electric_vehicle_departure_time_start = 5
+    electric_vehicle_departure_time_end = 8
 
     electric_vehicle_fleet = ElectricVehicleFleet(random_seed=random_seed,
                                                   number_of_electric_vehicles=number_of_electric_vehicles,
@@ -97,8 +96,8 @@ def get_building_case_original_results(is_winter: bool):
                                                   electric_vehicle_departure_time_start=
                                                   electric_vehicle_departure_time_start,
                                                   electric_vehicle_departure_time_end=
-                                                  electric_vehicle_departure_time_end,
-                                                  start_time_of_the_day=start_time_of_the_day)
+                                                  electric_vehicle_departure_time_end
+                                                  )
 
     electric_vehicle_fleet.check_electric_vehicle_fleet_charging_feasibility()
     if not electric_vehicle_fleet.is_electric_vehicle_feasible:
