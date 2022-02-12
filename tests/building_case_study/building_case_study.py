@@ -6,34 +6,20 @@ HVAC unit which is controlled in order to minimise costs, with the constraint
 that the internal temperature remains between 16 and 18 degrees C.
 """
 
-# import modules
 import os
-from os.path import normpath, join
-import copy
+from os.path import normpath
 import pandas as pd
 import pandapower as pp
-import pandapower.networks as pn
 import numpy as np
-import picos as pic
-import matplotlib.pyplot as plt
-from datetime import date, timedelta
 
-import System.Assets as AS
-import System.Markets as MK
-import System.EnergySystem as ES
+import System.Assets as Assets
+import System.Markets as Markets
+import System.EnergySystem as EnergySystem
 
-import sys
 
 from System.electric_vehicles import ElectricVehicleFleet
 
 print('Code started.')
-# plt.close('all')
-
-############## VERSION ##############
-
-
-__version__ = "1.1.0"
-
 
 #######################################
 ###
@@ -173,12 +159,12 @@ def get_building_case_original_results(is_winter: bool):
     # PV source at bus 3
     Pnet = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
     Qnet = np.zeros(number_of_time_intervals_per_day)
-    PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
+    PV_gen_bus3 = Assets.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
     nondispatch_assets.append(PV_gen_bus3)
     # Load at bus 3
     Pnet = np.sum(electric_loads, 1)  # summed load across 120 households
     Qnet = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
+    load_bus3 = Assets.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
     nondispatch_assets.append(load_bus3)
     # Building asset at bus 3
     Tmax_bldg_i = max_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
@@ -195,41 +181,41 @@ def get_building_case_original_results(is_winter: bool):
     else:
         Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     bus_id_bldg_i = bus3
-    bldg_i = AS.BuildingAsset(Tmax_bldg_i, Tmin_bldg_i, Hmax_bldg_i, Cmax_bldg_i, T0_i, C_i, R_i, CoP_heating_i,
-                              CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours,
-                              number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
-                              number_of_energy_management_system_time_intervals_per_day)
+    bldg_i = Assets.BuildingAsset(Tmax_bldg_i, Tmin_bldg_i, Hmax_bldg_i, Cmax_bldg_i, T0_i, C_i, R_i, CoP_heating_i,
+                                  CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours,
+                                  number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
+                                  number_of_energy_management_system_time_intervals_per_day)
     building_assets.append(bldg_i)
     N_BLDGs = len(building_assets)
     #######################################
     ### STEP 4: setup the market
     #######################################
     bus_id_market = bus1
-    market = MK.Market(network_bus_id=bus_id_market,
-                       number_of_EMS_time_intervals=number_of_energy_management_system_time_intervals_per_day,
-                       export_prices_in_pounds_per_kWh=prices_export,
-                       peak_period_import_prices=peak_period_import_prices,
-                       peak_period_hours_per_day=peak_period_hours_per_day,
-                       valley_period_import_prices=valley_period_import_prices,
-                       valley_period_hours_per_day=valley_period_hours_per_day,
-                       max_demand_charge_in_pounds_per_kWh=demand_charge,
-                       max_import_kW=max_import_kW,
-                       min_import_kW=min_import_kW,
-                       minutes_market_interval=market_time_interval_in_hours,
-                       number_of_market_time_intervals=number_of_market_time_intervals_per_day,
-                       offered_kW_in_frequency_response=offered_kW_in_frequency_response,
-                       max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
-                       min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                       frequency_response_price_in_pounds_per_kWh=frequency_response_price_in_pounds_per_kWh,
-                       daily_connection_charge=daily_connection_charge)
+    market = Markets.Market(network_bus_id=bus_id_market,
+                            number_of_EMS_time_intervals=number_of_energy_management_system_time_intervals_per_day,
+                            export_prices_in_pounds_per_kWh=prices_export,
+                            peak_period_import_prices=peak_period_import_prices,
+                            peak_period_hours_per_day=peak_period_hours_per_day,
+                            valley_period_import_prices=valley_period_import_prices,
+                            valley_period_hours_per_day=valley_period_hours_per_day,
+                            max_demand_charge_in_pounds_per_kWh=demand_charge,
+                            max_import_kW=max_import_kW,
+                            min_import_kW=min_import_kW,
+                            minutes_market_interval=market_time_interval_in_hours,
+                            number_of_market_time_intervals=number_of_market_time_intervals_per_day,
+                            offered_kW_in_frequency_response=offered_kW_in_frequency_response,
+                            max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
+                            min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
+                            frequency_response_price_in_pounds_per_kWh=frequency_response_price_in_pounds_per_kWh,
+                            daily_connection_charge=daily_connection_charge)
 
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours,
-                                    number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
-                                    number_of_energy_management_system_time_intervals_per_day,
-                                    building_assets)
+    energy_system = EnergySystem.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours,
+                                              number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
+                                              number_of_energy_management_system_time_intervals_per_day,
+                                              building_assets)
     #######################################
     ### STEP 6: simulate the energy system:
     #######################################
