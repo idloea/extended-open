@@ -621,7 +621,7 @@ class EnergySystem:
 
         for i in range(N_nondispatch):
             P_demand_actual += self.non_dispatchable_assets[i].active_power
-            P_demand_pred += self.non_dispatchable_assets[i].active_power_prediction
+            P_demand_pred += self.non_dispatchable_assets[i].active_power_pred
 
         # Assemble P_demand out of P actual and P predicted and convert to EMS
         # time series scale
@@ -813,7 +813,7 @@ class EnergySystem:
         P_demand = np.zeros(T_mpc)
         for i in range(N_nondispatch):
             P_demand_actual += self.non_dispatchable_assets[i].active_power
-            P_demand_pred += self.non_dispatchable_assets[i].active_power_prediction
+            P_demand_pred += self.non_dispatchable_assets[i].active_power_pred
         # Assemble P_demand out of P actual and P predicted and convert to
         # EMS time series scale
         for t_ems in T_range:
@@ -1039,9 +1039,9 @@ class EnergySystem:
         Q_demand = np.zeros([T_mpc, N_nondispatch])
         for i in range(N_nondispatch):
             P_demand_actual[:, i] = self.non_dispatchable_assets[i].active_power
-            P_demand_pred[:, i] = self.non_dispatchable_assets[i].active_power_prediction
+            P_demand_pred[:, i] = self.non_dispatchable_assets[i].active_power_pred
             Q_demand_actual[:, i] = self.non_dispatchable_assets[i].reactive_power
-            Q_demand_pred[:, i] = self.non_dispatchable_assets[i].reactive_power_prediction
+            Q_demand_pred[:, i] = self.non_dispatchable_assets[i].reactive_power_pred
         # Assemble P_demand out of P actual and P predicted and convert to EMS
         # time series scale
         for i in range(N_nondispatch):

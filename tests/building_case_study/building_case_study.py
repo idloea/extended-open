@@ -94,16 +94,16 @@ def get_building_case_original_results(is_winter: bool):
         return
 
     # Building parameters
-    max_building_degree_celsius = 18
-    min_building_degree_celsius = 16
+    max_inside_degree_celsius = 18
+    min_inside_degree_celsius = 16
     start_time_of_the_day = 17  # At the beginning of the scenario
-    max_heat_kilowatts = 90
-    max_cooling_kilowatts = 200
-    hvac_heating_coefficient_of_performance = 3
-    hvac_cooling_coefficient_of_performance = 1
+    max_consumed_electric_heating_kilowatts = 90
+    max_consumed_electric_cooling_kilowatts = 200
+    heat_pump_coefficient_of_performance = 3
+    chiller_coefficient_of_performance = 1
     # Parameters from MultiSAVES
-    C = 500  # kWh/ degree celsius
-    R = 0.0337  # degree celsius/kW
+    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = 500  # kWh/ degree celsius
+    building_thermal_resistance_in_degree_celsius_per_kilowatts = 0.0337  # degree celsius/kW
     # Market parameters
     # market and EMS have the same time-series
     market_time_interval_in_hours = energy_management_system_time_interval_in_hours
@@ -146,28 +146,32 @@ def get_building_case_original_results(is_winter: bool):
     # initiate empty lists for different types of assets
     storage_assets = []
     building_assets = []
-    nondispatch_assets = []
+    non_distpachable_assets = []
     # PV source at bus 3
-    Pnet = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
-    Qnet = np.zeros(number_of_time_intervals_per_day)
-    PV_gen_bus3 = Assets.NonDispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours,
-                                              number_of_time_intervals_per_day)
-    nondispatch_assets.append(PV_gen_bus3)
+    active_power = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
+    reactive_power = np.zeros(number_of_time_intervals_per_day)
+    PV_gen_bus3 = Assets.NonDispatchableAsset(active_power=active_power,
+                                              reactive_power=reactive_power,
+                                              bus_id=bus3,
+                                              time_intervals_in_hours=time_interval_in_hours,
+                                              number_of_time_intervals_per_day=number_of_time_intervals_per_day)
+    non_distpachable_assets.append(PV_gen_bus3)
     # Load at bus 3
-    Pnet = np.sum(electric_loads, 1)  # summed load across 120 households
-    Qnet = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = Assets.NonDispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
-    nondispatch_assets.append(load_bus3)
+    active_power = np.sum(electric_loads, 1)  # summed load across 120 households
+    reactive_power = np.zeros(number_of_time_intervals_per_day)
+    load_bus3 = Assets.NonDispatchableAsset(active_power, reactive_power, bus3, time_interval_in_hours,
+                                            number_of_time_intervals_per_day)
+    non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
-    Tmax_bldg_i = max_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    Tmin_bldg_i = min_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    Hmax_bldg_i = max_heat_kilowatts
-    Cmax_bldg_i = max_cooling_kilowatts
+    Tmax_bldg_i = max_inside_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
+    Tmin_bldg_i = min_inside_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
+    Hmax_bldg_i = max_consumed_electric_heating_kilowatts
+    Cmax_bldg_i = max_consumed_electric_cooling_kilowatts
     T0_i = start_time_of_the_day
-    C_i = C
-    R_i = R
-    CoP_heating_i = hvac_heating_coefficient_of_performance
-    CoP_cooling_i = hvac_cooling_coefficient_of_performance
+    C_i = building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
+    R_i = building_thermal_resistance_in_degree_celsius_per_kilowatts
+    CoP_heating_i = heat_pump_coefficient_of_performance
+    CoP_cooling_i = chiller_coefficient_of_performance
     if is_winter:
         Ta_i = 10 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     else:
@@ -184,8 +188,8 @@ def get_building_case_original_results(is_winter: bool):
                                   chiller_coefficient_of_performance=CoP_cooling_i,
                                   ambient_degree_celsius=Ta_i,
                                   bus_id=bus_id_bldg_i,
-                                  time_interval=time_interval_in_hours,
-                                  number_of_time_intervals=number_of_time_intervals_per_day,
+                                  time_intervals_in_hours=time_interval_in_hours,
+                                  number_of_time_intervals_per_day=number_of_time_intervals_per_day,
                                   energy_management_system_time_intervals=energy_management_system_time_interval_in_hours,
                                   number_of_energy_management_system_time_intervals=number_of_energy_management_system_time_intervals_per_day)
 
@@ -216,7 +220,7 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = EnergySystem.EnergySystem(storage_assets, nondispatch_assets, network, market,
+    energy_system = EnergySystem.EnergySystem(storage_assets, non_distpachable_assets, network, market,
                                               time_interval_in_hours,
                                               number_of_time_intervals_per_day,
                                               energy_management_system_time_interval_in_hours,
@@ -238,9 +242,9 @@ def get_building_case_original_results(is_winter: bool):
     P_BLDG_ems = output['P_BLDG_ems']
     P_demand_ems = output['P_demand_ems']
     P_demand_base = np.zeros(number_of_time_intervals_per_day)
-    for i in range(len(nondispatch_assets)):
-        bus_id = nondispatch_assets[i].bus_id
-        P_demand_base += nondispatch_assets[i].active_power
+    for i in range(len(non_distpachable_assets)):
+        bus_id = non_distpachable_assets[i].bus_id
+        P_demand_base += non_distpachable_assets[i].active_power
     #######################################
     ### STEP 7: plot results
     #######################################

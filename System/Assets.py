@@ -17,6 +17,8 @@ conditioning (HVAC).
 """
 
 # import modules
+from typing import List
+
 import numpy as np
 
 
@@ -31,9 +33,9 @@ class Asset:
     ----------
     bus_id : float
         id number of the bus in the network
-    dt : float
+    time_intervals_in_hours : float
         time interval duration
-    T : int
+    number_of_time_intervals_per_day : int
         number of time intervals
     phases : list, optional, default [0,1,2]
         [0, 1, 2] indicates 3 phase connection \
@@ -46,11 +48,15 @@ class Asset:
 
 
     """
-    def __init__(self, bus_id, dt, T, phases=[0, 1, 2]):
+    def __init__(self,
+                 bus_id: int,
+                 time_intervals_in_hours: float,
+                 number_of_time_intervals_per_day: int,
+                 phases: List = [0, 1, 2]):
         self.bus_id = bus_id
         self.phases = np.array(phases)
-        self.dt = dt
-        self.T = T
+        self.time_intervals_in_hours = time_intervals_in_hours
+        self.number_of_time_intervals_per_day = number_of_time_intervals_per_day
 
 
 class BuildingAsset(Asset):
@@ -113,11 +119,15 @@ class BuildingAsset(Asset):
                  chiller_coefficient_of_performance: float,
                  ambient_degree_celsius: np.array,
                  bus_id: int,
-                 time_interval: float,  # TD: find a better name
-                 number_of_time_intervals,
+                 time_intervals_in_hours: float,
+                 number_of_time_intervals_per_day: int,
                  energy_management_system_time_intervals: float,
-                 number_of_energy_management_system_time_intervals):
-        Asset.__init__(self, bus_id, time_interval, number_of_time_intervals)
+                 number_of_energy_management_system_time_intervals: int):
+
+        Asset.__init__(self,
+                       bus_id=bus_id,
+                       time_intervals_in_hours=time_intervals_in_hours,
+                       number_of_time_intervals_per_day=number_of_time_intervals_per_day)
         self.max_inside_degree_celsius = max_inside_degree_celsius
         self.min_inside_degree_celsius = min_inside_degree_celsius
         self.max_consumed_electric_heating_kilowatts = max_consumed_electric_heating_kilowatts
@@ -141,8 +151,8 @@ class BuildingAsset(Asset):
         self.gamma = energy_management_system_time_intervals / \
                      (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                       building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
-        self.active_power = np.zeros(number_of_time_intervals)   # input powers over the time series (kW)
-        self.reactive_power = np.zeros(number_of_time_intervals)   # reactive powers over the time series (kW)
+        self.active_power = np.zeros(number_of_time_intervals_per_day)   # input powers over the time series (kW)
+        self.reactive_power = np.zeros(number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
 
     def update_control(self, active_power):
         """
@@ -176,9 +186,9 @@ class StorageAsset(Asset):
         required terminal energy level (kWh)
     bus_id : float
         id number of the bus in the network
-    dt : float
+    time_intervals_in_hours : float
         time interval duration (s)
-    T : int
+    number_of_time_intervals_per_day : int
         number of time intervals
     dt_ems : float
         time interval duration (energy management system time horizon) (s)
@@ -207,10 +217,10 @@ class StorageAsset(Asset):
 
 
     """
-    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, dt, T, dt_ems,
+    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day, dt_ems,
                  T_ems, phases=[0, 1, 2], Pmax_abs=None, c_deg_lin=None,
                  eff=1, eff_opt=1):
-        Asset.__init__(self, bus_id, dt, T, phases=phases)
+        Asset.__init__(self, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day, phases=phases)
         self.Emax = Emax
         self.Emin = Emin
         self.Pmax = Pmax
@@ -221,11 +231,11 @@ class StorageAsset(Asset):
             self.Pmax_abs = Pmax_abs
         self.E0 = E0
         self.ET = ET
-        self.E = E0*np.ones(T+1)
+        self.E = E0*np.ones(number_of_time_intervals_per_day + 1)
         self.dt_ems = dt_ems
         self.T_ems = T_ems
-        self.Pnet = np.zeros(T)
-        self.Qnet = np.zeros(T)
+        self.Pnet = np.zeros(number_of_time_intervals_per_day)
+        self.Qnet = np.zeros(number_of_time_intervals_per_day)
         self.c_deg_lin = c_deg_lin or 0
         self.eff = eff*np.ones(100)
         self.eff_opt = eff_opt
@@ -242,20 +252,20 @@ class StorageAsset(Asset):
         """
         self.Pnet = Pnet
         self.E[0] = self.E0
-        t_ems = self.dt/self.dt_ems
-        for t in range(self.T):
+        t_ems = self.time_intervals_in_hours / self.dt_ems
+        for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
             P_eff = self.eff[P_ratio-1]
             if self.Pnet[t] < 0:
                 if self.E[t] <= self.Emin[int(t*t_ems)]:
                     self.E[t] = self.Emin[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.dt
+                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
             elif self.Pnet[t] >= 0:
                 if self.E[t] >= self.Emax[int(t*t_ems)]:
                     self.E[t] = self.Emax[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.dt
+                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
 # NEEDED FOR OXEMF EV CASE
     def update_control_t(self, Pnet_t, t):
         """
@@ -271,19 +281,19 @@ class StorageAsset(Asset):
         """
         self.Pnet[t] = Pnet_t
         self.E[0] = self.E0
-        t_ems = self.dt/self.dt_ems
+        t_ems = self.time_intervals_in_hours / self.dt_ems
         P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
         P_eff = self.eff[P_ratio-1]
         if self.Pnet[t] < 0:
             if self.E[t] <= self.Emin[int(t*t_ems)]:
                 self.E[t] = self.Emin[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.dt
+            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
         elif self.Pnet[t] >= 0:
             if self.E[t] >= self.Emax[int(t*t_ems)]:
                 self.E[t] = self.Emax[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.dt
+            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
 
 
 class NonDispatchableAsset(Asset):
@@ -299,17 +309,17 @@ class NonDispatchableAsset(Asset):
         uncontrolled reactive input powers over the time series (kVar)
     bus_id : float
         id number of the bus in the network
-    time_intervals : float
+    time_intervals_in_hours : float
         time interval duration
-    number_of_time_intervals : int
+    number_of_time_intervals_per_day : int
         number of time intervals
     phases : list, optional, default [0,1,2]
         [0, 1, 2] indicates 3 phase connection \
         Wye: [0, 1] indicates an a,b connection \
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    active_power_prediction : float or None
+    active_power_pred : float or None
         predicted real input powers over the time series (kW)
-    reactive_power_prediction : float or None
+    reactive_power_pred : float or None
         predicted reactive input powers over the time series (kVar)
 
     Returns
@@ -321,25 +331,39 @@ class NonDispatchableAsset(Asset):
 
     def __init__(self,
                  active_power: float,
-                 reactive_power: float,
+                 reactive_power: np.array,
                  bus_id: int,
-                 time_intervals: float,
-                 number_of_time_intervals: int,
-                 phases=[0, 1, 2],
-                 active_power_prediction=None,
-                 reactive_power_prediction=None):
-        Asset.__init__(self, bus_id, time_intervals, number_of_time_intervals, phases=phases)
+                 time_intervals_in_hours: float,
+                 number_of_time_intervals_per_day: int,
+                 phases: List = [0, 1, 2],
+                 active_power_pred=None,
+                 reactive_power_pred=None):
+
+        Asset.__init__(self,
+                       bus_id=bus_id,
+                       time_intervals_in_hours=time_intervals_in_hours,
+                       number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                       phases=phases)
+
         self.active_power = active_power
         self.reactive_power = reactive_power
-        if active_power_prediction is not None:
-            self.active_power_prediction = active_power_prediction
-        else:
-            self.active_power_prediction = active_power
-        if reactive_power_prediction is not None:
-            self.reactive_power_prediction = reactive_power_prediction
-        else:
-            self.reactive_power_prediction = reactive_power
 
+        self.active_power_pred = self._get_active_power_pred(active_power_pred=active_power_pred)
+        self.reactive_power_pred = self._get_reactive_power_pred(reactive_power_pred=reactive_power_pred)
+
+    def _get_active_power_pred(self, active_power_pred):
+        if active_power_pred is not None:
+            self.active_power_pred = active_power_pred
+        else:
+            self.active_power_pred = self.active_power
+        return self.active_power_pred
+
+    def _get_reactive_power_pred(self, reactive_power_pred):
+        if reactive_power_pred is not None:
+            self.reactive_power_pred = reactive_power_pred
+        else:
+            self.reactive_power_pred = self.reactive_power
+        return self.reactive_power_pred
 
 # =============================================================================
 # Below 3ph assets to be removed in V 0.1.0
@@ -360,9 +384,9 @@ class Asset_3ph(Asset):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    dt : float
+    time_intervals_in_hours : float
         time interval duration
-    T : int
+    number_of_time_intervals_per_day : int
         number of time intervals
 
     Returns
@@ -371,8 +395,8 @@ class Asset_3ph(Asset):
 
 
     """
-    def __init__(self, bus_id, phases, dt, T):
-        Asset.__init__(self, bus_id, dt, T)
+    def __init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day):
+        Asset.__init__(self, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day)
         self.phases = np.array(phases)
 
 
@@ -400,9 +424,9 @@ class StorageAsset_3ph(Asset_3ph):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    dt : float
+    time_intervals_in_hours : float
         time interval duration (s)
-    T : int
+    number_of_time_intervals_per_day : int
         number of time intervals
     dt_ems : float
         time interval duration (energy management system time horizon) (s)
@@ -429,10 +453,10 @@ class StorageAsset_3ph(Asset_3ph):
 
 
     """
-    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, phases, dt, T,
+    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day,
                  dt_ems, T_ems, Pmax_abs=None, c_deg_lin=None, eff=1,
                  eff_opt=1):
-        Asset_3ph.__init__(self, bus_id, phases, dt, T)
+        Asset_3ph.__init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day)
         self.Emax = Emax
         self.Emin = Emin
         self.Pmax = Pmax
@@ -443,11 +467,11 @@ class StorageAsset_3ph(Asset_3ph):
             self.Pmax_abs = Pmax_abs
         self.E0 = E0
         self.ET = ET
-        self.E = E0*np.ones(T+1)
+        self.E = E0*np.ones(number_of_time_intervals_per_day + 1)
         self.dt_ems = dt_ems
         self.T_ems = T_ems
-        self.Pnet = np.zeros(T)
-        self.Qnet = np.zeros(T)
+        self.Pnet = np.zeros(number_of_time_intervals_per_day)
+        self.Qnet = np.zeros(number_of_time_intervals_per_day)
         self.c_deg_lin = c_deg_lin or 0
         self.eff = eff*np.ones(100)
         self.eff_opt = eff_opt
@@ -464,20 +488,20 @@ class StorageAsset_3ph(Asset_3ph):
         """
         self.Pnet = Pnet
         self.E[0] = self.E0
-        t_ems = self.dt/self.dt_ems
-        for t in range(self.T):
+        t_ems = self.time_intervals_in_hours / self.dt_ems
+        for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
             P_eff = self.eff[P_ratio-1]
             if self.Pnet[t] < 0:
                 if self.E[t] <= self.Emin[int(t*t_ems)]:
                     self.E[t] = self.Emin[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.dt
+                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
             elif self.Pnet[t] >= 0:
                 if self.E[t] >= self.Emax[t]:
                     self.E[t] = self.Emax[t]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.dt
+                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
 
     def update_control_t(self, Pnet_t, t):
         """
@@ -493,19 +517,19 @@ class StorageAsset_3ph(Asset_3ph):
         """
         self.Pnet[t] = Pnet_t
         self.E[0] = self.E0
-        t_ems = self.dt/self.dt_ems
+        t_ems = self.time_intervals_in_hours / self.dt_ems
         P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
         P_eff = self.eff[P_ratio-1]
         if self.Pnet[t] < 0:
             if self.E[t] <= self.Emin[int(t*t_ems)]:
                 self.E[t] = self.Emin[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.dt
+            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
         elif self.Pnet[t] >= 0:
             if self.E[t] >= self.Emax[int(t*t_ems)]:
                 self.E[t] = self.Emax[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.dt
+            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
 
 
 class NondispatchableAsset_3ph(Asset_3ph):
@@ -525,9 +549,9 @@ class NondispatchableAsset_3ph(Asset_3ph):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    dt : float
+    time_intervals_in_hours : float
         time interval duration
-    T : int
+    number_of_time_intervals_per_day : int
         number of time intervals
     Pnet_pred : float
         predicted real input powers over the time series (kW)
@@ -541,9 +565,9 @@ class NondispatchableAsset_3ph(Asset_3ph):
 
     """
 
-    def __init__(self, Pnet, Qnet, bus_id, phases, dt, T, Pnet_pred=None,
+    def __init__(self, Pnet, Qnet, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day, Pnet_pred=None,
                  Qnet_pred=None):
-        Asset_3ph.__init__(self, bus_id, phases, dt, T)
+        Asset_3ph.__init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day)
         self.Pnet = Pnet
         self.Qnet = Qnet
         if Pnet_pred is not None:

@@ -18,9 +18,9 @@ Q_demand_pred = np.zeros([T,N_nondispatch])
 Q_demand = np.zeros([T_mpc,N_nondispatch])
 for i in range(N_nondispatch):
     P_demand_actual[:,i] = nondispatch_assets[i].active_power
-    P_demand_pred[:,i] = nondispatch_assets[i].active_power_prediction
+    P_demand_pred[:,i] = nondispatch_assets[i].active_power_pred
     Q_demand_actual[:,i] = nondispatch_assets[i].reactive_power
-    Q_demand_pred[:,i] = nondispatch_assets[i].reactive_power_prediction
+    Q_demand_pred[:,i] = nondispatch_assets[i].reactive_power_pred
 #Assemble P_demand out of P actual and P predicted and convert to EMS time series scale
 for i in range(N_nondispatch):
     for t_ems in T_range:
