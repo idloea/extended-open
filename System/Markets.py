@@ -85,7 +85,7 @@ class Market(ABC):
         self.import_prices_in_pounds_per_kWh = np.hstack((peak_import_prices_in_pounds_per_kWh,
                                                           valley_import_prices_in_pounds_per_kWh))
 
-    def _calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
+    def calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
         """
         Calculate revenue according to simulation results
         """

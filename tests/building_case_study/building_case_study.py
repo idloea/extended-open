@@ -250,7 +250,7 @@ def get_building_case_original_results(is_winter: bool):
         number_of_energy_management_system_time_intervals_per_day)
     timeE = time_interval_in_hours * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
-    revenue = market._calculate_revenue(-Pnet_market, time_interval_in_hours)
+    revenue = market.calculate_revenue(-Pnet_market, time_interval_in_hours)
 
     return [revenue,
             buses_Vpu[0],
