@@ -818,10 +818,10 @@ class Network_3ph:
                             /self.transformer_df.iloc[trans_index]['kV_B'])
             else:
                 A_i = np.eye(3)
-            Y_AA = np.matmul(np.matmul(A_i,Y_AA),A_i.T)
+            Y_AA = np.matmul(np.matmul(A_i,Y_AA), A_i.number_of_time_intervals)
             Y_AB = np.matmul(A_i,Y_AB)
             Y_BB = Y_BB
-            Y_BA = np.matmul(Y_BA,A_i.T)
+            Y_BA = np.matmul(Y_BA, A_i.number_of_time_intervals)
 
 #Diagonal elements
             self.Ynet[busA_Yindex+0:busA_Yindex+3,

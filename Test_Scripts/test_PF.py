@@ -17,10 +17,10 @@ Q_demand_actual = np.zeros([T,N_nondispatch])
 Q_demand_pred = np.zeros([T,N_nondispatch])
 Q_demand = np.zeros([T_mpc,N_nondispatch])
 for i in range(N_nondispatch):
-    P_demand_actual[:,i] = nondispatch_assets[i].Pnet
-    P_demand_pred[:,i] = nondispatch_assets[i].Pnet_pred
-    Q_demand_actual[:,i] = nondispatch_assets[i].Qnet
-    Q_demand_pred[:,i] = nondispatch_assets[i].Qnet_pred
+    P_demand_actual[:,i] = nondispatch_assets[i].active_power
+    P_demand_pred[:,i] = nondispatch_assets[i].active_power_prediction
+    Q_demand_actual[:,i] = nondispatch_assets[i].reactive_power
+    Q_demand_pred[:,i] = nondispatch_assets[i].reactive_power_prediction
 #Assemble P_demand out of P actual and P predicted and convert to EMS time series scale
 for i in range(N_nondispatch):
     for t_ems in T_range:
@@ -34,7 +34,7 @@ for i in range(N_nondispatch):
 #get total ES system demand (before optimisation)
 Pnet_ES_sum = np.zeros(T)
 for i in range(N_nondispatch):
-    Pnet_ES_sum += storage_assets[i].Pnet  
+    Pnet_ES_sum += storage_assets[i].active_power
 #get the maximum (historical) demand before t0
 if t0 > 0:
     P_max_demand_pre_t0 = np.max(P_demand_actual[0:t0_dt]+Pnet_ES_sum[0:t0_dt]) 
@@ -136,11 +136,11 @@ for t in range(T_mpc):
     #Note that linear power flow matricies are in units of W (not kW)
     PQ0_wye = np.concatenate((np.real(network_t.S_PQloads_wye_res),np.imag(network_t.S_PQloads_wye_res)))*1e3
     PQ0_del = np.concatenate((np.real(network_t.S_PQloads_del_res),np.imag(network_t.S_PQloads_del_res)))*1e3
-    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M_wye)))),G_wye_ES_PQ)\
-                 + np.matmul(np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M_del)))),G_del_ES_PQ))
-    b_Pslack =   np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.matmul(np.conj(network_t.M_wye),PQ0_wye))))\
-                +np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.matmul(np.conj(network_t.M_del),PQ0_del))))\
-                +np.real(np.matmul(network_t.vs.T,(np.matmul(np.conj(network_t.Yss),np.conj(network_t.vs))+np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M0)))))
+    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_wye)))), G_wye_ES_PQ) \
+                + np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_del)))), G_del_ES_PQ))
+    b_Pslack =   np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_wye), PQ0_wye))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_del), PQ0_del))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals, (np.matmul(np.conj(network_t.Yss), np.conj(network_t.vs)) + np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M0)))))
     prob.add_constraint(P_import[t]-P_export[t] == (np.sum(A_Pslack[i]*P_ES[t,i]*1e3 for i in range(N_ES)) + b_Pslack)/1e3) #net import variables
     #Voltage magnitude constraints
     A_vlim = np.matmul(network_t.K_wye,G_wye_ES_PQ) + np.matmul(network_t.K_del,G_del_ES_PQ)

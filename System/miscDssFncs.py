@@ -177,7 +177,7 @@ def get_sYsD(DSSCircuit):
     sD = sD[iD.nonzero()]
     yzD = [YZ[i] for i in iD.nonzero()[0]]
     iD = iD[iD.nonzero()]
-    iTot = iY + (H.T).dot(iD)
+    iTot = iY + (H.number_of_time_intervals).dot(iD)
     # chka = abs((H.T).dot(iD.conj())*V0 + sY - V0*(iTot.conj()))/abs(sY) # 1a error, kW
     # sD0 = ((H.dot(V0))*(iD.conj()))
     # chkb = abs(sD - sD0)/abs(sD) # 1b error, kW

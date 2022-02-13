@@ -11,29 +11,20 @@ from os.path import normpath
 import pandas as pd
 import pandapower as pp
 import numpy as np
-
 import System.Assets as Assets
 import System.Markets as Markets
 import System.EnergySystem as EnergySystem
-
-
 from System.electric_vehicles import ElectricVehicleFleet
 
-print('Code started.')
 
-#######################################
-###
 ### Case Study: Building HVAC flexibility
-###
-#######################################
 
 def get_building_case_original_results(is_winter: bool):
     path_string = normpath('Results/Building_Case_Study/')
     if not os.path.isdir(path_string):
         os.makedirs(path_string)
-    #######################################
     ### STEP 0: Load Data
-    #######################################
+
     winter_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
     winter_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
         winter_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
@@ -57,21 +48,20 @@ def get_building_case_original_results(is_winter: bool):
         photovoltaic_generation_per_unit = sum_of_winter_photovoltaic_electricity_generation_in_per_unit / \
                                            np.max(sum_of_summer_photovoltaic_electricity_generation_in_per_unit)
     electric_loads = summer_electric_load_data
-    #######################################
-    ### STEP 1: setup parameters
-    #######################################
-    time_interval_in_minutes = 1
-    time_interval_in_hours = time_interval_in_minutes / 60  # 1 minute time intervals
-    hours_per_day = 24
-    number_of_time_intervals_per_day = int(hours_per_day / time_interval_in_hours)  # Number of intervals
 
-    energy_management_system_time_interval_in_minutes = 15  # 15 minute EMS time intervals
-    energy_management_system_time_interval_in_hours = energy_management_system_time_interval_in_minutes / 60  # Number of EMS intervals
+    ### STEP 1: setup parameters
+    time_interval_in_minutes = 1
+    time_interval_in_hours = time_interval_in_minutes / 60
+    hours_per_day = 24
+    number_of_time_intervals_per_day = int(hours_per_day / time_interval_in_hours)
+
+    energy_management_system_time_interval_in_minutes = 15
+    energy_management_system_time_interval_in_hours = energy_management_system_time_interval_in_minutes / 60
     number_of_energy_management_system_time_intervals_per_day = int(number_of_time_intervals_per_day *
                                                                     time_interval_in_hours /
                                                                     energy_management_system_time_interval_in_hours)
 
-    rated_photovoltaic_kilowatts = 400  # power rating of the PV generation
+    rated_photovoltaic_kilowatts = 400
 
     # Electric Vehicle (EV) parameters
     seed = 1000  # Used by OPEN originally
@@ -160,12 +150,13 @@ def get_building_case_original_results(is_winter: bool):
     # PV source at bus 3
     Pnet = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
     Qnet = np.zeros(number_of_time_intervals_per_day)
-    PV_gen_bus3 = Assets.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
+    PV_gen_bus3 = Assets.NonDispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours,
+                                              number_of_time_intervals_per_day)
     nondispatch_assets.append(PV_gen_bus3)
     # Load at bus 3
     Pnet = np.sum(electric_loads, 1)  # summed load across 120 households
     Qnet = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = Assets.NondispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
+    load_bus3 = Assets.NonDispatchableAsset(Pnet, Qnet, bus3, time_interval_in_hours, number_of_time_intervals_per_day)
     nondispatch_assets.append(load_bus3)
     # Building asset at bus 3
     Tmax_bldg_i = max_building_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
@@ -182,10 +173,22 @@ def get_building_case_original_results(is_winter: bool):
     else:
         Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     bus_id_bldg_i = bus3
-    bldg_i = Assets.BuildingAsset(Tmax_bldg_i, Tmin_bldg_i, Hmax_bldg_i, Cmax_bldg_i, T0_i, C_i, R_i, CoP_heating_i,
-                                  CoP_cooling_i, Ta_i, bus_id_bldg_i, time_interval_in_hours,
-                                  number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
-                                  number_of_energy_management_system_time_intervals_per_day)
+    bldg_i = Assets.BuildingAsset(max_inside_degree_celsius=Tmax_bldg_i,
+                                  min_inside_degree_celsius=Tmin_bldg_i,
+                                  max_consumed_electric_heating_kilowatts=Hmax_bldg_i,
+                                  max_consumed_electric_cooling_kilowatts=Cmax_bldg_i,
+                                  initial_inside_degree_celsius=T0_i,
+                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=C_i,
+                                  building_thermal_resistance_in_degree_celsius_per_kilowatts=R_i,
+                                  heat_pump_coefficient_of_performance=CoP_heating_i,
+                                  chiller_coefficient_of_performance=CoP_cooling_i,
+                                  ambient_degree_celsius=Ta_i,
+                                  bus_id=bus_id_bldg_i,
+                                  time_interval=time_interval_in_hours,
+                                  number_of_time_intervals=number_of_time_intervals_per_day,
+                                  energy_management_system_time_intervals=energy_management_system_time_interval_in_hours,
+                                  number_of_energy_management_system_time_intervals=number_of_energy_management_system_time_intervals_per_day)
+
     building_assets.append(bldg_i)
     N_BLDGs = len(building_assets)
     #######################################
@@ -213,8 +216,10 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = EnergySystem.EnergySystem(storage_assets, nondispatch_assets, network, market, time_interval_in_hours,
-                                              number_of_time_intervals_per_day, energy_management_system_time_interval_in_hours,
+    energy_system = EnergySystem.EnergySystem(storage_assets, nondispatch_assets, network, market,
+                                              time_interval_in_hours,
+                                              number_of_time_intervals_per_day,
+                                              energy_management_system_time_interval_in_hours,
                                               number_of_energy_management_system_time_intervals_per_day,
                                               building_assets)
     #######################################
@@ -235,7 +240,7 @@ def get_building_case_original_results(is_winter: bool):
     P_demand_base = np.zeros(number_of_time_intervals_per_day)
     for i in range(len(nondispatch_assets)):
         bus_id = nondispatch_assets[i].bus_id
-        P_demand_base += nondispatch_assets[i].Pnet
+        P_demand_base += nondispatch_assets[i].active_power
     #######################################
     ### STEP 7: plot results
     #######################################

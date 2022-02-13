@@ -147,13 +147,13 @@ nondispatch_assets = []
 # PV source at bus 3
 Pnet = -PVpu * Ppv_nom  # 100kW PV plant
 Qnet = np.zeros(T)
-PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+PV_gen_bus3 = AS.NonDispatchableAsset(Pnet, Qnet, bus3, dt, T)
 nondispatch_assets.append(PV_gen_bus3)
 
 # Load at bus 3
 Pnet = np.sum(Loads, 1)  # summed load across 120 households
 Qnet = np.zeros(T)
-load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+load_bus3 = AS.NonDispatchableAsset(Pnet, Qnet, bus3, dt, T)
 nondispatch_assets.append(load_bus3)
 
 # Building asset at bus 3
