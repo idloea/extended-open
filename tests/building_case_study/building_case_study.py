@@ -239,21 +239,20 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 6: simulate the energy system:
     #######################################
     output = energy_system.simulate_network()
-    # output = energy_system.simulate_network_bldg()
-    buses_Vang = output['buses_Vang']
-    buses_Pnet = output['buses_Pnet']
-    buses_Qnet = output['buses_Qnet']
-    Pnet_market = output['Pnet_market']
-    Qnet_market = output['Qnet_market']
-    buses_Vpu = output['buses_Vpu']
-    P_import_ems = output['P_import_ems']
-    P_export_ems = output['P_export_ems']
-    P_BLDG_ems = output['P_BLDG_ems']
-    P_demand_ems = output['P_demand_ems']
-    P_demand_base = np.zeros(number_of_time_intervals_per_day)
+    buses_voltage_angle_in_degrees = output['buses_Vang']
+    buses_active_power_in_kilowatts = output['buses_Pnet']
+    buses_reactive_power = output['buses_Qnet']
+    market_active_power_in_kilowatts = output['Pnet_market']
+    market_reactive_power = output['Qnet_market']
+    buses_voltage_in_per_unit = output['buses_Vpu']
+    energy_management_system_imported_active_power_in_kilowatts = output['P_import_ems']
+    energy_management_system_exported_active_power_in_kilowatts = output['P_export_ems']
+    building_energy_management_system_active_power_in_kilowatts = output['P_BLDG_ems']
+    energy_management_system_active_power_demand_in_kilowatt = output['P_demand_ems']
+    active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
     for i in range(len(non_distpachable_assets)):
         bus_id = non_distpachable_assets[i].bus_id
-        P_demand_base += non_distpachable_assets[i].active_power
+        active_power_demand_base_in_kilowatts += non_distpachable_assets[i].active_power
     #######################################
     ### STEP 7: plot results
     #######################################
@@ -263,17 +262,17 @@ def get_building_case_original_results(is_winter: bool):
         number_of_energy_management_system_time_intervals_per_day)
     timeE = time_interval_in_hours * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
-    revenue = market.calculate_revenue(-Pnet_market, time_interval_in_hours)
+    revenue = market.calculate_revenue(-market_active_power_in_kilowatts, time_interval_in_hours)
 
     return [revenue,
-            buses_Vpu[0],
-            buses_Vang[0],
-            buses_Pnet[0],
-            buses_Qnet[0],
-            Pnet_market[0],
-            Qnet_market[0],
-            P_import_ems[0],
-            P_export_ems[0],
-            P_BLDG_ems[0],
-            P_demand_ems[0],
-            P_demand_base[0]]
+            buses_voltage_in_per_unit[0],
+            buses_voltage_angle_in_degrees[0],
+            buses_active_power_in_kilowatts[0],
+            buses_reactive_power[0],
+            market_active_power_in_kilowatts[0],
+            market_reactive_power[0],
+            energy_management_system_imported_active_power_in_kilowatts[0],
+            energy_management_system_exported_active_power_in_kilowatts[0],
+            building_energy_management_system_active_power_in_kilowatts[0],
+            energy_management_system_active_power_demand_in_kilowatt[0],
+            active_power_demand_base_in_kilowatts[0]]
