@@ -40,18 +40,18 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
     def test_winter_building_case(self):
         is_winter = True
         # Results manually obtained from the original OPEN code for summer
-        expected_revenue = 90.48279419097048
-        expected_buses_Vpu = np.array([1., 0.99518916, 0.94452166])
-        expected_buses_Vang = np.array([0., - 1.05772496, - 1.43470765])
-        expected_buses_Pnet = np.array([-127.52757771, 0., 119.21799983])
-        expected_buses_Qnet = np.array([-3.17172107, 0., 0.])
-        expected_Pnet_market = 127.52757771149913
-        expected_Qnet_market = 3.171721069281089
-        expected_P_import_ems = 115.93379983461517
-        expected_P_export_ems = 6.473029541718239e-09
-        expected_P_BLDG_ems = 89.99999982814215
-        expected_P_demand_ems = 25.933799999999998
-        expected_P_demand_base = 29.218000000000004
+        expected_revenue = 103.87032557045784
+        expected_buses_Vpu = np.array([1., 0.99458841,  0.93796202])
+        expected_buses_Vang = np.array([0., -1.18118568, -1.60273713])
+        expected_buses_Pnet = np.array([-142.34896823, 0., 132.30699109])
+        expected_buses_Qnet = np.array([-3.95819044, 0., 0.])
+        expected_Pnet_market = 142.348968233712
+        expected_Qnet_market = 3.958190435584834
+        expected_P_import_ems = 127.23482471394126
+        expected_P_export_ems = 2.8688983452894103e-07
+        expected_P_BLDG_ems = 89.9999910937181
+        expected_P_demand_ems = 37.23483333333333
+        expected_P_demand_base = 42.30700000000001
 
         revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_building_case_original_results(is_winter=is_winter)
 
