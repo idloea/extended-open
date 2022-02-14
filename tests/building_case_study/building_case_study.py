@@ -171,34 +171,34 @@ def get_building_case_original_results(is_winter: bool):
                                             number_of_time_intervals_per_day)
     non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
-
     if is_winter:
-        Ta_i = 10 * np.ones(number_of_energy_management_system_time_intervals_per_day)
+        ambient_degree_celsius = 10
     else:
-        Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    bus_id_bldg_i = bus_3
-    bldg_i = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
-                                  min_inside_degree_celsius=min_inside_degree_celsius,
-                                  max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
-                                  max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
-                                  initial_inside_degree_celsius=initial_inside_degree_celsius,
-                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=
-                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius,
-                                  building_thermal_resistance_in_degree_celsius_per_kilowatts=
-                                  building_thermal_resistance_in_degree_celsius_per_kilowatts,
-                                  heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
-                                  chiller_coefficient_of_performance=chiller_coefficient_of_performance,
-                                  ambient_degree_celsius=Ta_i,
-                                  bus_id=bus_id_bldg_i,
-                                  time_intervals_in_hours=time_interval_in_hours,
-                                  number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                  energy_management_system_time_intervals=
-                                  energy_management_system_time_interval_in_hours,
-                                  number_of_energy_management_system_time_intervals_per_day=
-                                  number_of_energy_management_system_time_intervals_per_day)
+        ambient_degree_celsius = 22
 
-    building_assets.append(bldg_i)
-    N_BLDGs = len(building_assets)
+    bus_id_building = bus_3
+    building = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
+                                    min_inside_degree_celsius=min_inside_degree_celsius,
+                                    max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
+                                    max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
+                                    initial_inside_degree_celsius=initial_inside_degree_celsius,
+                                    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=
+                                    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius,
+                                    building_thermal_resistance_in_degree_celsius_per_kilowatts=
+                                    building_thermal_resistance_in_degree_celsius_per_kilowatts,
+                                    heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
+                                    chiller_coefficient_of_performance=chiller_coefficient_of_performance,
+                                    ambient_degree_celsius=ambient_degree_celsius,
+                                    bus_id=bus_id_building,
+                                    time_intervals_in_hours=time_interval_in_hours,
+                                    number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                                    energy_management_system_time_intervals=
+                                    energy_management_system_time_interval_in_hours,
+                                    number_of_energy_management_system_time_intervals_per_day=
+                                    number_of_energy_management_system_time_intervals_per_day)
+
+    building_assets.append(building)
+
     #######################################
     ### STEP 4: setup the market
     #######################################

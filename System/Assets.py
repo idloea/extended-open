@@ -117,7 +117,7 @@ class BuildingAsset(Asset):
                  building_thermal_resistance_in_degree_celsius_per_kilowatts: float,
                  heat_pump_coefficient_of_performance: float,
                  chiller_coefficient_of_performance: float,
-                 ambient_degree_celsius: np.array,
+                 ambient_degree_celsius: float,
                  bus_id: int,
                  time_intervals_in_hours: float,
                  number_of_time_intervals_per_day: int,
@@ -140,7 +140,6 @@ class BuildingAsset(Asset):
             building_thermal_resistance_in_degree_celsius_per_kilowatts
         self.heat_pump_coefficient_of_performance = heat_pump_coefficient_of_performance
         self.chiller_coefficient_of_performance = chiller_coefficient_of_performance
-        self.ambient_degree_celsius = ambient_degree_celsius
         self.energy_management_system_time_intervals = energy_management_system_time_intervals
         self.number_of_energy_management_system_time_intervals_per_day = \
             number_of_energy_management_system_time_intervals_per_day
@@ -158,6 +157,8 @@ class BuildingAsset(Asset):
                                          np.ones(self.number_of_energy_management_system_time_intervals_per_day)
         self.min_inside_degree_celsius = min_inside_degree_celsius * \
                                          np.ones(self.number_of_energy_management_system_time_intervals_per_day)
+        self.ambient_degree_celsius = ambient_degree_celsius * \
+                                      np.ones(self.number_of_energy_management_system_time_intervals_per_day)
 
     def update_control(self, active_power):
         """
