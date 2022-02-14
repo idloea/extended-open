@@ -113,7 +113,7 @@ def get_building_case_original_results(is_winter: bool):
     market_time_interval_in_hours = energy_management_system_time_interval_in_hours
     # market and EMS have same length
     number_of_market_time_intervals_per_day = number_of_energy_management_system_time_intervals_per_day
-    # TODO: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
+    # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export = 0.04  # money received of net exports
     peak_period_import_prices = 0.07
     peak_period_hours_per_day = 7
@@ -171,35 +171,31 @@ def get_building_case_original_results(is_winter: bool):
                                             number_of_time_intervals_per_day)
     non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
-    Tmax_bldg_i = max_inside_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    Tmin_bldg_i = min_inside_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    Hmax_bldg_i = max_consumed_electric_heating_kilowatts
-    Cmax_bldg_i = max_consumed_electric_cooling_kilowatts
-    T0_i = initial_inside_degree_celsius
-    C_i = building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
-    R_i = building_thermal_resistance_in_degree_celsius_per_kilowatts
-    CoP_heating_i = heat_pump_coefficient_of_performance
-    CoP_cooling_i = chiller_coefficient_of_performance
+
     if is_winter:
         Ta_i = 10 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     else:
         Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     bus_id_bldg_i = bus_3
-    bldg_i = Assets.BuildingAsset(max_inside_degree_celsius=Tmax_bldg_i,
-                                  min_inside_degree_celsius=Tmin_bldg_i,
-                                  max_consumed_electric_heating_kilowatts=Hmax_bldg_i,
-                                  max_consumed_electric_cooling_kilowatts=Cmax_bldg_i,
-                                  initial_inside_degree_celsius=T0_i,
-                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=C_i,
-                                  building_thermal_resistance_in_degree_celsius_per_kilowatts=R_i,
-                                  heat_pump_coefficient_of_performance=CoP_heating_i,
-                                  chiller_coefficient_of_performance=CoP_cooling_i,
+    bldg_i = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
+                                  min_inside_degree_celsius=min_inside_degree_celsius,
+                                  max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
+                                  max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
+                                  initial_inside_degree_celsius=initial_inside_degree_celsius,
+                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=
+                                  building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius,
+                                  building_thermal_resistance_in_degree_celsius_per_kilowatts=
+                                  building_thermal_resistance_in_degree_celsius_per_kilowatts,
+                                  heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
+                                  chiller_coefficient_of_performance=chiller_coefficient_of_performance,
                                   ambient_degree_celsius=Ta_i,
                                   bus_id=bus_id_bldg_i,
                                   time_intervals_in_hours=time_interval_in_hours,
                                   number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                  energy_management_system_time_intervals=energy_management_system_time_interval_in_hours,
-                                  number_of_energy_management_system_time_intervals=number_of_energy_management_system_time_intervals_per_day)
+                                  energy_management_system_time_intervals=
+                                  energy_management_system_time_interval_in_hours,
+                                  number_of_energy_management_system_time_intervals_per_day=
+                                  number_of_energy_management_system_time_intervals_per_day)
 
     building_assets.append(bldg_i)
     N_BLDGs = len(building_assets)

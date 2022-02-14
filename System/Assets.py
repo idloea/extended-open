@@ -122,7 +122,7 @@ class BuildingAsset(Asset):
                  time_intervals_in_hours: float,
                  number_of_time_intervals_per_day: int,
                  energy_management_system_time_intervals: float,
-                 number_of_energy_management_system_time_intervals: int):
+                 number_of_energy_management_system_time_intervals_per_day: int):
 
         Asset.__init__(self,
                        bus_id=bus_id,
@@ -142,7 +142,8 @@ class BuildingAsset(Asset):
         self.chiller_coefficient_of_performance = chiller_coefficient_of_performance
         self.ambient_degree_celsius = ambient_degree_celsius
         self.energy_management_system_time_intervals = energy_management_system_time_intervals
-        self.number_of_energy_management_system_time_intervals = number_of_energy_management_system_time_intervals
+        self.number_of_energy_management_system_time_intervals_per_day = \
+            number_of_energy_management_system_time_intervals_per_day
         self.alpha = (1 - (energy_management_system_time_intervals /
                            (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)))
@@ -153,6 +154,10 @@ class BuildingAsset(Asset):
                       building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
         self.active_power = np.zeros(number_of_time_intervals_per_day)   # input powers over the time series (kW)
         self.reactive_power = np.zeros(number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
+        self.max_inside_degree_celsius = max_inside_degree_celsius * \
+                                         np.ones(self.number_of_energy_management_system_time_intervals_per_day)
+        self.min_inside_degree_celsius = min_inside_degree_celsius * \
+                                         np.ones(self.number_of_energy_management_system_time_intervals_per_day)
 
     def update_control(self, active_power):
         """
@@ -164,6 +169,7 @@ class BuildingAsset(Asset):
             input powers over the time series (kW)
         """
         self.active_power = active_power
+
 
 # NEEDED FOR OXEMF EV CASE
 class StorageAsset(Asset):
