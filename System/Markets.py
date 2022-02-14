@@ -80,10 +80,9 @@ class Market(ABC):
         self.export_price_time_series_in_pounds_per_kWh = export_prices_in_pounds_per_kWh * \
                                                           np.ones(self.number_of_EMS_time_intervals)
 
-        peak_import_prices_in_pounds_per_kWh = self._get_peak_period_import_prices()
-        valley_import_prices_in_pounds_per_kWh = self._get_valley_period_import_prices()
-        self.import_prices_in_pounds_per_kWh = np.hstack((peak_import_prices_in_pounds_per_kWh,
-                                                          valley_import_prices_in_pounds_per_kWh))
+        self.peak_import_prices_in_pounds_per_kWh = self._get_peak_period_import_prices()
+        self.valley_import_prices_in_pounds_per_kWh = self._get_valley_period_import_prices()
+        self.import_prices_in_pounds_per_kWh = self._get_prices_in_pounds_per_kilowatts()
 
     def calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
         """
@@ -175,3 +174,6 @@ class Market(ABC):
 
     def _get_prices_in_pounds_per_kilowatts(self):
         return np.hstack((self.peak_import_prices_in_pounds_per_kWh, self.valley_import_prices_in_pounds_per_kWh))
+
+
+# class OriginalUnitedKingdomMarket(Market):
