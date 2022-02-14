@@ -48,7 +48,7 @@ class EnergySystem:
                  number_of_time_intervals: int,
                  energy_management_system_time_intervals_in_hours: float,
                  number_of_energy_management_system_time_intervals_per_day: int,
-                 building_assets=[]):
+                 building_assets: List):
         self.storage_assets = storage_assets
         self.building_assets = building_assets
         self.non_dispatchable_assets = non_dispatchable_assets

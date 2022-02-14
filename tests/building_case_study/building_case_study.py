@@ -224,12 +224,17 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     # STEP 5: setup the energy system
     #######################################
-    energy_system = EnergySystem.EnergySystem(storage_assets, non_distpachable_assets, network, market,
-                                              time_interval_in_hours,
-                                              number_of_time_intervals_per_day,
+    energy_system = EnergySystem.EnergySystem(storage_assets=storage_assets,
+                                              non_dispatchable_assets=non_distpachable_assets,
+                                              network=network,
+                                              market=market,
+                                              time_intervals_in_hours=time_interval_in_hours,
+                                              number_of_time_intervals=number_of_time_intervals_per_day,
+                                              energy_management_system_time_intervals_in_hours=
                                               energy_management_system_time_interval_in_hours,
+                                              number_of_energy_management_system_time_intervals_per_day=
                                               number_of_energy_management_system_time_intervals_per_day,
-                                              building_assets)
+                                              building_assets=building_assets)
     #######################################
     ### STEP 6: simulate the energy system:
     #######################################
