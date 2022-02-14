@@ -29,6 +29,9 @@ def get_building_case_original_results(is_winter: bool):
     winter_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
         winter_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
 
+    winter_electric_load_data_path = os.path.join("Data/Building/", "Loads_1min_2014JAN.csv")
+    winter_electric_load_data = pd.read_csv(winter_electric_load_data_path, index_col=0, parse_dates=True).values
+
     summer_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
     summer_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
         summer_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
@@ -44,10 +47,11 @@ def get_building_case_original_results(is_winter: bool):
     if not is_winter:
         photovoltaic_generation_per_unit = sum_of_summer_photovoltaic_electricity_generation_in_per_unit / \
                                            np.max(sum_of_summer_photovoltaic_electricity_generation_in_per_unit)
+        electric_loads = summer_electric_load_data
     else:
         photovoltaic_generation_per_unit = sum_of_winter_photovoltaic_electricity_generation_in_per_unit / \
                                            np.max(sum_of_summer_photovoltaic_electricity_generation_in_per_unit)
-    electric_loads = summer_electric_load_data
+        electric_loads = winter_electric_load_data
 
     ### STEP 1: setup parameters
     time_interval_in_minutes = 1
@@ -96,7 +100,7 @@ def get_building_case_original_results(is_winter: bool):
     # Building parameters
     max_inside_degree_celsius = 18
     min_inside_degree_celsius = 16
-    start_time_of_the_day = 17  # At the beginning of the scenario
+    initial_inside_degree_celsius = 17  # At the beginning of the scenario
     max_consumed_electric_heating_kilowatts = 90
     max_consumed_electric_cooling_kilowatts = 200
     heat_pump_coefficient_of_performance = 3
@@ -109,7 +113,7 @@ def get_building_case_original_results(is_winter: bool):
     market_time_interval_in_hours = energy_management_system_time_interval_in_hours
     # market and EMS have same length
     number_of_market_time_intervals_per_day = number_of_energy_management_system_time_intervals_per_day
-    # TD: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
+    # TODO: update from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export = 0.04  # money received of net exports
     peak_period_import_prices = 0.07
     peak_period_hours_per_day = 7
@@ -131,15 +135,15 @@ def get_building_case_original_results(is_winter: bool):
     # (from https://github.com/e2nIEE/pandapower/blob/master/tutorials/minimal_example.ipynb)
     network = pp.create_empty_network()
     # create buses
-    bus1 = pp.create_bus(network, vn_kv=20., name="bus 1")
-    bus2 = pp.create_bus(network, vn_kv=0.4, name="bus 2")
-    bus3 = pp.create_bus(network, vn_kv=0.4, name="bus 3")
+    bus_1 = pp.create_bus(network, vn_kv=20., name="bus 1")
+    bus_2 = pp.create_bus(network, vn_kv=0.4, name="bus 2")
+    bus_3 = pp.create_bus(network, vn_kv=0.4, name="bus 3")
     # create bus elements
-    pp.create_ext_grid(network, bus=bus1, vm_pu=1.0, name="Grid Connection")
+    pp.create_ext_grid(network, bus=bus_1, vm_pu=1.0, name="Grid Connection")
     # create branch elements
-    trafo = pp.create_transformer(network, hv_bus=bus1, lv_bus=bus2, std_type="0.4 MVA 20/0.4 kV", name="Trafo")
-    line = pp.create_line(network, from_bus=bus2, to_bus=bus3, length_km=0.1, std_type="NAYY 4x50 SE", name="Line")
-    N_buses = network.bus['name'].size
+    trafo = pp.create_transformer(network, hv_bus=bus_1, lv_bus=bus_2, std_type="0.4 MVA 20/0.4 kV", name="Trafo")
+    line = pp.create_line(network, from_bus=bus_2, to_bus=bus_3, length_km=0.1, std_type="NAYY 4x50 SE", name="Line")
+    number_of_buses = network.bus['name'].size
     #######################################
     ### STEP 3: setup the assets
     #######################################
@@ -148,18 +152,22 @@ def get_building_case_original_results(is_winter: bool):
     building_assets = []
     non_distpachable_assets = []
     # PV source at bus 3
-    active_power = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # 100kW PV plant
-    reactive_power = np.zeros(number_of_time_intervals_per_day)
-    PV_gen_bus3 = Assets.NonDispatchableAsset(active_power=active_power,
-                                              reactive_power=reactive_power,
-                                              bus_id=bus3,
-                                              time_intervals_in_hours=time_interval_in_hours,
-                                              number_of_time_intervals_per_day=number_of_time_intervals_per_day)
-    non_distpachable_assets.append(PV_gen_bus3)
+    photovoltaic_active_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
+    photovoltaic_reactive_power = np.zeros(
+        number_of_time_intervals_per_day)  # Solar panels won't produce reactive power being a DC generator
+    non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(active_power=photovoltaic_active_kilowatts,
+                                                                      reactive_power=photovoltaic_reactive_power,
+                                                                      bus_id=bus_3,
+                                                                      time_intervals_in_hours=time_interval_in_hours,
+                                                                      number_of_time_intervals_per_day=
+                                                                      number_of_time_intervals_per_day)
+    non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
     # Load at bus 3
-    active_power = np.sum(electric_loads, 1)  # summed load across 120 households
-    reactive_power = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = Assets.NonDispatchableAsset(active_power, reactive_power, bus3, time_interval_in_hours,
+    photovoltaic_active_kilowatts = np.sum(electric_loads, 1)  # summed load across 120 households
+    photovoltaic_reactive_power = np.zeros(number_of_time_intervals_per_day)
+    load_bus3 = Assets.NonDispatchableAsset(photovoltaic_active_kilowatts, photovoltaic_reactive_power,
+                                            bus_3,
+                                            time_interval_in_hours,
                                             number_of_time_intervals_per_day)
     non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
@@ -167,7 +175,7 @@ def get_building_case_original_results(is_winter: bool):
     Tmin_bldg_i = min_inside_degree_celsius * np.ones(number_of_energy_management_system_time_intervals_per_day)
     Hmax_bldg_i = max_consumed_electric_heating_kilowatts
     Cmax_bldg_i = max_consumed_electric_cooling_kilowatts
-    T0_i = start_time_of_the_day
+    T0_i = initial_inside_degree_celsius
     C_i = building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
     R_i = building_thermal_resistance_in_degree_celsius_per_kilowatts
     CoP_heating_i = heat_pump_coefficient_of_performance
@@ -176,7 +184,7 @@ def get_building_case_original_results(is_winter: bool):
         Ta_i = 10 * np.ones(number_of_energy_management_system_time_intervals_per_day)
     else:
         Ta_i = 22 * np.ones(number_of_energy_management_system_time_intervals_per_day)
-    bus_id_bldg_i = bus3
+    bus_id_bldg_i = bus_3
     bldg_i = Assets.BuildingAsset(max_inside_degree_celsius=Tmax_bldg_i,
                                   min_inside_degree_celsius=Tmin_bldg_i,
                                   max_consumed_electric_heating_kilowatts=Hmax_bldg_i,
@@ -198,7 +206,7 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     ### STEP 4: setup the market
     #######################################
-    bus_id_market = bus1
+    bus_id_market = bus_1
     market = Markets.Market(network_bus_id=bus_id_market,
                             number_of_EMS_time_intervals=number_of_energy_management_system_time_intervals_per_day,
                             export_prices_in_pounds_per_kWh=prices_export,

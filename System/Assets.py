@@ -330,8 +330,8 @@ class NonDispatchableAsset(Asset):
     """
 
     def __init__(self,
-                 active_power: float,
-                 reactive_power: np.array,
+                 active_power: np.ndarray,
+                 reactive_power: np.ndarray,
                  bus_id: int,
                  time_intervals_in_hours: float,
                  number_of_time_intervals_per_day: int,
