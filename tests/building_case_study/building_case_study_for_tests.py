@@ -15,16 +15,15 @@ import src.Assets as Assets
 import src.Markets as Markets
 import src.EnergySystem as EnergySystem
 from src.electric_vehicles import ElectricVehicleFleet
-
-
-### Case Study: Building HVAC flexibility
+from src.folder_management import create_results_folder
 from src.read import read_open_csv_files
 
 
+### Case Study: Building HVAC flexibility
+
 def get_building_case_original_results(is_winter: bool):
-    path_string = normpath('Results/Building_Case_Study/')
-    if not os.path.isdir(path_string):
-        os.makedirs(path_string)
+    results_path = 'Results/Building_Case_Study/'
+    create_results_folder(results_path=results_path)
     ### STEP 0: Load Data
 
     building_data_path = "Data/Building/"
