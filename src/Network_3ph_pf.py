@@ -1145,7 +1145,7 @@ class Network_3ph:
     def loadDssNetwork(self, ntwkName, updateYZ=True,
                        testModel=False, testPlot=False):
         print('Loading network ', ntwkName, '\n')
-        # sys.path.insert(0, os.path.join(path,'System'))
+        # sys.path.insert(0, os.path.join(path,'src'))
         # os.path.dirname(os.path.dirname(path))
         path = os.path.dirname(os.path.abspath(__file__))
         path = os.path.dirname(os.path.dirname(__file__))

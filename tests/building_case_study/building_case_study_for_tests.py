@@ -11,13 +11,15 @@ from os.path import normpath
 import pandas as pd
 import pandapower as pp
 import numpy as np
-import System.Assets as Assets
-import System.Markets as Markets
-import System.EnergySystem as EnergySystem
-from System.electric_vehicles import ElectricVehicleFleet
+import src.Assets as Assets
+import src.Markets as Markets
+import src.EnergySystem as EnergySystem
+from src.electric_vehicles import ElectricVehicleFleet
 
 
 ### Case Study: Building HVAC flexibility
+from src.read import read_open_csv_files
+
 
 def get_building_case_original_results(is_winter: bool):
     path_string = normpath('Results/Building_Case_Study/')
@@ -25,19 +27,19 @@ def get_building_case_original_results(is_winter: bool):
         os.makedirs(path_string)
     ### STEP 0: Load Data
 
-    winter_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
-    winter_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
-        winter_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
+    building_data_path = "Data/Building/"
 
-    winter_electric_load_data_path = os.path.join("Data/Building/", "Loads_1min_2014JAN.csv")
-    winter_electric_load_data = pd.read_csv(winter_electric_load_data_path, index_col=0, parse_dates=True).values
+    winter_photovoltaic_data_file = "PVpu_1min_2014JAN.csv"
+    winter_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(path=building_data_path,
+                                                                                 csv_file=winter_photovoltaic_data_file)
+    winter_electric_load_data_file = "Loads_1min_2014JAN.csv"
+    winter_electric_load_data = read_open_csv_files(path=building_data_path, csv_file=winter_electric_load_data_file)
 
-    summer_photovoltaic_electricity_generation_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
-    summer_photovoltaic_electricity_generation_in_per_unit = pd.read_csv(
-        summer_photovoltaic_electricity_generation_data_path, index_col=0, parse_dates=True).values
-
-    summer_electric_load_data_path = os.path.join("Data/Building/", "Loads_1min_2013JUN.csv")
-    summer_electric_load_data = pd.read_csv(summer_electric_load_data_path, index_col=0, parse_dates=True).values
+    summer_photovoltaic_data_file = "PVpu_1min_2013JUN.csv"
+    summer_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(path=building_data_path,
+                                                                                 csv_file=summer_photovoltaic_data_file)
+    summer_electric_load_data_file = "Loads_1min_2013JUN.csv"
+    summer_electric_load_data = read_open_csv_files(path=building_data_path, csv_file=summer_electric_load_data_file)
 
     sum_of_summer_photovoltaic_electricity_generation_in_per_unit = np.sum(
         summer_photovoltaic_electricity_generation_in_per_unit, 1)

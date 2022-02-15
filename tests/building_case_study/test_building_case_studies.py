@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from tests.building_case_study.building_case_study import get_building_case_original_results
+from tests.building_case_study.building_case_study_for_tests import get_building_case_original_results
 
 
 class OriginalOPENTestBuildingCases(unittest.TestCase):

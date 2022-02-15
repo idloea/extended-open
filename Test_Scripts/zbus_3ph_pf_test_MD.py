@@ -3,13 +3,13 @@ import sys, os
 
 # path = os.path.dirname(os.path.dirname(__file__)) 
 path = os.path.dirname(os.path.dirname(sys.argv[0]))
-sys.path.insert(0, os.path.join(path,'System'))
+sys.path.insert(0, os.path.join(path,'src'))
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-# from System.Network_3ph_pf import Network_3ph 
+# from src.Network_3ph_pf import Network_3ph
 from Network_3ph_pf import Network_3ph 
 import copy
 import time

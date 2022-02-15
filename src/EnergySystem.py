@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-OPEN Energy System Module.
+OPEN Energy src Module.
 
 The EnergySystem Class has two types of methods
 i) energy management system (EMS) methods which implement algorithms to
@@ -33,8 +33,8 @@ from typing import List
 import pandapower as pp
 import numpy as np
 import picos as pic
-from System.Markets import Market
-from System.Network_3ph_pf import Network_3ph
+from src.Markets import Market
+from src.Network_3ph_pf import Network_3ph
 
 
 class EnergySystem:
@@ -82,7 +82,7 @@ class EnergySystem:
                 P_BLDG_val :Builfing power consumption (kW)
                 P_import_val :Power imported from central grid (kW)
                 P_export_val :Power exported to central grid (kW)
-                P_demand_val :System power demand at energy management time
+                P_demand_val :src power demand at energy management time
                               resolution
 
         """
@@ -284,7 +284,7 @@ class EnergySystem:
 
     def simulate_network(self):
         """
-        Run the Energy Management System in open loop and simulate a pandapower
+        Run the Energy Management src in open loop and simulate a pandapower
         network.
 
         Parameters
@@ -311,7 +311,7 @@ class EnergySystem:
                     management time resolution (kW)
                 P_export_ems :Power exported to central grid at energy
                     management time resolution(kW)
-                P_demand_ems :System power demand at energy management time
+                P_demand_ems :src power demand at energy management time
                     resolution (kW)
 
         """
@@ -452,7 +452,7 @@ class EnergySystem:
                                i_unconstrained_lines=[],
                                v_unconstrained_buses=[]):
         """
-        Run the Energy Management System in open loop and simulate an IEEE 13
+        Run the Energy Management src in open loop and simulate an IEEE 13
         bus network either copper plate or 3ph
 
         Parameters
@@ -478,7 +478,7 @@ class EnergySystem:
                     management time resolution (kW)
                 P_export_ems :Power exported to central grid at energy
                     management time resolution(kW)
-                P_demand_ems :System power demand at energy management time
+                P_demand_ems :src power demand at energy management time
                     resolution (kW)
 
         """
@@ -977,7 +977,7 @@ class EnergySystem:
                 P_ES_val : Charge/discharge power for storage assets (kW)
                 P_import_val : Power imported from central grid (kW)
                 P_export_val : Power exported to central grid (kW)
-                P_demand_val : System power demand at energy management time
+                P_demand_val : src power demand at energy management time
                     resolution (kW)
                 PF_networks_lin : Network 3ph list of objects, one for each
                     optimisation interval, storing the linear power
@@ -1349,7 +1349,7 @@ class EnergySystem:
                                    i_unconstrained_lines=[],
                                    v_unconstrained_buses=[]):
         """
-        Run the Energy Management System using Model Predictive Control (MPC)
+        Run the Energy Management src using Model Predictive Control (MPC)
         and simulate an IEEE 13 bus network either copper plate or 3ph
 
         Parameters
@@ -1375,7 +1375,7 @@ class EnergySystem:
                     management time resolution (kW)
                 P_export_ems :Power exported to central grid at energy
                     management time resolution(kW)
-                P_demand_ems :System power demand at energy management time
+                P_demand_ems :src power demand at energy management time
                     resolution (kW)
 
         """

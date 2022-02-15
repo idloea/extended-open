@@ -10,7 +10,7 @@ import time
 #set the directory one level up to be able to import from OxEMF_Files folders
 path = os.path.dirname(os.path.dirname(__file__)) 
 os.chdir(path) 
-from System.Network_3ph_pf import Network_3ph 
+from src.Network_3ph_pf import Network_3ph
 
 net_ieee13 = Network_3ph()
 

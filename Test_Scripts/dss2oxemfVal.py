@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 path = os.path.dirname(os.path.dirname(sys.argv[0]))
-sys.path.insert(0, os.path.join(path,'System'))
+sys.path.insert(0, os.path.join(path,'src'))
 
 import Network_3ph_pf
 

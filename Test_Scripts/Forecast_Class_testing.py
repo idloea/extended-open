@@ -5,7 +5,7 @@ path = os.path.dirname(os.path.dirname(__file__))
 os.chdir(path) 
 #os.environ['DYLD_LIBRARY_PATH'] ='/Applications/MATLAB/MATLAB_Runtime/v94/runtime/maci64:/Applications/MATLAB/MATLAB_Runtime/v94/sys/os/maci64:/Applications/MATLAB/MATLAB_Runtime/v94/bin/maci64'
 
-import System.ForecastingSystem as FS
+import src.ForecastingSystem as FS
 forecast=FS.ForecastingSystem()
 Forecast_output=forecast.pv()
 Forecast_det= Forecast_output['det'].rename(index=str, columns={0: "Deterministic"})

@@ -20,25 +20,6 @@ from abc import ABC, abstractmethod
 
 
 class Market(ABC):
-    """
-    A market class to handle prices and other market associated parameters.
-
-    Parameters
-    ----------
-   frequency_response_active : int
-        binary value over time series to indicate when frequency response has 
-        been offered (0,1)
-    offered_kW_in_frequency_response : float
-        capacity of frequency response offered (kW)
-    max_frequency_response_state_of_charge : float
-        max SOC at which frequency response can still be fulfilled if needed
-    min_frequency_response_state_of_charge : float
-        min SOC at which frequency response can still be fulfilled if needed
-    frequency_response_price_in_pounds_per_kWh : float
-        price per kW capacity per hour available (£/kW.h)
-
-    """
-
     def __init__(self, network_bus_id: int,
                  number_of_EMS_time_intervals: int,
                  export_prices_in_pounds_per_kWh: float,
@@ -174,6 +155,3 @@ class Market(ABC):
 
     def _get_prices_in_pounds_per_kilowatts(self):
         return np.hstack((self.peak_import_prices_in_pounds_per_kWh, self.valley_import_prices_in_pounds_per_kWh))
-
-
-# class OriginalUnitedKingdomMarket(Market):
