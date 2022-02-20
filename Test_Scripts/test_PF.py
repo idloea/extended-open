@@ -115,16 +115,16 @@ for t in range(T_mpc):
 Asum = pic.new_param('Asum',np.tril(np.ones([T_mpc,T_mpc]))) #lower triangle matrix summing powers
 #linear battery model constraints
 for i in range(N_ES):
-    prob.add_constraint(P_ES[:,i] <= storage_assets[i].max_import_kW[T_range]) #maximum power constraint
-    prob.add_constraint(P_ES[:,i] >= storage_assets[i].min_import_kW[T_range]) #minimum power constraint
+    prob.add_constraint(P_ES[:,i] <= storage_assets[i].max_import_kilowatts[T_range]) #maximum power constraint
+    prob.add_constraint(P_ES[:,i] >= storage_assets[i].max_export_kilowatts[T_range]) #minimum power constraint
     prob.add_constraint(dt_ems*Asum*P_ES[:,i] <= storage_assets[i].Emax[T_range]-storage_assets[i].E[t0_dt]) #maximum energy constraint
     prob.add_constraint(dt_ems*Asum*P_ES[:,i] >= storage_assets[i].Emin[T_range]-storage_assets[i].E[t0_dt]) #minimum energy constraint
     prob.add_constraint(dt_ems*Asum[T_mpc-1,:]*P_ES[:,i] + E_T_min >= storage_assets[i].ET-storage_assets[i].E[t0_dt]) #final energy constraint
 #import/export constraints
 for t in range(T_mpc):
-    prob.add_constraint(P_import[t] <= market.max_import_kW[t0 + t]) #maximum import constraint
+    prob.add_constraint(P_import[t] <= market.max_import_kilowatts[t0 + t]) #maximum import constraint
     prob.add_constraint(P_import[t] >= 0) #maximum import constraint
-    prob.add_constraint(P_export[t] <= -market.min_import_kW[t0 + t]) #maximum import constraint
+    prob.add_constraint(P_export[t] <= -market.max_export_kilowatts[t0 + t]) #maximum import constraint
     prob.add_constraint(P_export[t] >= 0) #maximum import constraint
     prob.add_constraint(P_max_demand + P_max_demand_pre_t0 >= P_import[t]-P_export[t]) #maximum demand dummy variable constraint
     prob.add_constraint(P_max_demand  >= 0) #maximum demand dummy variable constraint

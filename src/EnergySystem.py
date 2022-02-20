@@ -188,10 +188,10 @@ class EnergySystem:
         for i in range(number_of_storage_assets):
             # maximum power constraint
             problem.add_constraint(P_ctrl_asset[:, number_of_buildings + i] <= \
-                                self.storage_assets[i].max_import_kW)
+                                   self.storage_assets[i].max_import_kilowatts)
             # minimum power constraint
             problem.add_constraint(P_ctrl_asset[:, number_of_buildings + i] >= \
-                                self.storage_assets[i].min_import_kW)
+                                   self.storage_assets[i].max_export_kilowatts)
             # maximum energy constraint
             problem.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * P_ctrl_asset[:, number_of_buildings + i] <= \
                                    self.storage_assets[i].Emax \
@@ -211,11 +211,11 @@ class EnergySystem:
             problem.add_constraint(sum(P_ctrl_asset[t, :]) + P_demand[t] == \
                                 P_import[t] - P_export[t])
             # maximum import constraint
-            problem.add_constraint(P_import[t] <= self.market.max_import_kW[t])
+            problem.add_constraint(P_import[t] <= self.market.max_import_kilowatts[t])
             # maximum import constraint
             problem.add_constraint(P_import[t] >= 0)
             # maximum import constraint
-            problem.add_constraint(P_export[t] <= -self.market.min_import_kW[t])
+            problem.add_constraint(P_export[t] <= -self.market.max_export_kilowatts[t])
             # maximum import constraint
             problem.add_constraint(P_export[t] >= 0)
             # maximum demand dummy variable constraint
@@ -645,10 +645,10 @@ class EnergySystem:
         for i in range(N_ES):
             # maximum power constraint
             prob.add_constraint((P_ES_ch[:, i] - P_ES_dis[:, i]) \
-                                <= self.storage_assets[i].max_import_kW[T_range])
+                                <= self.storage_assets[i].max_import_kilowatts[T_range])
             # minimum power constraint
             prob.add_constraint((P_ES_ch[:, i] - P_ES_dis[:, i]) \
-                                >= self.storage_assets[i].min_import_kW[T_range])
+                                >= self.storage_assets[i].max_export_kilowatts[T_range])
             # maximum energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum
@@ -837,10 +837,10 @@ class EnergySystem:
         for i in range(N_ES):
             # maximum power constraint
             prob.add_constraint((P_ES_ch[:, i] - P_ES_dis[:, i]) \
-                                <= self.storage_assets[i].max_import_kW[T_range])
+                                <= self.storage_assets[i].max_import_kilowatts[T_range])
             # minimum power constraint
             prob.add_constraint((P_ES_ch[:, i] - P_ES_dis[:, i]) \
-                                >= self.storage_assets[i].min_import_kW[T_range])
+                                >= self.storage_assets[i].max_export_kilowatts[T_range])
             # maximum energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum
@@ -1153,10 +1153,10 @@ class EnergySystem:
         for i in range(N_ES):
             # maximum power constraint
             prob.add_constraint(P_ES[:, i] <=
-                                self.storage_assets[i].max_import_kW[T_range])
+                                self.storage_assets[i].max_import_kilowatts[T_range])
             # minimum power constraint
             prob.add_constraint(P_ES[:, i] >=
-                                self.storage_assets[i].min_import_kW[T_range])
+                                self.storage_assets[i].max_export_kilowatts[T_range])
             # maximum energy constraint
             prob.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * (P_ES_ch[:, i] -
                                                       P_ES_dis[:, i]) <=
@@ -1185,11 +1185,11 @@ class EnergySystem:
         # import/export constraints
         for t in range(T_mpc):
             # maximum import constraint
-            prob.add_constraint(P_import[t] <= self.market.max_import_kW[t0 + t])
+            prob.add_constraint(P_import[t] <= self.market.max_import_kilowatts[t0 + t])
             # maximum import constraint
             prob.add_constraint(P_import[t] >= 0)
             # maximum import constraint
-            prob.add_constraint(P_export[t] <= -self.market.min_import_kW[t0 + t])
+            prob.add_constraint(P_export[t] <= -self.market.max_export_kilowatts[t0 + t])
             # maximum import constraint
             prob.add_constraint(P_export[t] >= 0)
             # maximum demand dummy variable constraint

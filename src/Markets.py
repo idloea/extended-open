@@ -31,12 +31,12 @@ class Market(ABC):
                  valley_period_import_prices_in_pounds_per_kilowatt_hour: float,
                  valley_period_hours_per_day: int,
                  max_demand_charge_in_pounds_per_kWh: float,
-                 max_import_kW: float,
-                 min_import_kW: float,
+                 max_import_kilowatts: float,
+                 max_export_kilowatts: float,
                  offered_kW_in_frequency_response: float,
                  max_frequency_response_state_of_charge: float,
                  min_frequency_response_state_of_charge: float,
-                 frequency_response_price_in_pounds_per_kWh: float,
+                 frequency_response_price_in_pounds_per_kilowatt_hour: float,
                  daily_connection_charge: float):
 
         self.network_bus_id = network_bus_id
@@ -58,14 +58,14 @@ class Market(ABC):
         self.valley_import_prices_in_pounds_per_kWh = self._get_valley_period_import_prices()
         self.import_prices_in_pounds_per_kWh = self._get_prices_in_pounds_per_kilowatts()
 
-        self.max_import_kW = max_import_kW * np.ones(self.number_of_market_time_intervals)
-        self.min_import_kW = min_import_kW * np.ones(self.number_of_market_time_intervals)
+        self.max_import_kilowatts = max_import_kilowatts * np.ones(self.number_of_market_time_intervals)
+        self.max_export_kilowatts = max_export_kilowatts * np.ones(self.number_of_market_time_intervals)
 
-        self.offered_kW_in_frequency_response = offered_kW_in_frequency_response
+        self.frequency_response_price_in_pounds_per_kilowatt_hour = offered_kW_in_frequency_response
         self.frequency_response_active = self._is_frequency_response_active()
         self.max_frequency_response_state_of_charge = max_frequency_response_state_of_charge
         self.min_frequency_response_state_of_charge = min_frequency_response_state_of_charge
-        self.frequency_response_price_in_pounds_per_kWh = frequency_response_price_in_pounds_per_kWh
+        self.frequency_response_price_in_pounds_per_kWh = frequency_response_price_in_pounds_per_kilowatt_hour
         self.total_frequency_response_earnings = 0  # Initiate as 0
         self.daily_connection_charge = daily_connection_charge
 
@@ -128,7 +128,7 @@ class Market(ABC):
     def _get_total_frequency_response_revenue(self):
         if self.frequency_response_active:
             total_frequency_response_revenue = self.frequency_response_price_in_pounds_per_kWh * \
-                                               self.offered_kW_in_frequency_response * \
+                                               self.frequency_response_price_in_pounds_per_kilowatt_hour * \
                                                np.count_nonzero(self.frequency_response_active) * \
                                                self.market_time_series_minute_resolution
         else:
@@ -144,7 +144,7 @@ class Market(ABC):
                self.market_time_series_minute_resolution
 
     def _is_frequency_response_active(self):
-        if self.offered_kW_in_frequency_response > 0:
+        if self.frequency_response_price_in_pounds_per_kilowatt_hour > 0:
             frequency_response_active = True
         else:
             frequency_response_active = False
