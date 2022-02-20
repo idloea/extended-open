@@ -1,7 +1,5 @@
 import unittest
-
 import numpy as np
-
 from src.read import read_open_csv_files
 
 

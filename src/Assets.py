@@ -24,6 +24,8 @@ import numpy as np
 
 __version__ = "1.1.0"
 
+from src.time_intervals import get_number_of_time_intervals_per_day
+
 
 class Asset:
     """
@@ -33,7 +35,7 @@ class Asset:
     ----------
     bus_id : float
         id number of the bus in the network
-    time_intervals_in_hours : float
+    simulation_time_series_hour_resolution : float
         time interval duration
     number_of_time_intervals_per_day : int
         number of time intervals
@@ -49,14 +51,16 @@ class Asset:
 
     """
     def __init__(self,
-                 bus_id: int,
-                 time_intervals_in_hours: float,
-                 number_of_time_intervals_per_day: int,
+                 bus_id: float,
+                 simulation_time_series_hour_resolution: float,
                  phases: List = [0, 1, 2]):
+
         self.bus_id = bus_id
+        self.simulation_time_series_hour_resolution = simulation_time_series_hour_resolution
         self.phases = np.array(phases)
-        self.time_intervals_in_hours = time_intervals_in_hours
-        self.number_of_time_intervals_per_day = number_of_time_intervals_per_day
+
+        self.number_of_time_intervals_per_day = get_number_of_time_intervals_per_day(
+            time_series_hour_resolution=self.simulation_time_series_hour_resolution)
 
 
 class BuildingAsset(Asset):
@@ -119,20 +123,17 @@ class BuildingAsset(Asset):
                  chiller_coefficient_of_performance: float,
                  ambient_degree_celsius: float,
                  bus_id: int,
-                 time_intervals_in_hours: float,
-                 number_of_time_intervals_per_day: int,
-                 energy_management_system_time_intervals: float,
-                 number_of_energy_management_system_time_intervals_per_day: int):
+                 simulation_time_series_hour_resolution: float,
+                 energy_management_system_time_series_hour_resolution: float):
 
         Asset.__init__(self,
                        bus_id=bus_id,
-                       time_intervals_in_hours=time_intervals_in_hours,
-                       number_of_time_intervals_per_day=number_of_time_intervals_per_day)
+                       simulation_time_series_hour_resolution=simulation_time_series_hour_resolution)
         self.max_inside_degree_celsius = max_inside_degree_celsius
         self.min_inside_degree_celsius = min_inside_degree_celsius
         self.max_consumed_electric_heating_kilowatts = max_consumed_electric_heating_kilowatts
         self.max_consumed_electric_cooling_kilowatts = max_consumed_electric_cooling_kilowatts
-        self.energy_management_system_time_intervals = energy_management_system_time_intervals
+        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_hour_resolution
         self.initial_inside_degree_celsius = initial_inside_degree_celsius
         self.building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = \
             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
@@ -140,19 +141,20 @@ class BuildingAsset(Asset):
             building_thermal_resistance_in_degree_celsius_per_kilowatts
         self.heat_pump_coefficient_of_performance = heat_pump_coefficient_of_performance
         self.chiller_coefficient_of_performance = chiller_coefficient_of_performance
-        self.energy_management_system_time_intervals = energy_management_system_time_intervals
+        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_hour_resolution
         self.number_of_energy_management_system_time_intervals_per_day = \
-            number_of_energy_management_system_time_intervals_per_day
-        self.alpha = (1 - (energy_management_system_time_intervals /
+            int(24 / self.energy_management_system_time_series_hour_resolution)
+        self.number_of_time_intervals_per_day = int(24 / self.simulation_time_series_hour_resolution)
+        self.alpha = (1 - (energy_management_system_time_series_hour_resolution /
                            (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)))
-        self.beta = (energy_management_system_time_intervals /
+        self.beta = (energy_management_system_time_series_hour_resolution /
                      building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
-        self.gamma = energy_management_system_time_intervals / \
+        self.gamma = energy_management_system_time_series_hour_resolution / \
                      (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                       building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
-        self.active_power = np.zeros(number_of_time_intervals_per_day)   # input powers over the time series (kW)
-        self.reactive_power = np.zeros(number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
+        self.active_power = np.zeros(self.number_of_time_intervals_per_day)   # input powers over the time series (kW)
+        self.reactive_power = np.zeros(self.number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
         self.max_inside_degree_celsius = max_inside_degree_celsius * \
                                          np.ones(self.number_of_energy_management_system_time_intervals_per_day)
         self.min_inside_degree_celsius = min_inside_degree_celsius * \
@@ -193,7 +195,7 @@ class StorageAsset(Asset):
         required terminal energy level (kWh)
     bus_id : float
         id number of the bus in the network
-    time_intervals_in_hours : float
+    simulation_time_series_hour_resolution : float
         time interval duration (s)
     number_of_time_intervals_per_day : int
         number of time intervals
@@ -224,10 +226,10 @@ class StorageAsset(Asset):
 
 
     """
-    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day, dt_ems,
+    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, simulation_time_series_hour_resolution, number_of_time_intervals_per_day, dt_ems,
                  T_ems, phases=[0, 1, 2], Pmax_abs=None, c_deg_lin=None,
                  eff=1, eff_opt=1):
-        Asset.__init__(self, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day, phases=phases)
+        Asset.__init__(self, bus_id, simulation_time_series_hour_resolution, number_of_time_intervals_per_day, phases=phases)
         self.Emax = Emax
         self.Emin = Emin
         self.Pmax = Pmax
@@ -259,7 +261,7 @@ class StorageAsset(Asset):
         """
         self.Pnet = Pnet
         self.E[0] = self.E0
-        t_ems = self.time_intervals_in_hours / self.dt_ems
+        t_ems = self.simulation_time_series_hour_resolution / self.dt_ems
         for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
             P_eff = self.eff[P_ratio-1]
@@ -267,12 +269,12 @@ class StorageAsset(Asset):
                 if self.E[t] <= self.Emin[int(t*t_ems)]:
                     self.E[t] = self.Emin[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
+                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.simulation_time_series_hour_resolution
             elif self.Pnet[t] >= 0:
                 if self.E[t] >= self.Emax[int(t*t_ems)]:
                     self.E[t] = self.Emax[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
+                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.simulation_time_series_hour_resolution
 # NEEDED FOR OXEMF EV CASE
     def update_control_t(self, Pnet_t, t):
         """
@@ -288,68 +290,39 @@ class StorageAsset(Asset):
         """
         self.Pnet[t] = Pnet_t
         self.E[0] = self.E0
-        t_ems = self.time_intervals_in_hours / self.dt_ems
+        t_ems = self.simulation_time_series_hour_resolution / self.dt_ems
         P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
         P_eff = self.eff[P_ratio-1]
         if self.Pnet[t] < 0:
             if self.E[t] <= self.Emin[int(t*t_ems)]:
                 self.E[t] = self.Emin[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
+            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.simulation_time_series_hour_resolution
         elif self.Pnet[t] >= 0:
             if self.E[t] >= self.Emax[int(t*t_ems)]:
                 self.E[t] = self.Emax[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
+            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.simulation_time_series_hour_resolution
 
 
 class NonDispatchableAsset(Asset):
-    """
-    A 3 phase nondispatchable asset class (use for inflexible loads,
-    PVsources etc)
-
-    Parameters
-    ----------
-    active_power : float
-        uncontrolled real input powers over the time series
-    reactive_power : float
-        uncontrolled reactive input powers over the time series (kVar)
-    bus_id : float
-        id number of the bus in the network
-    time_intervals_in_hours : float
-        time interval duration
-    number_of_time_intervals_per_day : int
-        number of time intervals
-    phases : list, optional, default [0,1,2]
-        [0, 1, 2] indicates 3 phase connection \
-        Wye: [0, 1] indicates an a,b connection \
-        Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    active_power_pred : float or None
-        predicted real input powers over the time series (kW)
-    reactive_power_pred : float or None
-        predicted reactive input powers over the time series (kVar)
-
-    Returns
-    -------
-    Asset
-
-
-    """
+    """ A 3 phase nondispatchable asset class (use for inflexible loads,
+    PVsources etc)"""
 
     def __init__(self,
+                 simulation_time_series_hour_resolution: float,
+                 bus_id: int,
                  active_power: np.ndarray,
                  reactive_power: np.ndarray,
-                 bus_id: int,
-                 time_intervals_in_hours: float,
-                 number_of_time_intervals_per_day: int,
                  phases: List = [0, 1, 2],
                  active_power_pred=None,
                  reactive_power_pred=None):
 
+        self.simulation_time_series_hour_resolution = simulation_time_series_hour_resolution
+
         Asset.__init__(self,
                        bus_id=bus_id,
-                       time_intervals_in_hours=time_intervals_in_hours,
-                       number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                       simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
                        phases=phases)
 
         self.active_power = active_power
@@ -391,7 +364,7 @@ class Asset_3ph(Asset):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    time_intervals_in_hours : float
+    simulation_time_series_hour_resolution : float
         time interval duration
     number_of_time_intervals_per_day : int
         number of time intervals
@@ -402,8 +375,10 @@ class Asset_3ph(Asset):
 
 
     """
-    def __init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day):
-        Asset.__init__(self, bus_id, time_intervals_in_hours, number_of_time_intervals_per_day)
+    def __init__(self, bus_id, phases, simulation_time_series_hour_resolution):
+        Asset.__init__(self,
+                       bus_id=bus_id,
+                       simulation_time_series_hour_resolution=simulation_time_series_hour_resolution)
         self.phases = np.array(phases)
 
 
@@ -431,7 +406,7 @@ class StorageAsset_3ph(Asset_3ph):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    time_intervals_in_hours : float
+    simulation_time_series_hour_resolution : float
         time interval duration (s)
     number_of_time_intervals_per_day : int
         number of time intervals
@@ -460,10 +435,12 @@ class StorageAsset_3ph(Asset_3ph):
 
 
     """
-    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day,
+    def __init__(self, Emax, Emin, Pmax, Pmin, E0, ET, bus_id, phases, simulation_time_series_hour_resolution,
                  dt_ems, T_ems, Pmax_abs=None, c_deg_lin=None, eff=1,
                  eff_opt=1):
-        Asset_3ph.__init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day)
+        Asset_3ph.__init__(self, bus_id, phases, simulation_time_series_hour_resolution)
+        self.number_of_time_intervals_per_day = get_number_of_time_intervals_per_day(
+            time_series_hour_resolution=self.simulation_time_series_hour_resolution)
         self.Emax = Emax
         self.Emin = Emin
         self.Pmax = Pmax
@@ -474,11 +451,11 @@ class StorageAsset_3ph(Asset_3ph):
             self.Pmax_abs = Pmax_abs
         self.E0 = E0
         self.ET = ET
-        self.E = E0*np.ones(number_of_time_intervals_per_day + 1)
+        self.E = E0*np.ones(self.number_of_time_intervals_per_day + 1)
         self.dt_ems = dt_ems
         self.T_ems = T_ems
-        self.Pnet = np.zeros(number_of_time_intervals_per_day)
-        self.Qnet = np.zeros(number_of_time_intervals_per_day)
+        self.Pnet = np.zeros(self.number_of_time_intervals_per_day)
+        self.Qnet = np.zeros(self.number_of_time_intervals_per_day)
         self.c_deg_lin = c_deg_lin or 0
         self.eff = eff*np.ones(100)
         self.eff_opt = eff_opt
@@ -495,7 +472,7 @@ class StorageAsset_3ph(Asset_3ph):
         """
         self.Pnet = Pnet
         self.E[0] = self.E0
-        t_ems = self.time_intervals_in_hours / self.dt_ems
+        t_ems = self.simulation_time_series_hour_resolution / self.dt_ems
         for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
             P_eff = self.eff[P_ratio-1]
@@ -503,12 +480,12 @@ class StorageAsset_3ph(Asset_3ph):
                 if self.E[t] <= self.Emin[int(t*t_ems)]:
                     self.E[t] = self.Emin[int(t*t_ems)]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
+                self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.simulation_time_series_hour_resolution
             elif self.Pnet[t] >= 0:
                 if self.E[t] >= self.Emax[t]:
                     self.E[t] = self.Emax[t]
                     self.Pnet[t] = 0
-                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
+                self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.simulation_time_series_hour_resolution
 
     def update_control_t(self, Pnet_t, t):
         """
@@ -524,19 +501,19 @@ class StorageAsset_3ph(Asset_3ph):
         """
         self.Pnet[t] = Pnet_t
         self.E[0] = self.E0
-        t_ems = self.time_intervals_in_hours / self.dt_ems
+        t_ems = self.simulation_time_series_hour_resolution / self.dt_ems
         P_ratio = int(100*(abs(self.Pnet[t]/self.Pmax_abs)))
         P_eff = self.eff[P_ratio-1]
         if self.Pnet[t] < 0:
             if self.E[t] <= self.Emin[int(t*t_ems)]:
                 self.E[t] = self.Emin[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.time_intervals_in_hours
+            self.E[t+1] = self.E[t] + (1/P_eff)*self.Pnet[t]*self.simulation_time_series_hour_resolution
         elif self.Pnet[t] >= 0:
             if self.E[t] >= self.Emax[int(t*t_ems)]:
                 self.E[t] = self.Emax[int(t*t_ems)]
                 self.Pnet[t] = 0
-            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.time_intervals_in_hours
+            self.E[t+1] = self.E[t] + P_eff*self.Pnet[t]*self.simulation_time_series_hour_resolution
 
 
 class NondispatchableAsset_3ph(Asset_3ph):
@@ -556,7 +533,7 @@ class NondispatchableAsset_3ph(Asset_3ph):
         [0, 1, 2] indicates 3 phase connection
         Wye: [0, 1] indicates an a,b connection
         Delta: [0] indicates a-b, [1] b-c, [2] c-a
-    time_intervals_in_hours : float
+    simulation_time_series_hour_resolution : float
         time interval duration
     number_of_time_intervals_per_day : int
         number of time intervals
@@ -572,9 +549,9 @@ class NondispatchableAsset_3ph(Asset_3ph):
 
     """
 
-    def __init__(self, Pnet, Qnet, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day, Pnet_pred=None,
+    def __init__(self, Pnet, Qnet, bus_id, phases, simulation_time_series_hour_resolution, Pnet_pred=None,
                  Qnet_pred=None):
-        Asset_3ph.__init__(self, bus_id, phases, time_intervals_in_hours, number_of_time_intervals_per_day)
+        Asset_3ph.__init__(self, bus_id, phases, simulation_time_series_hour_resolution)
         self.Pnet = Pnet
         self.Qnet = Qnet
         if Pnet_pred is not None:
@@ -585,7 +562,3 @@ class NondispatchableAsset_3ph(Asset_3ph):
             self.Qnet_pred = Qnet_pred
         else:
             self.Qnet_pred = Qnet
-
-
-if __name__ == "__main__":
-    pass

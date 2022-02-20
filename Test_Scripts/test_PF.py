@@ -136,11 +136,11 @@ for t in range(T_mpc):
     #Note that linear power flow matricies are in units of W (not kW)
     PQ0_wye = np.concatenate((np.real(network_t.S_PQloads_wye_res),np.imag(network_t.S_PQloads_wye_res)))*1e3
     PQ0_del = np.concatenate((np.real(network_t.S_PQloads_del_res),np.imag(network_t.S_PQloads_del_res)))*1e3
-    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_wye)))), G_wye_ES_PQ) \
-                + np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_del)))), G_del_ES_PQ))
-    b_Pslack =   np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_wye), PQ0_wye))))\
-                +np.real(np.matmul(network_t.vs.number_of_time_intervals, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_del), PQ0_del))))\
-                +np.real(np.matmul(network_t.vs.number_of_time_intervals, (np.matmul(np.conj(network_t.Yss), np.conj(network_t.vs)) + np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M0)))))
+    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_wye)))), G_wye_ES_PQ) \
+                + np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_del)))), G_del_ES_PQ))
+    b_Pslack =   np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_wye), PQ0_wye))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_del), PQ0_del))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, (np.matmul(np.conj(network_t.Yss), np.conj(network_t.vs)) + np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M0)))))
     prob.add_constraint(P_import[t]-P_export[t] == (np.sum(A_Pslack[i]*P_ES[t,i]*1e3 for i in range(N_ES)) + b_Pslack)/1e3) #net import variables
     #Voltage magnitude constraints
     A_vlim = np.matmul(network_t.K_wye,G_wye_ES_PQ) + np.matmul(network_t.K_del,G_del_ES_PQ)

@@ -55,16 +55,15 @@ def get_building_case_original_results(is_winter: bool):
         electric_loads = winter_electric_load_data
 
     ### STEP 1: setup parameters
-    time_interval_in_minutes = 1
-    time_interval_in_hours = time_interval_in_minutes / 60
+    simulation_time_series_minute_resolution = 1
+    simulation_time_series_hour_resolution = simulation_time_series_minute_resolution / 60
     hours_per_day = 24
-    number_of_time_intervals_per_day = int(hours_per_day / time_interval_in_hours)
+    number_of_time_intervals_per_day = int(hours_per_day / simulation_time_series_hour_resolution)
 
-    energy_management_system_time_interval_in_minutes = 15
-    energy_management_system_time_interval_in_hours = energy_management_system_time_interval_in_minutes / 60
-    number_of_energy_management_system_time_intervals_per_day = int(number_of_time_intervals_per_day *
-                                                                    time_interval_in_hours /
-                                                                    energy_management_system_time_interval_in_hours)
+    energy_management_system_time_series_minute_resolution = 15
+    energy_management_system_time_series_hour_resolution = energy_management_system_time_series_minute_resolution / 60
+    number_of_energy_management_system_time_intervals_per_day = int(
+        hours_per_day / energy_management_system_time_series_hour_resolution)
 
     rated_photovoltaic_kilowatts = 400
 
@@ -111,9 +110,8 @@ def get_building_case_original_results(is_winter: bool):
     building_thermal_resistance_in_degree_celsius_per_kilowatts = 0.0337  # degree celsius/kW
     # Market parameters
     # market and EMS have the same time-series
-    market_time_interval_in_hours = energy_management_system_time_interval_in_hours
+    market_time_interval_in_hours = energy_management_system_time_series_hour_resolution
     # market and EMS have same length
-    number_of_market_time_intervals_per_day = number_of_energy_management_system_time_intervals_per_day
     # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export = 0.04  # money received of net exports
     peak_period_import_prices = 0.07
@@ -156,20 +154,20 @@ def get_building_case_original_results(is_winter: bool):
     photovoltaic_active_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
     photovoltaic_reactive_power = np.zeros(
         number_of_time_intervals_per_day)  # Solar panels won't produce reactive power being a DC generator
-    non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(active_power=photovoltaic_active_kilowatts,
-                                                                      reactive_power=photovoltaic_reactive_power,
-                                                                      bus_id=bus_3,
-                                                                      time_intervals_in_hours=time_interval_in_hours,
-                                                                      number_of_time_intervals_per_day=
-                                                                      number_of_time_intervals_per_day)
+    non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(
+        simulation_time_series_hour_resolution=simulation_time_series_hour_resolution, bus_id=bus_3,
+        active_power=photovoltaic_active_kilowatts, reactive_power=photovoltaic_reactive_power)
     non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
     # Load at bus 3
     photovoltaic_active_kilowatts = np.sum(electric_loads, 1)  # summed load across 120 households
     photovoltaic_reactive_power = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = Assets.NonDispatchableAsset(photovoltaic_active_kilowatts, photovoltaic_reactive_power,
-                                            bus_3,
-                                            time_interval_in_hours,
-                                            number_of_time_intervals_per_day)
+    load_bus3 = Assets.NonDispatchableAsset(simulation_time_series_hour_resolution=
+                                            simulation_time_series_hour_resolution,
+                                            bus_id=bus_3,
+                                            active_power=photovoltaic_active_kilowatts,
+                                            reactive_power=photovoltaic_reactive_power
+                                            )
+
     non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
     if is_winter:
@@ -191,12 +189,9 @@ def get_building_case_original_results(is_winter: bool):
                                     chiller_coefficient_of_performance=chiller_coefficient_of_performance,
                                     ambient_degree_celsius=ambient_degree_celsius,
                                     bus_id=bus_id_building,
-                                    time_intervals_in_hours=time_interval_in_hours,
-                                    number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                    energy_management_system_time_intervals=
-                                    energy_management_system_time_interval_in_hours,
-                                    number_of_energy_management_system_time_intervals_per_day=
-                                    number_of_energy_management_system_time_intervals_per_day)
+                                    simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
+                                    energy_management_system_time_series_hour_resolution=
+                                    energy_management_system_time_series_hour_resolution)
 
     building_assets.append(building)
 
@@ -205,17 +200,15 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     bus_id_market = bus_1
     market = Markets.Market(network_bus_id=bus_id_market,
-                            number_of_EMS_time_intervals=number_of_energy_management_system_time_intervals_per_day,
-                            export_prices_in_pounds_per_kWh=prices_export,
-                            peak_period_import_prices=peak_period_import_prices,
+                            export_prices_in_pounds_per_kilowatt_hour=prices_export,
+                            peak_period_import_prices_in_pounds_per_kilowatt_hour=peak_period_import_prices,
                             peak_period_hours_per_day=peak_period_hours_per_day,
-                            valley_period_import_prices=valley_period_import_prices,
+                            valley_period_import_prices_in_pounds_per_kilowatt_hour=valley_period_import_prices,
                             valley_period_hours_per_day=valley_period_hours_per_day,
                             max_demand_charge_in_pounds_per_kWh=demand_charge,
                             max_import_kW=max_import_kW,
                             min_import_kW=min_import_kW,
-                            minutes_market_interval=market_time_interval_in_hours,
-                            number_of_market_time_intervals=number_of_market_time_intervals_per_day,
+                            market_time_series_minute_resolution=market_time_interval_in_hours,  # TODO: check the naming
                             offered_kW_in_frequency_response=offered_kW_in_frequency_response,
                             max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                             min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
@@ -229,12 +222,10 @@ def get_building_case_original_results(is_winter: bool):
                                               non_dispatchable_assets=non_distpachable_assets,
                                               network=network,
                                               market=market,
-                                              time_intervals_in_hours=time_interval_in_hours,
-                                              number_of_time_intervals=number_of_time_intervals_per_day,
-                                              energy_management_system_time_intervals_in_hours=
-                                              energy_management_system_time_interval_in_hours,
-                                              number_of_energy_management_system_time_intervals_per_day=
-                                              number_of_energy_management_system_time_intervals_per_day,
+                                              simulation_time_series_hour_resolution=
+                                              simulation_time_series_hour_resolution,
+                                              energy_management_system_time_series_hour_resolution=
+                                              energy_management_system_time_series_hour_resolution,
                                               building_assets=building_assets)
     #######################################
     ### STEP 6: simulate the energy system:
@@ -258,12 +249,12 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 7: plot results
     #######################################
     # x-axis time values
-    time = time_interval_in_hours * np.arange(number_of_time_intervals_per_day)
-    time_ems = energy_management_system_time_interval_in_hours * np.arange(
+    time = simulation_time_series_hour_resolution * np.arange(number_of_time_intervals_per_day)
+    time_ems = energy_management_system_time_series_hour_resolution * np.arange(
         number_of_energy_management_system_time_intervals_per_day)
-    timeE = time_interval_in_hours * np.arange(number_of_time_intervals_per_day + 1)
+    timeE = simulation_time_series_hour_resolution * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
-    revenue = market.calculate_revenue(-market_active_power_in_kilowatts, time_interval_in_hours)
+    revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_hour_resolution)
 
     return [revenue,
             buses_voltage_in_per_unit[0],
