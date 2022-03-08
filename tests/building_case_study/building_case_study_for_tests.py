@@ -98,28 +98,28 @@ def get_building_case_original_results(is_winter: bool):
         return
 
     # Building parameters
-    max_inside_degree_celsius = 18
-    min_inside_degree_celsius = 16
-    initial_inside_degree_celsius = 17  # At the beginning of the scenario
+    max_allowed_building_degree_celsius = 18
+    min_allowed_building_degree_celsius = 16
+    initial_building_degree_celsius = 17  # At the beginning of the scenario
     max_consumed_electric_heating_kilowatts = 90
     max_consumed_electric_cooling_kilowatts = 200
     heat_pump_coefficient_of_performance = 3
     chiller_coefficient_of_performance = 1
     # Parameters from MultiSAVES
-    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = 500  # kWh/ degree celsius
-    building_thermal_resistance_in_degree_celsius_per_kilowatts = 0.0337  # degree celsius/kW
+    building_thermal_mass_in_kilowatts_hour_per_degree_celsius = 500  # kWh/ degree celsius
+    building_heat_transfer_in_degree_celsius_per_kilowatts = 0.0337  # degree celsius/kW
     # Market parameters
     # market and EMS have the same time-series
     market_time_interval_in_hours = energy_management_system_time_series_hour_resolution
     # market and EMS have same length
     # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
-    prices_export = 0.04  # money received of net exports
-    peak_period_import_prices = 0.07
+    prices_export_in_pounds_per_kilowatt_hour = 0.04  # money received of net exports
+    peak_period_import_prices_in_pounds_per_kilowatt_hour = 0.07
     peak_period_hours_per_day = 7
-    valley_period_import_prices = 0.15
+    valley_period_import_prices_in_pounds_per_kilowatt_hour = 0.15
     valley_period_hours_per_day = 17
 
-    demand_charge_in_pounds_per_kilowatt = 0.10  # price per kW for the maximum demand
+    demand_charge_in_pounds_per_kilowatt = 0.10  # for the maximum power import over the day
     max_import_kilowatts = 500  # maximum import power
     max_export_kilowatts = -500  # maximum export power
 
@@ -176,15 +176,15 @@ def get_building_case_original_results(is_winter: bool):
         ambient_degree_celsius = 22
 
     bus_id_building = bus_3
-    building = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
-                                    min_inside_degree_celsius=min_inside_degree_celsius,
+    building = Assets.BuildingAsset(max_inside_degree_celsius=max_allowed_building_degree_celsius,
+                                    min_inside_degree_celsius=min_allowed_building_degree_celsius,
                                     max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
                                     max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
-                                    initial_inside_degree_celsius=initial_inside_degree_celsius,
+                                    initial_inside_degree_celsius=initial_building_degree_celsius,
                                     building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=
-                                    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius,
+                                    building_thermal_mass_in_kilowatts_hour_per_degree_celsius,
                                     building_thermal_resistance_in_degree_celsius_per_kilowatts=
-                                    building_thermal_resistance_in_degree_celsius_per_kilowatts,
+                                    building_heat_transfer_in_degree_celsius_per_kilowatts,
                                     heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
                                     chiller_coefficient_of_performance=chiller_coefficient_of_performance,
                                     ambient_degree_celsius=ambient_degree_celsius,
@@ -201,10 +201,10 @@ def get_building_case_original_results(is_winter: bool):
     bus_id_market = bus_1
     market = Markets.Market(network_bus_id=bus_id_market,
                             market_time_series_minute_resolution=market_time_interval_in_hours,
-                            export_prices_in_pounds_per_kilowatt_hour=prices_export,
-                            peak_period_import_prices_in_pounds_per_kilowatt_hour=peak_period_import_prices,
+                            export_prices_in_pounds_per_kilowatt_hour=prices_export_in_pounds_per_kilowatt_hour,
+                            peak_period_import_prices_in_pounds_per_kilowatt_hour=peak_period_import_prices_in_pounds_per_kilowatt_hour,
                             peak_period_hours_per_day=peak_period_hours_per_day,
-                            valley_period_import_prices_in_pounds_per_kilowatt_hour=valley_period_import_prices,
+                            valley_period_import_prices_in_pounds_per_kilowatt_hour=valley_period_import_prices_in_pounds_per_kilowatt_hour,
                             valley_period_hours_per_day=valley_period_hours_per_day,
                             max_demand_charge_in_pounds_per_kWh=demand_charge_in_pounds_per_kilowatt,
                             max_import_kilowatts=max_import_kilowatts,
