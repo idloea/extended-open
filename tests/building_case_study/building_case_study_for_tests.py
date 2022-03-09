@@ -94,7 +94,7 @@ def get_building_case_original_results(is_winter: bool):
                                                   )
 
     electric_vehicle_fleet.check_electric_vehicle_fleet_charging_feasibility()
-    if not electric_vehicle_fleet.is_electric_vehicle_feasible:
+    if not electric_vehicle_fleet.is_electric_vehicle_fleet_feasible_for_the_system:
         return
 
     # Building parameters
@@ -223,9 +223,9 @@ def get_building_case_original_results(is_winter: bool):
                                               non_dispatchable_assets=non_distpachable_assets,
                                               network=network,
                                               market=market,
-                                              simulation_time_series_hour_resolution=
+                                              simulation_time_series_resolution_in_hours=
                                               simulation_time_series_hour_resolution,
-                                              energy_management_system_time_series_hour_resolution=
+                                              energy_management_system_time_series_resolution_in_hours=
                                               energy_management_system_time_series_hour_resolution,
                                               building_assets=building_assets)
     #######################################

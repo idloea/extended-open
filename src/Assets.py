@@ -60,7 +60,7 @@ class Asset:
         self.phases = np.array(phases)
 
         self.number_of_time_intervals_per_day = get_number_of_time_intervals_per_day(
-            time_series_hour_resolution=self.simulation_time_series_hour_resolution)
+            time_series_resolution_in_hours=self.simulation_time_series_hour_resolution)
 
 
 class BuildingAsset(Asset):
@@ -440,7 +440,7 @@ class StorageAsset_3ph(Asset_3ph):
                  eff_opt=1):
         Asset_3ph.__init__(self, bus_id, phases, simulation_time_series_hour_resolution)
         self.number_of_time_intervals_per_day = get_number_of_time_intervals_per_day(
-            time_series_hour_resolution=self.simulation_time_series_hour_resolution)
+            time_series_resolution_in_hours=self.simulation_time_series_hour_resolution)
         self.Emax = Emax
         self.Emin = Emin
         self.Pmax = Pmax

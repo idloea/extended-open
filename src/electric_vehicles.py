@@ -13,7 +13,7 @@ class ElectricVehicleFleet:
                  electric_vehicle_departure_time_end: int,
                  ):
 
-        self.is_electric_vehicle_feasible = False
+        self.is_electric_vehicle_fleet_feasible_for_the_system = False
         self.random_seed = random_seed
         self.number_of_electric_vehicles = number_of_electric_vehicles
         self.max_electric_vehicle_energy_level = max_battery_capacity_in_kilowatts_per_hour
@@ -60,6 +60,6 @@ class ElectricVehicleFleet:
         condition = all(electric_vehicle_energy_level >= 0 for electric_vehicle_energy_level
                         in self.random_electric_vehicle_energy_levels)
         if condition:
-            self.is_electric_vehicle_feasible = True
+            self.is_electric_vehicle_fleet_feasible_for_the_system = True
         else:
             pass

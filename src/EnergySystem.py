@@ -45,22 +45,23 @@ class EnergySystem:
                  non_dispatchable_assets: List,
                  network: Network_3ph,
                  market: Market,
-                 simulation_time_series_hour_resolution: float,
-                 energy_management_system_time_series_hour_resolution: float,
+                 simulation_time_series_resolution_in_hours: float,
+                 energy_management_system_time_series_resolution_in_hours: float,
                  building_assets: List):
 
         self.storage_assets = storage_assets
         self.non_dispatchable_assets = non_dispatchable_assets
         self.network = network
         self.market = market
-        self.simulation_time_series_hour_resolution = simulation_time_series_hour_resolution
-        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_hour_resolution
+        self.simulation_time_series_resolution_in_hours = simulation_time_series_resolution_in_hours
+        self.energy_management_system_time_series_resolution_in_hours = \
+            energy_management_system_time_series_resolution_in_hours
         self.building_assets = building_assets
 
         self.number_of_time_intervals_per_day = get_number_of_time_intervals_per_day(
-            time_series_hour_resolution=self.simulation_time_series_hour_resolution)
+            time_series_resolution_in_hours=self.simulation_time_series_resolution_in_hours)
         self.number_of_energy_management_system_time_intervals_per_day = get_number_of_time_intervals_per_day(
-            time_series_hour_resolution=self.energy_management_system_time_series_hour_resolution)
+            time_series_resolution_in_hours=self.energy_management_system_time_series_resolution_in_hours)
 
 
 
@@ -107,8 +108,8 @@ class EnergySystem:
             P_demand_actual += self.non_dispatchable_assets[i].active_power
         # convert P_demand_actual to EMS time series scale
         for t_ems in range(self.number_of_energy_management_system_time_intervals_per_day):
-            t_indexes = (t_ems * self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution \
-                         + np.arange(0, self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution)).astype(int)
+            t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours \
+                         + np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
             P_demand[t_ems] = np.mean(P_demand_actual[t_indexes])
         #######################################
         ### STEP 1: set up decision variables
@@ -193,15 +194,15 @@ class EnergySystem:
             problem.add_constraint(P_ctrl_asset[:, number_of_buildings + i] >= \
                                    self.storage_assets[i].max_export_kilowatts)
             # maximum energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * P_ctrl_asset[:, number_of_buildings + i] <= \
+            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:, number_of_buildings + i] <= \
                                    self.storage_assets[i].Emax \
                                    - self.storage_assets[i].E0)
             # minimum energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * P_ctrl_asset[:, number_of_buildings + i] >= \
+            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:, number_of_buildings + i] >= \
                                    self.storage_assets[i].Emin \
                                    - self.storage_assets[i].E0)
             # final energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum[self.energy_management_system_time_series_hour_resolution - 1, :] \
+            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[self.energy_management_system_time_series_resolution_in_hours - 1, :] \
                                    * P_ctrl_asset[:, number_of_buildings + i] == \
                                    self.storage_assets[i].ET \
                                    - self.storage_assets[i].E0)
@@ -228,14 +229,14 @@ class EnergySystem:
                 if FR_window:
                     for i in range(number_of_storage_assets):
                         # final energy constraint
-                        problem.add_constraint(self.energy_management_system_time_series_hour_resolution
+                        problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
                                             * Asum[t, :]
                                             * P_ctrl_asset[:, number_of_buildings + i]
                                             <= (FR_SoC_max
                                                 * self.storage_assets[i].Emax)
                                             - self.storage_assets[i].E0)
                         # final energy constraint
-                        problem.add_constraint(self.energy_management_system_time_series_hour_resolution
+                        problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
                                             * Asum[t, :]
                                             * P_ctrl_asset[:, number_of_buildings + i]
                                             >= (FR_SoC_min
@@ -342,12 +343,12 @@ class EnergySystem:
         if N_ESs > 0:
             P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
             for t in range(self.number_of_time_intervals_per_day):
-                t_ems = int(t / (self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution))
+                t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
                 P_ESs[t, :] = P_ES_ems[t_ems, :]
         if N_BLDGs > 0:
             P_BLDGs = np.zeros([self.number_of_time_intervals_per_day, N_BLDGs])
             for t in range(self.number_of_time_intervals_per_day):
-                t_ems = int(t / (self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution))
+                t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
                 P_BLDGs[t, :] = P_BLDG_ems[t_ems, :]
         #######################################
         ### STEP 2: update the controllable assets
@@ -507,7 +508,7 @@ class EnergySystem:
         N_nondispatch = len(self.non_dispatchable_assets)
         P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
         for t in range(self.number_of_time_intervals_per_day):
-            t_ems = int(t / (self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution))
+            t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
             P_ESs[t, :] = P_ES_ems[t_ems, :]
         #######################################
         ### STEP 2: update the controllable assets
@@ -580,7 +581,7 @@ class EnergySystem:
         ### STEP 0: setup variables
         #######################################
 
-        t0_dt = int(t0 * self.dt_ems / self.simulation_time_series_hour_resolution)
+        t0_dt = int(t0 * self.dt_ems / self.simulation_time_series_resolution_in_hours)
         T_mpc = self.number_of_energy_management_system_time_intervals_per_day - t0
         T_range = np.arange(t0, self.number_of_energy_management_system_time_intervals_per_day)
         prob = pic.Problem()
@@ -597,8 +598,8 @@ class EnergySystem:
         # Assemble P_demand out of P actual and P predicted and convert to EMS
         # time series scale
         for t_ems in T_range:
-            t_indexes = ((t_ems * self.dt_ems / self.simulation_time_series_hour_resolution
-                          + np.arange(0, self.dt_ems / self.simulation_time_series_hour_resolution)).astype(int))
+            t_indexes = ((t_ems * self.dt_ems / self.simulation_time_series_resolution_in_hours
+                          + np.arange(0, self.dt_ems / self.simulation_time_series_resolution_in_hours)).astype(int))
             if t_ems == t0:
                 P_demand[t_ems - t0] = np.mean(P_demand_actual[t_indexes])
             else:
@@ -773,7 +774,7 @@ class EnergySystem:
         #######################################
         ### STEP 0: setup variables
         #######################################
-        t0_dt = int(t0 * self.dt_ems / self.simulation_time_series_hour_resolution)
+        t0_dt = int(t0 * self.dt_ems / self.simulation_time_series_resolution_in_hours)
         T_mpc = self.number_of_energy_management_system_time_intervals_per_day - t0
         T_range = np.arange(t0, self.number_of_energy_management_system_time_intervals_per_day)
         prob = pic.Problem()
@@ -790,8 +791,8 @@ class EnergySystem:
         for t_ems in T_range:
             t_indexes = (t_ems
                          * self.dt_ems
-                         / self.simulation_time_series_hour_resolution
-                         + np.arange(0, self.dt_ems / self.simulation_time_series_hour_resolution)).astype(int)
+                         / self.simulation_time_series_resolution_in_hours
+                         + np.arange(0, self.dt_ems / self.simulation_time_series_resolution_in_hours)).astype(int)
             if t_ems == t0:
                 P_demand[t_ems - t0] = np.mean(P_demand_actual[t_indexes])
             else:
@@ -995,7 +996,7 @@ class EnergySystem:
         ### STEP 0: setup variables
         #######################################
         prob = pic.Problem()
-        t0_dt = int(t0 * self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution)
+        t0_dt = int(t0 * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
         T_mpc = self.number_of_energy_management_system_time_intervals_per_day - t0
         T_range = np.arange(t0, self.number_of_energy_management_system_time_intervals_per_day)
         N_buses = self.network.N_buses
@@ -1017,8 +1018,8 @@ class EnergySystem:
         # time series scale
         for i in range(N_nondispatch):
             for t_ems in T_range:
-                t_indexes = (t_ems * self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution +
-                             np.arange(0, self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution)).astype(int)
+                t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours +
+                             np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
                 if t_ems == t0:
                     P_demand[t_ems - t0, i] = \
                         np.mean(P_demand_actual[t_indexes, i])
@@ -1158,17 +1159,17 @@ class EnergySystem:
             prob.add_constraint(P_ES[:, i] >=
                                 self.storage_assets[i].max_export_kilowatts[T_range])
             # maximum energy constraint
-            prob.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * (P_ES_ch[:, i] -
+            prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
                                                       P_ES_dis[:, i]) <=
                                 self.storage_assets[i].Emax[T_range] -
                                 self.storage_assets[i].E[t0_dt])
             # minimum energy constraint
-            prob.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum * (P_ES_ch[:, i] -
+            prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
                                                       P_ES_dis[:, i]) >=
                                 self.storage_assets[i].Emin[T_range] -
                                 self.storage_assets[i].E[t0_dt])
             # final energy constraint
-            prob.add_constraint(self.energy_management_system_time_series_hour_resolution * Asum[T_mpc - 1, :] * (P_ES_ch[:, i] -
+            prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[T_mpc - 1, :] * (P_ES_ch[:, i] -
                                                                     P_ES_dis[:, i]) + E_T_min[i] >=
                                 self.storage_assets[i].ET -
                                 self.storage_assets[i].E[t0_dt])
@@ -1295,14 +1296,14 @@ class EnergySystem:
                 if FR_window[t] == 1:
                     for i in range(N_ES):
                         # final energy constraint
-                        prob.add_constraint((self.energy_management_system_time_series_hour_resolution
+                        prob.add_constraint((self.energy_management_system_time_series_resolution_in_hours
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             <= ((FR_SoC_max
                                                  * self.storage_assets[i].Emax)
                                                 - self.storage_assets[i].E[t0_dt]))
                         # final energy constraint
-                        prob.add_constraint((self.energy_management_system_time_series_hour_resolution
+                        prob.add_constraint((self.energy_management_system_time_series_resolution_in_hours
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             >= ((FR_SoC_min
@@ -1323,12 +1324,12 @@ class EnergySystem:
 
         prob.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * \
                            (P_max_demand + P_max_demand_pre_t0) +
-                           sum(sum(self.energy_management_system_time_series_hour_resolution * self.storage_assets[i]. \
+                           sum(sum(self.energy_management_system_time_series_resolution_in_hours * self.storage_assets[i]. \
                                    c_deg_lin * (P_ES_ch[t, i] +
                                                 P_ES_dis[t, i]) \
                                    for i in range(N_ES)) \
-                               + self.energy_management_system_time_series_hour_resolution * prices_import[t0 + t] * P_import[t] \
-                               - self.energy_management_system_time_series_hour_resolution * prices_export[t0 + t] * P_export[t]
+                               + self.energy_management_system_time_series_resolution_in_hours * prices_import[t0 + t] * P_import[t] \
+                               - self.energy_management_system_time_series_resolution_in_hours * prices_export[t0 + t] * P_export[t]
                                for t in range(T_mpc)) \
                            + sum(terminal_const * E_T_min[i] \
                                  for i in range(N_ES)))
@@ -1425,14 +1426,14 @@ class EnergySystem:
             P_export_ems[t_mpc] = output_ems['P_export_val'][0]
             P_ES_ems[t_mpc, :] = output_ems['P_ES_val'][0, :]
             # convert P_EV signals to system time-series scale
-            T_interval = int(self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution)
+            T_interval = int(self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
             P_ESs = np.zeros([T_interval, N_ESs])
             for t in range(T_interval):
                 P_ESs[t, :] = P_ES_ems[t_mpc, :]
             #######################################
             ### STEP 1.2: update the controllable assets
             #######################################
-            t0 = int(t_mpc * (self.energy_management_system_time_series_hour_resolution / self.simulation_time_series_hour_resolution))
+            t0 = int(t_mpc * (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
             # get the simulation time intervals within each EMS time interval
             # and implement the ES system control for them
             t_range = np.arange(t0, t0 + T_interval)
@@ -1510,7 +1511,7 @@ class EnergySystem:
         N_nondispatch = len(self.non_dispatchable_assets)  # number of EVs
         P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
         for t in range(self.number_of_time_intervals_per_day):
-            t_ems = int(t / (self.dt_ems / self.simulation_time_series_hour_resolution))
+            t_ems = int(t / (self.dt_ems / self.simulation_time_series_resolution_in_hours))
             P_ESs[t, :] = P_ES_ems[t_ems, :]
         #######################################
         ### STEP 2: update the controllable assets

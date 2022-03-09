@@ -1,5 +1,4 @@
 import numpy as np
-
 from src.electric_vehicles import ElectricVehicleFleet
 from src.read import read_open_csv_files
 
@@ -14,16 +13,18 @@ electric_loads = read_open_csv_files(path=data_path, csv_file=electric_load_data
 # Photovoltaic generation
 sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_in_per_unit, 1)
 is_winter = True
-photovoltaic_generation_per_unit = sum_of_photovoltaic_generation_in_per_unit / \
-                                   np.max(sum_of_photovoltaic_generation_in_per_unit)
+max_photovoltaic_generation_in_per_unit = np.max(sum_of_photovoltaic_generation_in_per_unit)
+photovoltaic_generation_per_unit = sum_of_photovoltaic_generation_in_per_unit / max_photovoltaic_generation_in_per_unit
+
 rated_photovoltaic_kilowatts = 400
 
 # STEP 1: setup parameters
-simulation_time_series_minute_resolution = 1
-simulation_time_series_hour_resolution = simulation_time_series_minute_resolution / 60
+simulation_time_series_resolution_in_minutes = 1
+simulation_time_series_resolution_in_hours = simulation_time_series_resolution_in_minutes / 60
 
-energy_management_system_time_series_minute_resolution = 15
-energy_management_system_time_series_hour_resolution = energy_management_system_time_series_minute_resolution / 60
+energy_management_system_time_series_resolution_in_minutes = 15
+energy_management_system_time_series_resolution_in_hours = \
+    energy_management_system_time_series_resolution_in_minutes / 60
 
 # Electric Vehicle (EV) parameters
 seed = 1000  # Used by OPEN originally
@@ -51,13 +52,13 @@ electric_vehicle_fleet = ElectricVehicleFleet(random_seed=random_seed,
                                               )
 
 electric_vehicle_fleet.check_electric_vehicle_fleet_charging_feasibility()
-if not electric_vehicle_fleet.is_electric_vehicle_feasible:
-    raise ValueError('The electric vehicle fleet is not feasible')
+if not electric_vehicle_fleet.is_electric_vehicle_fleet_feasible_for_the_system:
+    raise ValueError('The electric vehicle fleet is not feasible for the system')
 
 # Building parameters
 max_inside_degree_celsius = 18
 min_inside_degree_celsius = 16
-initial_inside_degree_celsius = 17  # At the beginning of the scenario
+initial_inside_degree_celsius = 17
 max_consumed_electric_heating_kilowatts = 90
 max_consumed_electric_cooling_kilowatts = 200
 heat_pump_coefficient_of_performance = 3
@@ -66,17 +67,17 @@ chiller_coefficient_of_performance = 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = 500
 building_thermal_resistance_in_degree_celsius_per_kilowatts = 0.0337
 
-market_time_interval_in_hours = energy_management_system_time_series_hour_resolution
+market_time_interval_in_hours = energy_management_system_time_series_resolution_in_hours
 
 # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
-prices_export = 0.04  # money received of net exports
-peak_period_import_prices = 0.07
+export_prices_in_pounds_per_kilowatt_hour = 0.04  # money received of net exports
+peak_period_import_prices_in_pounds_per_kilowatt_hour = 0.07
 peak_period_hours_per_day = 7
-valley_period_import_prices = 0.15
+valley_period_import_prices_in_pounds_per_kilowatt_hour = 0.15
 valley_period_hours_per_day = 17
 demand_charge_in_pounds_per_kilowatt = 0.10  # price per kW for the maximum demand
-max_import_kilowatts = 500  # maximum import power
-max_export_kilowatts = -500  # maximum export power
+max_import_kilowatts = 500
+max_export_kilowatts = -500
 offered_kilowatts_in_frequency_response = 0
 max_frequency_response_state_of_charge = 0.6
 min_frequency_response_state_of_charge = 0.4
