@@ -1,6 +1,7 @@
 import numpy as np
 from src.electric_vehicles import ElectricVehicleFleet
 from src.read import read_open_csv_files
+import pandapower as pp
 
 # STEP 0: Load Data
 data_path = "Data/Building/"
@@ -82,5 +83,11 @@ offered_kilowatts_in_frequency_response = 0
 max_frequency_response_state_of_charge = 0.6
 min_frequency_response_state_of_charge = 0.4
 frequency_response_price_in_pounds_per_kilowatt_hour = 0.005
-daily_connection_charge = 0.13
 
+offered_kilowatts_in_frequency_response = 0
+max_frequency_response_state_of_charge = 0.6
+min_frequency_response_state_of_charge = 0.4
+frequency_response_price_in_pounds_per_kilowatt_hour = 0.005
+
+# STEP 2: setup the network
+network = pp.create_empty_network()

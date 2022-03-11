@@ -127,7 +127,6 @@ def get_building_case_original_results(is_winter: bool):
     max_frequency_response_state_of_charge = 0.6
     min_frequency_response_state_of_charge = 0.4
     frequency_response_price_in_pounds_per_kilowatt_hour = 0.005
-    daily_connection_charge = 0.13
     #######################################
     ### STEP 2: setup the network
     #######################################
@@ -213,8 +212,7 @@ def get_building_case_original_results(is_winter: bool):
                             max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                             min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
                             frequency_response_price_in_pounds_per_kilowatt_hour=
-                            frequency_response_price_in_pounds_per_kilowatt_hour,
-                            daily_connection_charge=daily_connection_charge)
+                            frequency_response_price_in_pounds_per_kilowatt_hour)
 
     #######################################
     # STEP 5: setup the energy system

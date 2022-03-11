@@ -36,8 +36,7 @@ class Market(ABC):
                  offered_kW_in_frequency_response: float,
                  max_frequency_response_state_of_charge: float,
                  min_frequency_response_state_of_charge: float,
-                 frequency_response_price_in_pounds_per_kilowatt_hour: float,
-                 daily_connection_charge: float):
+                 frequency_response_price_in_pounds_per_kilowatt_hour: float):
 
         self.network_bus_id = network_bus_id
         self.market_time_series_minute_resolution = market_time_series_minute_resolution
@@ -67,7 +66,6 @@ class Market(ABC):
         self.min_frequency_response_state_of_charge = min_frequency_response_state_of_charge
         self.frequency_response_price_in_pounds_per_kWh = frequency_response_price_in_pounds_per_kilowatt_hour
         self.total_frequency_response_earnings = 0  # Initiate as 0
-        self.daily_connection_charge = daily_connection_charge  # Todo: not used in the code. Get more information.
 
     def calculate_revenue(self, total_import_kW: float, simulation_time_interval_in_minutes: float) -> float:
         """
