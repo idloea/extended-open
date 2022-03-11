@@ -1,4 +1,6 @@
 import numpy as np
+
+from src import Assets
 from src.electric_vehicles import ElectricVehicleFleet
 from src.read import read_open_csv_files
 import pandapower as pp
@@ -22,6 +24,8 @@ rated_photovoltaic_kilowatts = 400
 # STEP 1: setup parameters
 simulation_time_series_resolution_in_minutes = 1
 simulation_time_series_resolution_in_hours = simulation_time_series_resolution_in_minutes / 60
+hours_per_day = 24
+number_of_time_intervals_per_day = int(hours_per_day / simulation_time_series_resolution_in_hours)
 
 energy_management_system_time_series_resolution_in_minutes = 15
 energy_management_system_time_series_resolution_in_hours = \
@@ -91,3 +95,42 @@ frequency_response_price_in_pounds_per_kilowatt_hour = 0.005
 
 # STEP 2: setup the network
 network = pp.create_empty_network()
+
+grid_1_voltage_level_in_kilo_volts: int = 20
+grid_2_voltage_level_in_kilo_volts: float = 0.4
+grid_3_voltage_level_in_kilo_volts: float = 0.4
+
+bus_1 = pp.create_bus(network, vn_kv=grid_1_voltage_level_in_kilo_volts, name="bus 1")
+bus_2 = pp.create_bus(network, vn_kv=grid_2_voltage_level_in_kilo_volts, name="bus 2")
+bus_3 = pp.create_bus(network, vn_kv=grid_3_voltage_level_in_kilo_volts, name="bus 3")
+
+pp.create_ext_grid(network, bus=bus_1, vm_pu=1.0, name="Grid Connection")
+
+high_voltage_bus = bus_1
+low_voltage_bus = bus_2
+
+transformer_apparent_power_in_mega_volt_amper = 0.4
+trafo_std_type = f"{transformer_apparent_power_in_mega_volt_amper} MVA {grid_1_voltage_level_in_kilo_volts}" \
+           f"/{grid_2_voltage_level_in_kilo_volts} kV"
+trafo = pp.create_transformer(network, hv_bus=high_voltage_bus, lv_bus=low_voltage_bus, std_type=trafo_std_type,
+                              name="Trafo")
+
+length_from_bus_2_to_bus_3_in_km = 0.1
+line = pp.create_line(network, from_bus=bus_2, to_bus=bus_3, length_km=length_from_bus_2_to_bus_3_in_km,
+                      std_type="NAYY 4x50 SE", name="Line")
+
+number_of_buses = network.bus['name'].size
+
+# STEP 3: setup the assets
+storage_assets = []
+building_assets = []
+non_distpachable_assets = []
+
+photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
+photovoltaic_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
+
+non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(
+    simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
+    active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts,
+    reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere_reactive)
+non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)

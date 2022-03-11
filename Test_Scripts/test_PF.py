@@ -17,7 +17,7 @@ Q_demand_actual = np.zeros([T,N_nondispatch])
 Q_demand_pred = np.zeros([T,N_nondispatch])
 Q_demand = np.zeros([T_mpc,N_nondispatch])
 for i in range(N_nondispatch):
-    P_demand_actual[:,i] = nondispatch_assets[i].active_power
+    P_demand_actual[:,i] = nondispatch_assets[i].active_power_in_kilowatts
     P_demand_pred[:,i] = nondispatch_assets[i].active_power_pred
     Q_demand_actual[:,i] = nondispatch_assets[i].reactive_power
     Q_demand_pred[:,i] = nondispatch_assets[i].reactive_power_pred
@@ -34,7 +34,7 @@ for i in range(N_nondispatch):
 #get total ES system demand (before optimisation)
 Pnet_ES_sum = np.zeros(T)
 for i in range(N_nondispatch):
-    Pnet_ES_sum += storage_assets[i].active_power
+    Pnet_ES_sum += storage_assets[i].active_power_in_kilowatts
 #get the maximum (historical) demand before t0
 if t0 > 0:
     P_max_demand_pre_t0 = np.max(P_demand_actual[0:t0_dt]+Pnet_ES_sum[0:t0_dt]) 

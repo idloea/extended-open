@@ -529,7 +529,7 @@ class EnergySystem:
             N_phases_i = np.size(phases_i)
             for ph_i in np.nditer(phases_i):
                 P_demand_buses[:, bus_id, ph_i] += \
-                    self.storage_assets[i].active_power / N_phases_i
+                    self.storage_assets[i].active_power_in_kilowatts / N_phases_i
                 Q_demand_buses[:, bus_id, ph_i] += \
                     self.storage_assets[i].reactive_power / N_phases_i
         for i in range(N_nondispatch):
@@ -538,7 +538,7 @@ class EnergySystem:
             N_phases_i = np.size(phases_i)
             for ph_i in np.nditer(phases_i):
                 P_demand_buses[:, bus_id, ph_i] += \
-                    self.non_dispatchable_assets[i].active_power / N_phases_i
+                    self.non_dispatchable_assets[i].active_power_in_kilowatts / N_phases_i
                 Q_demand_buses[:, bus_id, ph_i] += \
                     self.non_dispatchable_assets[i].reactive_power / N_phases_i
         # Store power flow results as a list of network objects
@@ -592,7 +592,7 @@ class EnergySystem:
         P_demand = np.zeros(T_mpc)
 
         for i in range(N_nondispatch):
-            P_demand_actual += self.non_dispatchable_assets[i].active_power
+            P_demand_actual += self.non_dispatchable_assets[i].active_power_in_kilowatts
             P_demand_pred += self.non_dispatchable_assets[i].active_power_pred
 
         # Assemble P_demand out of P actual and P predicted and convert to EMS
@@ -608,7 +608,7 @@ class EnergySystem:
         # get total ES system demand (before optimisation)
         Pnet_ES_sum = np.zeros(self.number_of_time_intervals_per_day)
         for i in range(N_ES):
-            Pnet_ES_sum += self.storage_assets[i].active_power
+            Pnet_ES_sum += self.storage_assets[i].active_power_in_kilowatts
         # get the maximum (historical) demand before t0
         if t0 > 0:
             P_max_demand_pre_t0 = np.max(P_demand_actual[0:t0_dt] \
@@ -784,7 +784,7 @@ class EnergySystem:
         P_demand_pred = np.zeros(self.number_of_time_intervals_per_day)
         P_demand = np.zeros(T_mpc)
         for i in range(N_nondispatch):
-            P_demand_actual += self.non_dispatchable_assets[i].active_power
+            P_demand_actual += self.non_dispatchable_assets[i].active_power_in_kilowatts
             P_demand_pred += self.non_dispatchable_assets[i].active_power_pred
         # Assemble P_demand out of P actual and P predicted and convert to
         # EMS time series scale
@@ -800,7 +800,7 @@ class EnergySystem:
         # get total ES system demand (before optimisation)
         Pnet_ES_sum = np.zeros(self.number_of_time_intervals_per_day)
         for i in range(N_ES):
-            Pnet_ES_sum += self.storage_assets[i].active_power
+            Pnet_ES_sum += self.storage_assets[i].active_power_in_kilowatts
         # get the maximum (historical) demand before t0
         if t0 > 0:
             P_max_demand_pre_t0 = (np.max(P_demand_actual[0:t0_dt]
@@ -1010,7 +1010,7 @@ class EnergySystem:
         Q_demand_pred = np.zeros([self.number_of_time_intervals_per_day, N_nondispatch])
         Q_demand = np.zeros([T_mpc, N_nondispatch])
         for i in range(N_nondispatch):
-            P_demand_actual[:, i] = self.non_dispatchable_assets[i].active_power
+            P_demand_actual[:, i] = self.non_dispatchable_assets[i].active_power_in_kilowatts
             P_demand_pred[:, i] = self.non_dispatchable_assets[i].active_power_pred
             Q_demand_actual[:, i] = self.non_dispatchable_assets[i].reactive_power
             Q_demand_pred[:, i] = self.non_dispatchable_assets[i].reactive_power_pred
@@ -1031,7 +1031,7 @@ class EnergySystem:
         # get total ES system demand (before optimisation)
         Pnet_ES_sum = np.zeros(self.number_of_time_intervals_per_day)
         for i in range(N_ES):
-            Pnet_ES_sum += self.storage_assets[i].active_power
+            Pnet_ES_sum += self.storage_assets[i].active_power_in_kilowatts
         # get the maximum (historical) demand before t0
         if t0 == 0:
             P_max_demand_pre_t0 = 0
@@ -1453,7 +1453,7 @@ class EnergySystem:
                     N_phases_i = np.size(phases_i)
                     for ph_i in phases_i:
                         P_demand_buses[t, bus_id, ph_i] += \
-                            self.storage_assets[i].active_power[t] / N_phases_i
+                            self.storage_assets[i].active_power_in_kilowatts[t] / N_phases_i
                         Q_demand_buses[t, bus_id, ph_i] += \
                             self.storage_assets[i].reactive_power[t] / N_phases_i
                 for i in range(N_nondispatch):
@@ -1462,7 +1462,7 @@ class EnergySystem:
                     N_phases_i = np.size(phases_i)
                     for ph_i in np.nditer(phases_i):
                         P_demand_buses[t, bus_id, ph_i] += \
-                            self.non_dispatchable_assets[i].active_power[t] / N_phases_i
+                            self.non_dispatchable_assets[i].active_power_in_kilowatts[t] / N_phases_i
                         Q_demand_buses[t, bus_id, ph_i] += \
                             self.non_dispatchable_assets[i].reactive_power[t] / N_phases_i
                 # set up a copy of the network for simulation interval t
@@ -1531,7 +1531,7 @@ class EnergySystem:
             phases_i = self.storage_assets[i].phases
             N_phases_i = np.size(phases_i)
             for ph_i in np.nditer(phases_i):
-                P_demand_buses[:, bus_id, ph_i] += (self.storage_assets[i].active_power
+                P_demand_buses[:, bus_id, ph_i] += (self.storage_assets[i].active_power_in_kilowatts
                                                     / N_phases_i)
                 Q_demand_buses[:, bus_id, ph_i] += (self.storage_assets[i].reactive_power
                                                     / N_phases_i)
@@ -1541,7 +1541,7 @@ class EnergySystem:
             N_phases_i = np.size(phases_i)
             for ph_i in np.nditer(phases_i):
                 P_demand_buses[:, bus_id, ph_i] \
-                    += (self.non_dispatchable_assets[i].active_power / N_phases_i)
+                    += (self.non_dispatchable_assets[i].active_power_in_kilowatts / N_phases_i)
                 Q_demand_buses[:, bus_id, ph_i] \
                     += (self.non_dispatchable_assets[i].reactive_power / N_phases_i)
         # Store power flow results as a list of network objects

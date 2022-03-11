@@ -55,10 +55,10 @@ def get_building_case_original_results(is_winter: bool):
         electric_loads = winter_electric_load_data
 
     ### STEP 1: setup parameters
-    simulation_time_series_minute_resolution = 1
-    simulation_time_series_hour_resolution = simulation_time_series_minute_resolution / 60
+    simulation_time_series_resolution_in_minutes = 1
+    simulation_time_series_resolution_in_hours = simulation_time_series_resolution_in_minutes / 60
     hours_per_day = 24
-    number_of_time_intervals_per_day = int(hours_per_day / simulation_time_series_hour_resolution)
+    number_of_time_intervals_per_day = int(hours_per_day / simulation_time_series_resolution_in_hours)
 
     energy_management_system_time_series_minute_resolution = 15
     energy_management_system_time_series_hour_resolution = energy_management_system_time_series_minute_resolution / 60
@@ -150,22 +150,19 @@ def get_building_case_original_results(is_winter: bool):
     building_assets = []
     non_distpachable_assets = []
     # PV source at bus 3
-    photovoltaic_active_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
+    photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
     photovoltaic_reactive_power = np.zeros(
         number_of_time_intervals_per_day)  # Solar panels won't produce reactive power being a DC generator
     non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(
-        simulation_time_series_hour_resolution=simulation_time_series_hour_resolution, bus_id=bus_3,
-        active_power=photovoltaic_active_kilowatts, reactive_power=photovoltaic_reactive_power)
+        simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
+        active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts, reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power)
     non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
     # Load at bus 3
-    photovoltaic_active_kilowatts = np.sum(electric_loads, 1)  # summed load across 120 households
+    photovoltaic_active_power_in_kilowatts = np.sum(electric_loads, 1)  # summed load across 120 households
     photovoltaic_reactive_power = np.zeros(number_of_time_intervals_per_day)
-    load_bus3 = Assets.NonDispatchableAsset(simulation_time_series_hour_resolution=
-                                            simulation_time_series_hour_resolution,
-                                            bus_id=bus_3,
-                                            active_power=photovoltaic_active_kilowatts,
-                                            reactive_power=photovoltaic_reactive_power
-                                            )
+    load_bus3 = Assets.NonDispatchableAsset(
+        simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
+        active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts, reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power)
 
     non_distpachable_assets.append(load_bus3)
     # Building asset at bus 3
@@ -188,7 +185,7 @@ def get_building_case_original_results(is_winter: bool):
                                     chiller_coefficient_of_performance=chiller_coefficient_of_performance,
                                     ambient_degree_celsius=ambient_degree_celsius,
                                     bus_id=bus_id_building,
-                                    simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
+                                    simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
                                     energy_management_system_time_series_hour_resolution=
                                     energy_management_system_time_series_hour_resolution)
 
@@ -222,7 +219,7 @@ def get_building_case_original_results(is_winter: bool):
                                               network=network,
                                               market=market,
                                               simulation_time_series_resolution_in_hours=
-                                              simulation_time_series_hour_resolution,
+                                              simulation_time_series_resolution_in_hours,
                                               energy_management_system_time_series_resolution_in_hours=
                                               energy_management_system_time_series_hour_resolution,
                                               building_assets=building_assets)
@@ -248,12 +245,12 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 7: plot results
     #######################################
     # x-axis time values
-    time = simulation_time_series_hour_resolution * np.arange(number_of_time_intervals_per_day)
+    time = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day)
     time_ems = energy_management_system_time_series_hour_resolution * np.arange(
         number_of_energy_management_system_time_intervals_per_day)
-    timeE = simulation_time_series_hour_resolution * np.arange(number_of_time_intervals_per_day + 1)
+    timeE = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day + 1)
     # Print revenue generated
-    revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_hour_resolution)
+    revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
 
     return [revenue,
             buses_voltage_in_per_unit[0],

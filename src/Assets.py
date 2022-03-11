@@ -312,8 +312,8 @@ class NonDispatchableAsset(Asset):
     def __init__(self,
                  simulation_time_series_hour_resolution: float,
                  bus_id: int,
-                 active_power: np.ndarray,
-                 reactive_power: np.ndarray,
+                 active_power_in_kilowatts: np.ndarray,
+                 reactive_power_in_kilovolt_ampere_reactive: np.ndarray,
                  phases: List = [0, 1, 2],
                  active_power_pred=None,
                  reactive_power_pred=None):
@@ -325,8 +325,8 @@ class NonDispatchableAsset(Asset):
                        simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
                        phases=phases)
 
-        self.active_power = active_power
-        self.reactive_power = reactive_power
+        self.active_power = active_power_in_kilowatts
+        self.reactive_power = reactive_power_in_kilovolt_ampere_reactive
 
         self.active_power_pred = self._get_active_power_pred(active_power_pred=active_power_pred)
         self.reactive_power_pred = self._get_reactive_power_pred(reactive_power_pred=reactive_power_pred)
