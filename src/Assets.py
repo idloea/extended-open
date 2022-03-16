@@ -124,7 +124,7 @@ class BuildingAsset(Asset):
                  ambient_degree_celsius: float,
                  bus_id: int,
                  simulation_time_series_hour_resolution: float,
-                 energy_management_system_time_series_hour_resolution: float):
+                 energy_management_system_time_series_resolution_in_hours: float):
 
         Asset.__init__(self,
                        bus_id=bus_id,
@@ -133,7 +133,7 @@ class BuildingAsset(Asset):
         self.min_inside_degree_celsius = min_inside_degree_celsius
         self.max_consumed_electric_heating_kilowatts = max_consumed_electric_heating_kilowatts
         self.max_consumed_electric_cooling_kilowatts = max_consumed_electric_cooling_kilowatts
-        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_hour_resolution
+        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_resolution_in_hours
         self.initial_inside_degree_celsius = initial_inside_degree_celsius
         self.building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = \
             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
@@ -141,19 +141,19 @@ class BuildingAsset(Asset):
             building_thermal_resistance_in_degree_celsius_per_kilowatts
         self.heat_pump_coefficient_of_performance = heat_pump_coefficient_of_performance
         self.chiller_coefficient_of_performance = chiller_coefficient_of_performance
-        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_hour_resolution
+        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_resolution_in_hours
         self.number_of_energy_management_system_time_intervals_per_day = \
             int(24 / self.energy_management_system_time_series_hour_resolution)
         self.number_of_time_intervals_per_day = int(24 / self.simulation_time_series_hour_resolution)
-        self.alpha = (1 - (energy_management_system_time_series_hour_resolution /
+        self.alpha = (1 - (energy_management_system_time_series_resolution_in_hours /
                            (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)))
-        self.beta = (energy_management_system_time_series_hour_resolution /
+        self.beta = (energy_management_system_time_series_resolution_in_hours /
                      building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
-        self.gamma = energy_management_system_time_series_hour_resolution / \
+        self.gamma = energy_management_system_time_series_resolution_in_hours / \
                      (building_thermal_resistance_in_degree_celsius_per_kilowatts *
                       building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
-        self.active_power = np.zeros(self.number_of_time_intervals_per_day)   # input powers over the time series (kW)
+        self.active_power_in_kilowatts = np.zeros(self.number_of_time_intervals_per_day)   # input powers over the time series (kW)
         self.reactive_power = np.zeros(self.number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
         self.max_inside_degree_celsius = max_inside_degree_celsius * \
                                          np.ones(self.number_of_energy_management_system_time_intervals_per_day)
@@ -171,7 +171,7 @@ class BuildingAsset(Asset):
         active_power : numpy.ndarray
             input powers over the time series (kW)
         """
-        self.active_power = active_power
+        self.active_power_in_kilowatts = active_power
 
 
 # NEEDED FOR OXEMF EV CASE
@@ -325,7 +325,7 @@ class NonDispatchableAsset(Asset):
                        simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
                        phases=phases)
 
-        self.active_power = active_power_in_kilowatts
+        self.active_power_in_kilowatts = active_power_in_kilowatts
         self.reactive_power = reactive_power_in_kilovolt_ampere_reactive
 
         self.active_power_pred = self._get_active_power_pred(active_power_pred=active_power_pred)
@@ -335,7 +335,7 @@ class NonDispatchableAsset(Asset):
         if active_power_pred is not None:
             self.active_power_pred = active_power_pred
         else:
-            self.active_power_pred = self.active_power
+            self.active_power_pred = self.active_power_in_kilowatts
         return self.active_power_pred
 
     def _get_reactive_power_pred(self, reactive_power_pred):

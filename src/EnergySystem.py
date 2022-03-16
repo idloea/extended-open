@@ -33,6 +33,8 @@ from typing import List
 import pandapower as pp
 import numpy as np
 import picos as pic
+
+from src.Assets import NonDispatchableAsset, StorageAsset
 from src.Markets import Market
 from src.Network_3ph_pf import Network_3ph
 from src.time_intervals import get_number_of_time_intervals_per_day
@@ -41,8 +43,8 @@ from src.time_intervals import get_number_of_time_intervals_per_day
 class EnergySystem:
 
     def __init__(self,
-                 storage_assets: List,
-                 non_dispatchable_assets: List,
+                 storage_assets: List[StorageAsset],
+                 non_dispatchable_assets: List[NonDispatchableAsset],
                  network: Network_3ph,
                  market: Market,
                  simulation_time_series_resolution_in_hours: float,
@@ -63,13 +65,16 @@ class EnergySystem:
         self.number_of_energy_management_system_time_intervals_per_day = get_number_of_time_intervals_per_day(
             time_series_resolution_in_hours=self.energy_management_system_time_series_resolution_in_hours)
 
+    def _get_non_dispatchable_assets_active_power_in_kilowatts(self):
+        return sum([non_dispatchable_asset.active_power_in_kilowatts for non_dispatchable_asset in
+                    self.non_dispatchable_assets])
 
 
 
     #######################################
     ### Open Loop Control Methods
     #######################################
-    def EMS_copper_plate(self):
+    def single_copper_plate_network_model(self):
         """
         Energy management system optimization assuming all assets connected to
         a single node.
@@ -94,39 +99,39 @@ class EnergySystem:
         """
         # setup and run a basic energy optimisation
         # (single copper plate network model)
-        #######################################
         ### STEP 0: setup variables
-        #######################################
+
         problem = pic.Problem()
         number_of_storage_assets = len(self.storage_assets)
         number_of_buildings = len(self.building_assets)
-        number_of_independent_assets = number_of_storage_assets + number_of_buildings
-        number_of_non_dispatchable_assets = len(self.non_dispatchable_assets)
-        P_demand_actual = np.zeros(self.number_of_time_intervals_per_day)
-        P_demand = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
-        for i in range(number_of_non_dispatchable_assets):
-            P_demand_actual += self.non_dispatchable_assets[i].active_power
+        number_of_dispatchable_assets = number_of_storage_assets + number_of_buildings
+        demand_active_power_in_kilowatts_for_the_energy_management_system = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
+        non_dispatchable_assets_active_power_in_kilowatts = self._get_non_dispatchable_assets_active_power_in_kilowatts()
         # convert P_demand_actual to EMS time series scale
         for t_ems in range(self.number_of_energy_management_system_time_intervals_per_day):
             t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours \
                          + np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
-            P_demand[t_ems] = np.mean(P_demand_actual[t_indexes])
+            demand_active_power_in_kilowatts_for_the_energy_management_system[t_ems] = np.mean(non_dispatchable_assets_active_power_in_kilowatts[t_indexes])
         #######################################
         ### STEP 1: set up decision variables
         #######################################
         # controllable asset input powers
-        P_ctrl_asset = problem.add_variable('P_ctrl_asset', (self.number_of_energy_management_system_time_intervals_per_day, \
-                                                          number_of_independent_assets), \
-                                         vtype='continuous')
+        P_ctrl_asset = problem.add_variable('P_ctrl_asset',
+                                            (self.number_of_energy_management_system_time_intervals_per_day, \
+                                             number_of_dispatchable_assets), \
+                                            vtype='continuous')
         if number_of_buildings > 0:
             # cooling power
-            P_cooling = problem.add_variable('P_cooling', (self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
+            P_cooling = problem.add_variable('P_cooling', (
+                self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
                                              vtype='continuous')
             # heating power
-            P_heating = problem.add_variable('P_heating', (self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
+            P_heating = problem.add_variable('P_heating', (
+                self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
                                              vtype='continuous')
             # internal temperature
-            T_bldg = problem.add_variable('T_bldg', (self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
+            T_bldg = problem.add_variable('T_bldg', (
+                self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings), \
                                           vtype='continuous')
         # (positive) net power imports
         P_import = problem.add_variable('P_import', (self.number_of_energy_management_system_time_intervals_per_day, 1), \
@@ -136,81 +141,94 @@ class EnergySystem:
                                         vtype='continuous')
         # (positive) maximum demand dummy variable
         P_max_demand = problem.add_variable('P_max_demand', 1, \
-                                         vtype='continuous')
+                                            vtype='continuous')
         #######################################
         ### STEP 2: set up constraints
         #######################################
-        Asum_np = np.tril(np.ones([self.number_of_energy_management_system_time_intervals_per_day, self.number_of_energy_management_system_time_intervals_per_day])).astype('double')
+        Asum_np = np.tril(np.ones([self.number_of_energy_management_system_time_intervals_per_day,
+                                   self.number_of_energy_management_system_time_intervals_per_day])).astype('double')
         # lower triangle matrix summing powers
         Asum = pic.new_param('Asum', Asum_np)
 
         # lbuilding thermal model constraints
-        for i in range(number_of_buildings):
+        for non_dispatchable_asset in range(number_of_buildings):
             # maximum heating constraint
-            problem.add_constraint(P_heating[:, i] <= self.building_assets[i].max_consumed_electric_heating_kilowatts)
+            problem.add_constraint(P_heating[:, non_dispatchable_asset] <= self.building_assets[
+                non_dispatchable_asset].max_consumed_electric_heating_kilowatts)
             # maximum cooling constraint
-            problem.add_constraint(P_cooling[:, i] <= self.building_assets[i].max_consumed_electric_cooling_kilowatts)
+            problem.add_constraint(P_cooling[:, non_dispatchable_asset] <= self.building_assets[
+                non_dispatchable_asset].max_consumed_electric_cooling_kilowatts)
             # minimum heating constraint
-            problem.add_constraint(P_heating[:, i] >= 0)
+            problem.add_constraint(P_heating[:, non_dispatchable_asset] >= 0)
             # minimum cooling constraint
-            problem.add_constraint(P_cooling[:, i] >= 0)
+            problem.add_constraint(P_cooling[:, non_dispatchable_asset] >= 0)
             # maximum temperature constraint
-            problem.add_constraint(T_bldg[:, i] <= self.building_assets[i].max_inside_degree_celsius)
+            problem.add_constraint(T_bldg[:, non_dispatchable_asset] <= self.building_assets[
+                non_dispatchable_asset].max_inside_degree_celsius)
             # minimum temperature constraint
-            problem.add_constraint(T_bldg[:, i] >= self.building_assets[i].min_inside_degree_celsius)
+            problem.add_constraint(T_bldg[:, non_dispatchable_asset] >= self.building_assets[
+                non_dispatchable_asset].min_inside_degree_celsius)
             # power consumption is the sum of heating and cooling
-            problem.add_constraint(P_ctrl_asset[:, i] == P_cooling[:, i] \
-                                + P_heating[:, i])
+            problem.add_constraint(P_ctrl_asset[:, non_dispatchable_asset] == P_cooling[:, non_dispatchable_asset] \
+                                   + P_heating[:, non_dispatchable_asset])
             for t in range(self.number_of_energy_management_system_time_intervals_per_day):
                 if t == 0:
                     # initial temperature constraint
-                    problem.add_constraint(T_bldg[t, i] == \
-                                        self.building_assets[i].initial_inside_degree_celsius)
+                    problem.add_constraint(T_bldg[t, non_dispatchable_asset] == \
+                                           self.building_assets[non_dispatchable_asset].initial_inside_degree_celsius)
                 else:
                     # Inside temperature is a function of heating/cooling and
                     # outside temperature. Alpha, beta and gamma are parameters
                     # derived from the R and C values of the building.
                     # Relation between alpha, beta, gamma, R and C can be found
                     # in the BuildingAsset class in the Assets.py file
-                    problem.add_constraint(T_bldg[t, i] == \
-                                        self.building_assets[i]. \
-                                        alpha * T_bldg[t - 1, i] \
-                                        - self.building_assets[i]. \
-                                        beta * self.building_assets[i]. \
-                                        chiller_coefficient_of_performance * P_cooling[t - 1, i] \
-                                        + self.building_assets[i]. \
-                                        beta * self.building_assets[i]. \
-                                        heat_pump_coefficient_of_performance * P_heating[t - 1, i] \
-                                        + self.building_assets[i]. \
-                                        gamma * self.building_assets[i]. \
-                                        ambient_degree_celsius[t - 1])
+                    problem.add_constraint(T_bldg[t, non_dispatchable_asset] == \
+                                           self.building_assets[non_dispatchable_asset]. \
+                                           alpha * T_bldg[t - 1, non_dispatchable_asset] \
+                                           - self.building_assets[non_dispatchable_asset]. \
+                                           beta * self.building_assets[non_dispatchable_asset]. \
+                                           chiller_coefficient_of_performance * P_cooling[t - 1, non_dispatchable_asset] \
+                                           + self.building_assets[non_dispatchable_asset]. \
+                                           beta * self.building_assets[non_dispatchable_asset]. \
+                                           heat_pump_coefficient_of_performance * P_heating[
+                                               t - 1, non_dispatchable_asset] \
+                                           + self.building_assets[non_dispatchable_asset]. \
+                                           gamma * self.building_assets[non_dispatchable_asset]. \
+                                           ambient_degree_celsius[t - 1])
 
         # linear battery model constraints
-        for i in range(number_of_storage_assets):
+        for non_dispatchable_asset in range(number_of_storage_assets):
             # maximum power constraint
-            problem.add_constraint(P_ctrl_asset[:, number_of_buildings + i] <= \
-                                   self.storage_assets[i].max_import_kilowatts)
+            problem.add_constraint(P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset] <= \
+                                   self.storage_assets[non_dispatchable_asset].max_import_kilowatts)
             # minimum power constraint
-            problem.add_constraint(P_ctrl_asset[:, number_of_buildings + i] >= \
-                                   self.storage_assets[i].max_export_kilowatts)
+            problem.add_constraint(P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset] >= \
+                                   self.storage_assets[non_dispatchable_asset].max_export_kilowatts)
             # maximum energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:, number_of_buildings + i] <= \
-                                   self.storage_assets[i].Emax \
-                                   - self.storage_assets[i].E0)
+            problem.add_constraint(
+                self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:,
+                                                                                       number_of_buildings + non_dispatchable_asset] <= \
+                self.storage_assets[non_dispatchable_asset].Emax \
+                - self.storage_assets[non_dispatchable_asset].E0)
             # minimum energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:, number_of_buildings + i] >= \
-                                   self.storage_assets[i].Emin \
-                                   - self.storage_assets[i].E0)
+            problem.add_constraint(
+                self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:,
+                                                                                       number_of_buildings + non_dispatchable_asset] >= \
+                self.storage_assets[non_dispatchable_asset].Emin \
+                - self.storage_assets[non_dispatchable_asset].E0)
             # final energy constraint
-            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[self.energy_management_system_time_series_resolution_in_hours - 1, :] \
-                                   * P_ctrl_asset[:, number_of_buildings + i] == \
-                                   self.storage_assets[i].ET \
-                                   - self.storage_assets[i].E0)
+            problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[
+                                                                                                   self.energy_management_system_time_series_resolution_in_hours - 1,
+                                                                                                   :] \
+                                   * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset] == \
+                                   self.storage_assets[non_dispatchable_asset].ET \
+                                   - self.storage_assets[non_dispatchable_asset].E0)
         # import/export constraints
         for t in range(self.number_of_energy_management_system_time_intervals_per_day):
             # power balance
-            problem.add_constraint(sum(P_ctrl_asset[t, :]) + P_demand[t] == \
-                                P_import[t] - P_export[t])
+            problem.add_constraint(
+                sum(P_ctrl_asset[t, :]) + demand_active_power_in_kilowatts_for_the_energy_management_system[t] == \
+                P_import[t] - P_export[t])
             # maximum import constraint
             problem.add_constraint(P_import[t] <= self.market.max_import_kilowatts[t])
             # maximum import constraint
@@ -227,29 +245,29 @@ class EnergySystem:
             FR_SoC_min = self.market.min_frequency_response_state_of_charge
             for t in range(self.number_of_energy_management_system_time_intervals_per_day):
                 if FR_window:
-                    for i in range(number_of_storage_assets):
+                    for non_dispatchable_asset in range(number_of_storage_assets):
                         # final energy constraint
                         problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
-                                            * Asum[t, :]
-                                            * P_ctrl_asset[:, number_of_buildings + i]
-                                            <= (FR_SoC_max
-                                                * self.storage_assets[i].Emax)
-                                            - self.storage_assets[i].E0)
+                                               * Asum[t, :]
+                                               * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset]
+                                               <= (FR_SoC_max
+                                                   * self.storage_assets[non_dispatchable_asset].Emax)
+                                               - self.storage_assets[non_dispatchable_asset].E0)
                         # final energy constraint
                         problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
-                                            * Asum[t, :]
-                                            * P_ctrl_asset[:, number_of_buildings + i]
-                                            >= (FR_SoC_min
-                                                * self.storage_assets[i].Emax)
-                                            - self.storage_assets[i].E0)
+                                               * Asum[t, :]
+                                               * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset]
+                                               >= (FR_SoC_min
+                                                   * self.storage_assets[non_dispatchable_asset].Emax)
+                                               - self.storage_assets[non_dispatchable_asset].E0)
 
         #######################################
         ### STEP 3: set up objective
         #######################################
         problem.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * P_max_demand + \
                               sum(self.market.import_prices_in_pounds_per_kWh[t] * P_import[t] + \
-                               -self.market.export_price_time_series_in_pounds_per_kWh[t] * P_export[t] \
-                               for t in range(self.number_of_energy_management_system_time_intervals_per_day)))
+                                  -self.market.export_price_time_series_in_pounds_per_kWh[t] * P_export[t] \
+                                  for t in range(self.number_of_energy_management_system_time_intervals_per_day)))
         #######################################
         ### STEP 3: solve the optimisation
         #######################################
@@ -259,7 +277,7 @@ class EnergySystem:
         P_ctrl_asset_val = P_ctrl_asset.value
         P_import_val = P_import.value
         P_export_val = P_export.value
-        P_demand_val = P_demand
+        P_demand_val = demand_active_power_in_kilowatts_for_the_energy_management_system
 
         if number_of_buildings > 0:
             # Store internal temperature inside object
@@ -269,7 +287,8 @@ class EnergySystem:
 
         if number_of_storage_assets > 0 and number_of_buildings > 0:
             output = {'P_BLDG_val': P_ctrl_asset_val[:, :number_of_buildings], \
-                      'P_ES_val': P_ctrl_asset_val[:, number_of_buildings:number_of_storage_assets + number_of_buildings], \
+                      'P_ES_val': P_ctrl_asset_val[:,
+                                  number_of_buildings:number_of_storage_assets + number_of_buildings], \
                       'P_import_val': P_import_val, \
                       'P_export_val': P_export_val, \
                       'P_demand_val': P_demand_val}
@@ -321,43 +340,41 @@ class EnergySystem:
                     resolution (kW)
 
         """
+        # STEP 1: solve the optimisation
+        energy_management_system_output = self.single_copper_plate_network_model()
 
-        #######################################
-        ### STEP 1: solve the optimisation
-        #######################################
-        t0 = 0
-        output_ems = self.EMS_copper_plate()
+        number_of_electric_vehicles = len(self.storage_assets)
+        number_of_buildings = len(self.building_assets)
+        number_of_non_dispatchable_assets = len(self.non_dispatchable_assets)
 
-        N_ESs = len(self.storage_assets)  # number of EVs
-        N_BLDGs = len(self.building_assets)  # number of buildings
-        N_nondispatch = len(self.non_dispatchable_assets)  # number of EVs
-
-        P_import_ems = output_ems['P_import_val']
-        P_export_ems = output_ems['P_export_val']
-        if N_ESs > 0:
-            P_ES_ems = output_ems['P_ES_val']
-        if N_BLDGs > 0:
-            P_BLDG_ems = output_ems['P_BLDG_val']
-        P_demand_ems = output_ems['P_demand_val']
+        P_import_ems = energy_management_system_output['P_import_val']
+        P_export_ems = energy_management_system_output['P_export_val']
+        if number_of_electric_vehicles > 0:
+            P_ES_ems = energy_management_system_output['P_ES_val']
+        if number_of_buildings > 0:
+            P_BLDG_ems = energy_management_system_output['P_BLDG_val']
+        P_demand_ems = energy_management_system_output['P_demand_val']
         # convert P_ES and P_BLDG signals to system time-series scale
-        if N_ESs > 0:
-            P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
+        if number_of_electric_vehicles > 0:
+            P_ESs = np.zeros([self.number_of_time_intervals_per_day, number_of_electric_vehicles])
             for t in range(self.number_of_time_intervals_per_day):
-                t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
+                t_ems = int(t / (
+                        self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
                 P_ESs[t, :] = P_ES_ems[t_ems, :]
-        if N_BLDGs > 0:
-            P_BLDGs = np.zeros([self.number_of_time_intervals_per_day, N_BLDGs])
+        if number_of_buildings > 0:
+            P_BLDGs = np.zeros([self.number_of_time_intervals_per_day, number_of_buildings])
             for t in range(self.number_of_time_intervals_per_day):
-                t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
+                t_ems = int(t / (
+                        self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
                 P_BLDGs[t, :] = P_BLDG_ems[t_ems, :]
         #######################################
         ### STEP 2: update the controllable assets
         #######################################
-        if N_ESs > 0:
-            for i in range(N_ESs):
+        if number_of_electric_vehicles > 0:
+            for i in range(number_of_electric_vehicles):
                 self.storage_assets[i].update_control(P_ESs[:, i])
-        if N_BLDGs > 0:
-            for i in range(N_BLDGs):
+        if number_of_buildings > 0:
+            for i in range(number_of_buildings):
                 self.building_assets[i].update_control(P_BLDGs[:, i])
         #######################################
         ### STEP 3: simulate the network
@@ -365,21 +382,21 @@ class EnergySystem:
         N_buses = self.network.bus['name'].size
         P_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses])
         Q_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses])
-        if N_ESs > 0:
+        if number_of_electric_vehicles > 0:
             # calculate the total real and reactive power demand at each bus
-            for i in range(N_ESs):
+            for i in range(number_of_electric_vehicles):
                 network_bus_id = self.storage_assets[i].network_bus_id
-                P_demand_buses[:, network_bus_id] += self.storage_assets[i].active_power
+                P_demand_buses[:, network_bus_id] += self.storage_assets[i].active_power_in_kilowatts
                 Q_demand_buses[:, network_bus_id] += self.storage_assets[i].reactive_power
-        if N_BLDGs > 0:
+        if number_of_buildings > 0:
             # calculate the total real and reactive power demand at each bus
-            for i in range(N_BLDGs):
+            for i in range(number_of_buildings):
                 bus_id = self.building_assets[i].bus_id
-                P_demand_buses[:, bus_id] += self.building_assets[i].active_power
+                P_demand_buses[:, bus_id] += self.building_assets[i].active_power_in_kilowatts
                 Q_demand_buses[:, bus_id] += self.building_assets[i].reactive_power
-        for i in range(N_nondispatch):
+        for i in range(number_of_non_dispatchable_assets):
             network_bus_id = self.non_dispatchable_assets[i].bus_id
-            P_demand_buses[:, network_bus_id] += self.non_dispatchable_assets[i].active_power
+            P_demand_buses[:, network_bus_id] += self.non_dispatchable_assets[i].active_power_in_kilowatts
             Q_demand_buses[:, network_bus_id] += self.non_dispatchable_assets[i].reactive_power
 
         buses_Vpu = np.zeros([self.number_of_time_intervals_per_day, N_buses])
@@ -414,7 +431,7 @@ class EnergySystem:
 
         print('*** NETWORK SIMULATION COMPLETE ***')
 
-        if N_ESs > 0 and N_BLDGs > 0:
+        if number_of_electric_vehicles > 0 and number_of_buildings > 0:
             output = {'buses_Vpu': buses_Vpu, \
                       'buses_Vang': buses_Vang, \
                       'buses_Pnet': buses_Pnet, \
@@ -426,7 +443,7 @@ class EnergySystem:
                       'P_import_ems': P_import_ems, \
                       'P_export_ems': P_export_ems, \
                       'P_demand_ems': P_demand_ems}
-        elif N_ESs == 0 and N_BLDGs > 0:
+        elif number_of_electric_vehicles == 0 and number_of_buildings > 0:
             output = {'buses_Vpu': buses_Vpu, \
                       'buses_Vang': buses_Vang, \
                       'buses_Pnet': buses_Pnet, \
@@ -437,7 +454,7 @@ class EnergySystem:
                       'P_import_ems': P_import_ems, \
                       'P_export_ems': P_export_ems, \
                       'P_demand_ems': P_demand_ems}
-        elif N_ESs > 0 and N_BLDGs == 0:
+        elif number_of_electric_vehicles > 0 and number_of_buildings == 0:
             output = {'buses_Vpu': buses_Vpu, \
                       'buses_Vang': buses_Vang, \
                       'buses_Pnet': buses_Pnet, \
@@ -508,7 +525,8 @@ class EnergySystem:
         N_nondispatch = len(self.non_dispatchable_assets)
         P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
         for t in range(self.number_of_time_intervals_per_day):
-            t_ems = int(t / (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
+            t_ems = int(t / (
+                    self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
             P_ESs[t, :] = P_ES_ems[t_ems, :]
         #######################################
         ### STEP 2: update the controllable assets
@@ -996,7 +1014,8 @@ class EnergySystem:
         ### STEP 0: setup variables
         #######################################
         prob = pic.Problem()
-        t0_dt = int(t0 * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
+        t0_dt = int(
+            t0 * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
         T_mpc = self.number_of_energy_management_system_time_intervals_per_day - t0
         T_range = np.arange(t0, self.number_of_energy_management_system_time_intervals_per_day)
         N_buses = self.network.N_buses
@@ -1018,8 +1037,11 @@ class EnergySystem:
         # time series scale
         for i in range(N_nondispatch):
             for t_ems in T_range:
-                t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours +
-                             np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
+                t_indexes = (
+                        t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours +
+                        np.arange(0,
+                                  self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(
+                    int)
                 if t_ems == t0:
                     P_demand[t_ems - t0, i] = \
                         np.mean(P_demand_actual[t_indexes, i])
@@ -1160,19 +1182,23 @@ class EnergySystem:
                                 self.storage_assets[i].max_export_kilowatts[T_range])
             # maximum energy constraint
             prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
-                                                      P_ES_dis[:, i]) <=
+                                                                                                        P_ES_dis[:,
+                                                                                                        i]) <=
                                 self.storage_assets[i].Emax[T_range] -
                                 self.storage_assets[i].E[t0_dt])
             # minimum energy constraint
             prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
-                                                      P_ES_dis[:, i]) >=
+                                                                                                        P_ES_dis[:,
+                                                                                                        i]) >=
                                 self.storage_assets[i].Emin[T_range] -
                                 self.storage_assets[i].E[t0_dt])
             # final energy constraint
-            prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[T_mpc - 1, :] * (P_ES_ch[:, i] -
-                                                                    P_ES_dis[:, i]) + E_T_min[i] >=
-                                self.storage_assets[i].ET -
-                                self.storage_assets[i].E[t0_dt])
+            prob.add_constraint(
+                self.energy_management_system_time_series_resolution_in_hours * Asum[T_mpc - 1, :] * (P_ES_ch[:, i] -
+                                                                                                      P_ES_dis[:, i]) +
+                E_T_min[i] >=
+                self.storage_assets[i].ET -
+                self.storage_assets[i].E[t0_dt])
 
             eff_opt = self.storage_assets[i].eff_opt
 
@@ -1324,12 +1350,15 @@ class EnergySystem:
 
         prob.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * \
                            (P_max_demand + P_max_demand_pre_t0) +
-                           sum(sum(self.energy_management_system_time_series_resolution_in_hours * self.storage_assets[i]. \
+                           sum(sum(
+                               self.energy_management_system_time_series_resolution_in_hours * self.storage_assets[i]. \
                                    c_deg_lin * (P_ES_ch[t, i] +
                                                 P_ES_dis[t, i]) \
-                                   for i in range(N_ES)) \
-                               + self.energy_management_system_time_series_resolution_in_hours * prices_import[t0 + t] * P_import[t] \
-                               - self.energy_management_system_time_series_resolution_in_hours * prices_export[t0 + t] * P_export[t]
+                               for i in range(N_ES)) \
+                               + self.energy_management_system_time_series_resolution_in_hours * prices_import[t0 + t] *
+                               P_import[t] \
+                               - self.energy_management_system_time_series_resolution_in_hours * prices_export[t0 + t] *
+                               P_export[t]
                                for t in range(T_mpc)) \
                            + sum(terminal_const * E_T_min[i] \
                                  for i in range(N_ES)))
@@ -1407,9 +1436,10 @@ class EnergySystem:
         ### STEP 1: MPC Loop
         #######################################
         print('*** MPC SIMULATION START ***')
-        for t_mpc in range(self. number_of_energy_management_system_time_intervals_per_day):
+        for t_mpc in range(self.number_of_energy_management_system_time_intervals_per_day):
             print('************************')
-            print('MPC Interval ' + str(t_mpc) + ' of ' + str(self.number_of_energy_management_system_time_intervals_per_day))
+            print('MPC Interval ' + str(t_mpc) + ' of ' + str(
+                self.number_of_energy_management_system_time_intervals_per_day))
             print('************************')
             #######################################
             ### STEP 1.1: Optimisation
@@ -1426,14 +1456,16 @@ class EnergySystem:
             P_export_ems[t_mpc] = output_ems['P_export_val'][0]
             P_ES_ems[t_mpc, :] = output_ems['P_ES_val'][0, :]
             # convert P_EV signals to system time-series scale
-            T_interval = int(self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
+            T_interval = int(
+                self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
             P_ESs = np.zeros([T_interval, N_ESs])
             for t in range(T_interval):
                 P_ESs[t, :] = P_ES_ems[t_mpc, :]
             #######################################
             ### STEP 1.2: update the controllable assets
             #######################################
-            t0 = int(t_mpc * (self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
+            t0 = int(t_mpc * (
+                    self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
             # get the simulation time intervals within each EMS time interval
             # and implement the ES system control for them
             t_range = np.arange(t0, t0 + T_interval)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from src import Assets
+from src import Assets, Markets, EnergySystem
 from src.electric_vehicles import ElectricVehicleFleet
 from src.read import read_open_csv_files
 import pandapower as pp
@@ -111,7 +111,7 @@ low_voltage_bus = bus_2
 
 transformer_apparent_power_in_mega_volt_amper = 0.4
 trafo_std_type = f"{transformer_apparent_power_in_mega_volt_amper} MVA {grid_1_voltage_level_in_kilo_volts}" \
-           f"/{grid_2_voltage_level_in_kilo_volts} kV"
+                 f"/{grid_2_voltage_level_in_kilo_volts} kV"
 trafo = pp.create_transformer(network, hv_bus=high_voltage_bus, lv_bus=low_voltage_bus, std_type=trafo_std_type,
                               name="Trafo")
 
@@ -134,3 +134,85 @@ non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(
     active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts,
     reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere_reactive)
 non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
+
+electric_load_active_power_in_kilowatts = np.sum(electric_loads, 1)
+electric_load_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
+non_dispatchable_electric_load_at_bus_3 = Assets.NonDispatchableAsset(
+    simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
+    active_power_in_kilowatts=electric_load_active_power_in_kilowatts,
+    reactive_power_in_kilovolt_ampere_reactive=electric_load_reactive_power_in_kilovolt_ampere_reactive)
+non_distpachable_assets.append(non_dispatchable_electric_load_at_bus_3)
+
+# Building asset at bus 3
+if is_winter:
+    ambient_degree_celsius = 10
+else:
+    ambient_degree_celsius = 22
+
+bus_id_building = bus_3
+building = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
+                                min_inside_degree_celsius=min_inside_degree_celsius,
+                                max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
+                                max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
+                                initial_inside_degree_celsius=initial_inside_degree_celsius,
+                                building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius=
+                                building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius,
+                                building_thermal_resistance_in_degree_celsius_per_kilowatts=
+                                building_thermal_resistance_in_degree_celsius_per_kilowatts,
+                                heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
+                                chiller_coefficient_of_performance=chiller_coefficient_of_performance,
+                                ambient_degree_celsius=ambient_degree_celsius,
+                                bus_id=bus_id_building,
+                                simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
+                                energy_management_system_time_series_resolution_in_hours=
+                                energy_management_system_time_series_resolution_in_hours)
+
+building_assets.append(building)
+
+# STEP 4: setup the market
+bus_id_market = bus_1
+market = Markets.Market(network_bus_id=bus_id_market,
+                        market_time_series_minute_resolution=market_time_interval_in_hours,
+                        export_prices_in_pounds_per_kilowatt_hour=export_prices_in_pounds_per_kilowatt_hour,
+                        peak_period_import_prices_in_pounds_per_kilowatt_hour=
+                        peak_period_import_prices_in_pounds_per_kilowatt_hour,
+                        peak_period_hours_per_day=peak_period_hours_per_day,
+                        valley_period_import_prices_in_pounds_per_kilowatt_hour=
+                        valley_period_import_prices_in_pounds_per_kilowatt_hour,
+                        valley_period_hours_per_day=valley_period_hours_per_day,
+                        max_demand_charge_in_pounds_per_kWh=demand_charge_in_pounds_per_kilowatt,
+                        max_import_kilowatts=max_import_kilowatts,
+                        max_export_kilowatts=max_export_kilowatts,
+                        offered_kW_in_frequency_response=offered_kilowatts_in_frequency_response,
+                        max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
+                        min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
+                        frequency_response_price_in_pounds_per_kilowatt_hour=
+                        frequency_response_price_in_pounds_per_kilowatt_hour)
+
+# STEP 5: setup the energy system
+energy_system = EnergySystem.EnergySystem(storage_assets=storage_assets,
+                                          non_dispatchable_assets=non_distpachable_assets,
+                                          network=network,
+                                          market=market,
+                                          simulation_time_series_resolution_in_hours=
+                                          simulation_time_series_resolution_in_hours,
+                                          energy_management_system_time_series_resolution_in_hours=
+                                          energy_management_system_time_series_resolution_in_hours,
+                                          building_assets=building_assets)
+
+# STEP 6: simulate the energy system:
+output = energy_system.simulate_network()
+buses_voltage_angle_in_degrees = output['buses_Vang']
+buses_active_power_in_kilowatts = output['buses_Pnet']
+buses_reactive_power = output['buses_Qnet']
+market_active_power_in_kilowatts = output['Pnet_market']
+market_reactive_power = output['Qnet_market']
+buses_voltage_in_per_unit = output['buses_Vpu']
+energy_management_system_imported_active_power_in_kilowatts = output['P_import_ems']
+energy_management_system_exported_active_power_in_kilowatts = output['P_export_ems']
+building_energy_management_system_active_power_in_kilowatts = output['P_BLDG_ems']
+energy_management_system_active_power_demand_in_kilowatt = output['P_demand_ems']
+active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
+for i in range(len(non_distpachable_assets)):
+    bus_id = non_distpachable_assets[i].bus_id
+    active_power_demand_base_in_kilowatts += non_distpachable_assets[i].active_power_in_kilowatts
