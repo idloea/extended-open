@@ -1,4 +1,4 @@
-# The main file of interest is Network_3ph_pf.py - this is used to create a Network_3ph object. The Network_3ph_pf.setup_network_ieee13() sets up a network object as the ieee13 bus. As discussed, the main idea would be to have an alternative function which could replace this method, to load in bus & line data from an external file.
+# The main file of interest is network_3_phase_pf.py - this is used to create a Network_3ph object. The Network_3ph_pf.setup_network_ieee13() sets up a network object as the ieee13 bus. As discussed, the main idea would be to have an alternative function which could replace this method, to load in bus & line data from an external file.
 
 # Two main panda dataframes need to be set:
 # bus_df, with columns ['name','number','load_type','connect','Pa','Pb','Pc','Qa','Qb','Qc’], and 
@@ -27,7 +27,7 @@ import win32com.client
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-from Network_3ph_pf import Network_3ph
+from network_3_phase_pf import ThreePhaseNetwork
 from miscDssFncs import get_ckt, tp2mat, tp_2_ar, get_sYsD
 
 

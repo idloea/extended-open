@@ -18,9 +18,9 @@ import picos as pic
 import matplotlib.pyplot as plt
 from datetime import date, timedelta
 
-import src.Assets as AS
-import src.Markets as MK
-import src.EnergySystem as ES
+import src.assets as AS
+import src.markets as MK
+import src.energy_system as ES
 
 import sys
 

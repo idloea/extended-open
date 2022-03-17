@@ -34,9 +34,9 @@ import pandapower as pp
 import numpy as np
 import picos as pic
 
-from src.Assets import NonDispatchableAsset, StorageAsset
-from src.Markets import Market
-from src.Network_3ph_pf import Network_3ph
+from src.assets import NonDispatchableAsset, StorageAsset
+from src.markets import Market
+from src.network_3_phase_pf import ThreePhaseNetwork
 from src.time_intervals import get_number_of_time_intervals_per_day
 
 
@@ -45,7 +45,7 @@ class EnergySystem:
     def __init__(self,
                  storage_assets: List[StorageAsset],
                  non_dispatchable_assets: List[NonDispatchableAsset],
-                 network: Network_3ph,
+                 network: ThreePhaseNetwork,
                  market: Market,
                  simulation_time_series_resolution_in_hours: float,
                  energy_management_system_time_series_resolution_in_hours: float,
@@ -68,6 +68,15 @@ class EnergySystem:
     def _get_non_dispatchable_assets_active_power_in_kilowatts(self):
         return sum([non_dispatchable_asset.active_power_in_kilowatts for non_dispatchable_asset in
                     self.non_dispatchable_assets])
+
+    def _resample_non_dispatchable_assets_active_power_in_kilowatts(self,
+                                                                    non_dispatchable_assets_active_power_in_kilowatts):
+        demand_active_power_in_kilowatts_for_the_energy_management_system = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
+        for t_ems in range(self.number_of_energy_management_system_time_intervals_per_day):
+            t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours \
+                         + np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
+            demand_active_power_in_kilowatts_for_the_energy_management_system[t_ems] = np.mean(non_dispatchable_assets_active_power_in_kilowatts[t_indexes])
+        return demand_active_power_in_kilowatts_for_the_energy_management_system
 
 
 
@@ -105,13 +114,11 @@ class EnergySystem:
         number_of_storage_assets = len(self.storage_assets)
         number_of_buildings = len(self.building_assets)
         number_of_dispatchable_assets = number_of_storage_assets + number_of_buildings
-        demand_active_power_in_kilowatts_for_the_energy_management_system = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
-        non_dispatchable_assets_active_power_in_kilowatts = self._get_non_dispatchable_assets_active_power_in_kilowatts()
-        # convert P_demand_actual to EMS time series scale
-        for t_ems in range(self.number_of_energy_management_system_time_intervals_per_day):
-            t_indexes = (t_ems * self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours \
-                         + np.arange(0, self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)).astype(int)
-            demand_active_power_in_kilowatts_for_the_energy_management_system[t_ems] = np.mean(non_dispatchable_assets_active_power_in_kilowatts[t_indexes])
+        non_dispatchable_assets_active_power_in_kilowatts = \
+            self._get_non_dispatchable_assets_active_power_in_kilowatts()
+        demand_active_power_in_kilowatts_for_the_energy_management_system = \
+            self._resample_non_dispatchable_assets_active_power_in_kilowatts(
+                non_dispatchable_assets_active_power_in_kilowatts=non_dispatchable_assets_active_power_in_kilowatts)
         #######################################
         ### STEP 1: set up decision variables
         #######################################
@@ -181,7 +188,7 @@ class EnergySystem:
                     # outside temperature. Alpha, beta and gamma are parameters
                     # derived from the R and C values of the building.
                     # Relation between alpha, beta, gamma, R and C can be found
-                    # in the BuildingAsset class in the Assets.py file
+                    # in the BuildingAsset class in the assets.py file
                     problem.add_constraint(T_bldg[t, non_dispatchable_asset] == \
                                            self.building_assets[non_dispatchable_asset]. \
                                            alpha * T_bldg[t - 1, non_dispatchable_asset] \
@@ -208,21 +215,21 @@ class EnergySystem:
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:,
                                                                                        number_of_buildings + non_dispatchable_asset] <= \
-                self.storage_assets[non_dispatchable_asset].Emax \
-                - self.storage_assets[non_dispatchable_asset].E0)
+                self.storage_assets[non_dispatchable_asset].max_energy_in_kilowatt_hour \
+                - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
             # minimum energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * Asum * P_ctrl_asset[:,
                                                                                        number_of_buildings + non_dispatchable_asset] >= \
-                self.storage_assets[non_dispatchable_asset].Emin \
-                - self.storage_assets[non_dispatchable_asset].E0)
+                self.storage_assets[non_dispatchable_asset].min_energy_in_kilowatt_hour \
+                - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
             # final energy constraint
             problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum[
                                                                                                    self.energy_management_system_time_series_resolution_in_hours - 1,
                                                                                                    :] \
                                    * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset] == \
-                                   self.storage_assets[non_dispatchable_asset].ET \
-                                   - self.storage_assets[non_dispatchable_asset].E0)
+                                   self.storage_assets[non_dispatchable_asset].required_terminal_energy_level_in_kilowatt_hour \
+                                   - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
         # import/export constraints
         for t in range(self.number_of_energy_management_system_time_intervals_per_day):
             # power balance
@@ -251,15 +258,15 @@ class EnergySystem:
                                                * Asum[t, :]
                                                * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset]
                                                <= (FR_SoC_max
-                                                   * self.storage_assets[non_dispatchable_asset].Emax)
-                                               - self.storage_assets[non_dispatchable_asset].E0)
+                                                   * self.storage_assets[non_dispatchable_asset].max_energy_in_kilowatt_hour)
+                                               - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
                         # final energy constraint
                         problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
                                                * Asum[t, :]
                                                * P_ctrl_asset[:, number_of_buildings + non_dispatchable_asset]
                                                >= (FR_SoC_min
-                                                   * self.storage_assets[non_dispatchable_asset].Emax)
-                                               - self.storage_assets[non_dispatchable_asset].E0)
+                                                   * self.storage_assets[non_dispatchable_asset].max_energy_in_kilowatt_hour)
+                                               - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
 
         #######################################
         ### STEP 3: set up objective
@@ -659,7 +666,7 @@ class EnergySystem:
         #######################################
         # lower triangle matrix summing powers
         Asum = pic.new_param('Asum', np.tril(np.ones([T_mpc, T_mpc])))
-        eff_opt = self.storage_assets[i].eff_opt
+        eff_opt = self.storage_assets[i].charging_efficiency_used_in_the_optimizer
         # linear battery model constraints
         for i in range(N_ES):
             # maximum power constraint
@@ -672,23 +679,23 @@ class EnergySystem:
             prob.add_constraint((self.dt_ems
                                  * Asum
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])) \
-                                <= (self.storage_assets[i].Emax[T_range]
-                                    - self.storage_assets[i].E[t0_dt]))
+                                <= (self.storage_assets[i].max_energy_in_kilowatt_hour[T_range]
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
             # minimum energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])) \
-                                >= (self.storage_assets[i].Emin[T_range]
-                                    - self.storage_assets[i].E[t0_dt]))
+                                >= (self.storage_assets[i].min_energy_in_kilowatt_hour[T_range]
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
             # final energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum[T_mpc - 1, :]
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])
                                  + E_T_min) \
-                                >= (self.storage_assets[i].ET
-                                    - self.storage_assets[i].E[t0_dt]))
+                                >= (self.storage_assets[i].required_terminal_energy_level_in_kilowatt_hour
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
 
-            eff_opt = self.storage_assets[i].eff_opt
+            eff_opt = self.storage_assets[i].charging_efficiency_used_in_the_optimizer
 
             # P_ES_ch & P_ES_dis dummy variables
             for t in range(T_mpc):
@@ -730,15 +737,15 @@ class EnergySystem:
                                              * (P_ES_ch[:, i]
                                                 - P_ES_dis[:, i])) \
                                             <= (FR_SoC_max
-                                                * self.storage_assets[i].Emax)
-                                            - self.storage_assets[i].E[t0_dt])
+                                                * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                            - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt])
                         # final energy constraint
                         prob.add_constraint((self.dt_ems
                                              * Asum[t, :]
                                              * (P_ES_ch[:, i] - P_ES_dis[:, i])) \
                                             >= (FR_SoC_min
-                                                * self.storage_assets[i].Emax)
-                                            - self.storage_assets[i].E[t0_dt])
+                                                * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                            - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt])
         # minimum terminal energy dummy variable  constraint
         prob.add_constraint(E_T_min >= 0)
         #######################################
@@ -751,7 +758,7 @@ class EnergySystem:
         terminal_const = 1e12  # coeff for objective terminal soft constraint
         prob.set_objective('min', (self.market.demand_charge * P_max_demand + \
                                    sum(sum(self.dt_ems
-                                           * self.storage_assets[i].c_deg_lin
+                                           * self.storage_assets[i].battery_degradation_rate_in_pounds_per_kilowatt_hour
                                            * (P_ES_ch[t, i] + P_ES_dis[t, i]) \
                                            for i in range(N_ES))
                                        + self.dt_ems
@@ -864,23 +871,23 @@ class EnergySystem:
             prob.add_constraint((self.dt_ems
                                  * Asum
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])) \
-                                <= (self.storage_assets[i].Emax[T_range]
-                                    - self.storage_assets[i].E[t0_dt]))
+                                <= (self.storage_assets[i].max_energy_in_kilowatt_hour[T_range]
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
             # minimum energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])) \
-                                >= (self.storage_assets[i].Emin[T_range]
-                                    - self.storage_assets[i].E[t0_dt]))
+                                >= (self.storage_assets[i].min_energy_in_kilowatt_hour[T_range]
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
             # final energy constraint
             prob.add_constraint((self.dt_ems
                                  * Asum[T_mpc - 1, :]
                                  * (P_ES_ch[:, i] - P_ES_dis[:, i])
                                  + E_T_min) \
-                                >= (self.storage_assets[i].ET
-                                    - self.storage_assets[i].E[t0_dt]))
+                                >= (self.storage_assets[i].required_terminal_energy_level_in_kilowatt_hour
+                                    - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
 
-            eff_opt = self.storage_assets[i].eff_opt
+            eff_opt = self.storage_assets[i].charging_efficiency_used_in_the_optimizer
 
             # P_ES_ch & P_ES_dis dummy variables
             for t in range(T_mpc):
@@ -925,15 +932,15 @@ class EnergySystem:
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             <= ((FR_SoC_max
-                                                 * self.storage_assets[i].Emax)
-                                                - self.storage_assets[i].E[t0_dt]))
+                                                 * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                                - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
                         # final energy constraint
                         prob.add_constraint((self.dt_ems
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             >= ((FR_SoC_min
-                                                 * self.storage_assets[i].Emax)
-                                                - self.storage_assets[i].E[t0_dt]))
+                                                 * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                                - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
 
         #######################################
         ### STEP 3: set up objective
@@ -946,7 +953,7 @@ class EnergySystem:
         prob.set_objective('min', (self.market.demand_charge
                                    * P_max_demand
                                    + sum(sum(self.dt_ems
-                                             * self.storage_assets[i].c_deg_lin
+                                             * self.storage_assets[i].battery_degradation_rate_in_pounds_per_kilowatt_hour
                                              * (P_ES_ch[t, i] + P_ES_dis[t, i]) \
                                              for i in range(N_ES))
                                          + self.dt_ems
@@ -1184,23 +1191,23 @@ class EnergySystem:
             prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
                                                                                                         P_ES_dis[:,
                                                                                                         i]) <=
-                                self.storage_assets[i].Emax[T_range] -
-                                self.storage_assets[i].E[t0_dt])
+                                self.storage_assets[i].max_energy_in_kilowatt_hour[T_range] -
+                                self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt])
             # minimum energy constraint
             prob.add_constraint(self.energy_management_system_time_series_resolution_in_hours * Asum * (P_ES_ch[:, i] -
                                                                                                         P_ES_dis[:,
                                                                                                         i]) >=
-                                self.storage_assets[i].Emin[T_range] -
-                                self.storage_assets[i].E[t0_dt])
+                                self.storage_assets[i].min_energy_in_kilowatt_hour[T_range] -
+                                self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt])
             # final energy constraint
             prob.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * Asum[T_mpc - 1, :] * (P_ES_ch[:, i] -
                                                                                                       P_ES_dis[:, i]) +
                 E_T_min[i] >=
-                self.storage_assets[i].ET -
-                self.storage_assets[i].E[t0_dt])
+                self.storage_assets[i].required_terminal_energy_level_in_kilowatt_hour -
+                self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt])
 
-            eff_opt = self.storage_assets[i].eff_opt
+            eff_opt = self.storage_assets[i].charging_efficiency_used_in_the_optimizer
 
             # P_ES_ch & P_ES_dis dummy variables
             for t in range(T_mpc):
@@ -1326,15 +1333,15 @@ class EnergySystem:
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             <= ((FR_SoC_max
-                                                 * self.storage_assets[i].Emax)
-                                                - self.storage_assets[i].E[t0_dt]))
+                                                 * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                                - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
                         # final energy constraint
                         prob.add_constraint((self.energy_management_system_time_series_resolution_in_hours
                                              * Asum[t, :]
                                              * P_ES[:, i]) \
                                             >= ((FR_SoC_min
-                                                 * self.storage_assets[i].Emax)
-                                                - self.storage_assets[i].E[t0_dt]))
+                                                 * self.storage_assets[i].max_energy_in_kilowatt_hour)
+                                                - self.storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]))
 
         #######################################
         ### STEP 4: set up objective
@@ -1352,8 +1359,8 @@ class EnergySystem:
                            (P_max_demand + P_max_demand_pre_t0) +
                            sum(sum(
                                self.energy_management_system_time_series_resolution_in_hours * self.storage_assets[i]. \
-                                   c_deg_lin * (P_ES_ch[t, i] +
-                                                P_ES_dis[t, i]) \
+                                   battery_degradation_rate_in_pounds_per_kilowatt_hour * (P_ES_ch[t, i] +
+                                                                                           P_ES_dis[t, i]) \
                                for i in range(N_ES)) \
                                + self.energy_management_system_time_series_resolution_in_hours * prices_import[t0 + t] *
                                P_import[t] \

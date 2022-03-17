@@ -22,7 +22,7 @@ def strCpx2cpx(X):
     return X
 
 
-class Network_3ph:
+class ThreePhaseNetwork:
     """
     A 3-phase electric power network. Default to an unloaded IEEE 13 Bus Test 
     Feeder.
@@ -179,20 +179,20 @@ class Network_3ph:
 
     Returns
     -------
-    Network_3ph
+    ThreePhaseNetwork
 
     """
 
     def __init__(self):
         # Default constructor, which sets up the IEEE 13 bus network
-        self.Vslack = 4.16e3  # slack bus line-to-line voltage
-        self.Vslack_ph = self.Vslack / np.sqrt(3)  # slack bus phase voltage
-        self.N_iter = 10  # Z bus power flow iterations
+        self.slack_bus_line_voltage_in_volts = 4.16e3  # slack bus line-to-line voltage
+        self.slack_bus_phase_voltage_in_volts = self.slack_bus_line_voltage_in_volts / np.sqrt(3)  # slack bus phase voltage
+        self.z_bus_power_flow_iterations = 10  # Z bus power flow iterations
         self.setup_network_ieee13()  # by default set up the IEEE 13 bus network
         self.update_YandZ()  # setup the Z and Y bus matricies
         # set bus voltage and line current limits
-        self.set_pf_limits(0.8 * self.Vslack_ph,
-                           1.2 * self.Vslack_ph, 1000e3 / self.Vslack_ph)
+        self.set_pf_limits(0.8 * self.slack_bus_phase_voltage_in_volts,
+                           1.2 * self.slack_bus_phase_voltage_in_volts, 1000e3 / self.slack_bus_phase_voltage_in_volts)
 
     def linear_model_setup(self, v_net_lin0, S_wye_lin0, S_del_lin0):
         """
@@ -420,16 +420,16 @@ class Network_3ph:
         # Z bus method (PQ buses only)
         aaa = np.exp(1j * np.pi * 2 / 3)
         # NB: order matters. Positive sequence order is not [1 aaa aaa**2]
-        self.vs = np.array([1, aaa ** 2, aaa], dtype=np.complex_) * self.Vslack_ph
+        self.vs = np.array([1, aaa ** 2, aaa], dtype=np.complex_) * self.slack_bus_phase_voltage_in_volts
         # slack node voltage.
-        v = np.zeros([self.N_iter, self.Y.shape[0]], dtype=np.complex_)
+        v = np.zeros([self.z_bus_power_flow_iterations, self.Y.shape[0]], dtype=np.complex_)
 
         for phase_i in range(self.Y.shape[0]):
             v[0, phase_i] = self.vs[phase_i % 3]
-        dv = np.zeros([self.N_iter])
+        dv = np.zeros([self.z_bus_power_flow_iterations])
         dv[0] = np.sum(np.abs(v[0, :]))
         # Get initial current injections
-        i_PQ = np.zeros([self.N_iter, self.Y.shape[0]], dtype=np.complex_)
+        i_PQ = np.zeros([self.z_bus_power_flow_iterations, self.Y.shape[0]], dtype=np.complex_)
         # del_mat = np.array([[1,-1,0],[0,1,-1],[-1,0,1]],dtype=np.complex_)
         # del_blkmat = block_diag(*([del_mat]*(len(self.bus_df)-1)))
 
@@ -454,11 +454,11 @@ class Network_3ph:
                     i_PQ[0, phase_i] = \
                         -np.conj(S_PQ_del[phase_i] / (v[0, phase_i] - v[0, phase_i - 2])) \
                         - np.conj(S_PQ_del[phase_i - 1] / (v[0, phase_i] - v[0, phase_i - 1]))
-        di = np.zeros([self.N_iter])
+        di = np.zeros([self.z_bus_power_flow_iterations])
         di[0] = np.sum(np.abs(i_PQ[0, :]))
         # Iteratively:
         v0 = np.matmul(-self.Z, np.matmul(self.Yns, self.vs))
-        for k in range(1, self.N_iter):
+        for k in range(1, self.z_bus_power_flow_iterations):
             # update the bus voltages
             v[k, :] = np.matmul(self.Z, i_PQ[k - 1, :]) + v0
             dv[k] = np.sum(np.abs(v[k, :] - v[k - 1, :]))
@@ -811,10 +811,10 @@ class Network_3ph:
                                    / self.transformer_df.iloc[trans_index]['kV_B'])
             else:
                 A_i = np.eye(3)
-            Y_AA = np.matmul(np.matmul(A_i, Y_AA), A_i.number_of_time_intervals_per_day)
+            Y_AA = np.matmul(np.matmul(A_i, Y_AA), A_i.T)
             Y_AB = np.matmul(A_i, Y_AB)
             Y_BB = Y_BB
-            Y_BA = np.matmul(Y_BA, A_i.number_of_time_intervals_per_day)
+            Y_BA = np.matmul(Y_BA, A_i.T)
 
             # Diagonal elements
             self.Ynet[busA_Yindex + 0:busA_Yindex + 3,
@@ -908,55 +908,55 @@ class Network_3ph:
         self.bus_df = pd.DataFrame(index=bus_index, columns=bus_columns)
         self.bus_df.iloc[0] = \
             {'name': '650', 'number': 0,
-             'v_base': self.Vslack_ph, 'load_type': 'S', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'S', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[1] = \
             {'name': '632', 'number': 1,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[2] = \
             {'name': '645', 'number': 2,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[3] = \
             {'name': '646', 'number': 3,
-             'v_base': self.Vslack_ph, 'load_type': 'Z', 'connect': 'D',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'Z', 'connect': 'D',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[4] = \
             {'name': '633', 'number': 4,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[5] = \
             {'name': '634', 'number': 5,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[6] = \
             {'name': '671', 'number': 6,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'D',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'D',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[7] = \
             {'name': '680', 'number': 7,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[8] = \
             {'name': '684', 'number': 8,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[9] = \
             {'name': '611', 'number': 9,
-             'v_base': self.Vslack_ph, 'load_type': 'I', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'I', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[10] = \
             {'name': '652', 'number': 10,
-             'v_base': self.Vslack_ph, 'load_type': 'Z', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'Z', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[11] = \
             {'name': '692', 'number': 11,
-             'v_base': self.Vslack_ph, 'load_type': 'I', 'connect': 'D',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'I', 'connect': 'D',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         self.bus_df.iloc[12] = \
             {'name': '675', 'number': 12,
-             'v_base': self.Vslack_ph, 'load_type': 'PQ', 'connect': 'Y',
+             'v_base': self.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y',
              'Pa': 0, 'Pb': 0, 'Pc': 0, 'Qa': 0, 'Qb': 0, 'Qc': 0}
         # Create line configuration data frame
         line_config_col = ['name', 'Zaa', 'Zbb', 'Zcc', 'Zab', 'Zac', 'Zbc',
@@ -1206,8 +1206,8 @@ class Network_3ph:
             # empty but with correct column names
 
         # load these into the model
-        self.Vslack = VsrcLN * np.sqrt(3)
-        self.Vslack_ph = VsrcLN
+        self.slack_bus_line_voltage_in_volts = VsrcLN * np.sqrt(3)
+        self.slack_bus_phase_voltage_in_volts = VsrcLN
         self.bus_df = bus_df
         self.line_df = line_df
         self.transformer_df = trn_df
