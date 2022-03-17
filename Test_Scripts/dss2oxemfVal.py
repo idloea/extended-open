@@ -11,7 +11,7 @@ import Network_3ph_pf
 
 def main(networkName="13BusXfmr",testModel=True,testPlot=False):
     reload(Network_3ph_pf)
-    network3ph = Network_3ph_pf.Network_3ph()
+    network3ph = Network_3ph_pf.ThreePhaseNetwork()
     network3ph.loadDssNetwork(networkName,updateYZ=True,testModel=testModel,testPlot=testPlot)
     return network3ph
 

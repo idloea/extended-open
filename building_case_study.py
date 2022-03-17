@@ -1,6 +1,6 @@
 import numpy as np
 
-from src import Assets, Markets, EnergySystem
+from src import assets, markets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
 from src.read import read_open_csv_files
 import pandapower as pp
@@ -129,7 +129,7 @@ non_distpachable_assets = []
 photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
 photovoltaic_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
 
-non_dispatchable_photovoltaic_asset = Assets.NonDispatchableAsset(
+non_dispatchable_photovoltaic_asset = assets.NonDispatchableAsset(
     simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
     active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts,
     reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere_reactive)
@@ -137,7 +137,7 @@ non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
 
 electric_load_active_power_in_kilowatts = np.sum(electric_loads, 1)
 electric_load_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
-non_dispatchable_electric_load_at_bus_3 = Assets.NonDispatchableAsset(
+non_dispatchable_electric_load_at_bus_3 = assets.NonDispatchableAsset(
     simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
     active_power_in_kilowatts=electric_load_active_power_in_kilowatts,
     reactive_power_in_kilovolt_ampere_reactive=electric_load_reactive_power_in_kilovolt_ampere_reactive)
@@ -150,7 +150,7 @@ else:
     ambient_degree_celsius = 22
 
 bus_id_building = bus_3
-building = Assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
+building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
                                 min_inside_degree_celsius=min_inside_degree_celsius,
                                 max_consumed_electric_heating_kilowatts=max_consumed_electric_heating_kilowatts,
                                 max_consumed_electric_cooling_kilowatts=max_consumed_electric_cooling_kilowatts,
@@ -171,7 +171,7 @@ building_assets.append(building)
 
 # STEP 4: setup the market
 bus_id_market = bus_1
-market = Markets.Market(network_bus_id=bus_id_market,
+market = markets.Market(network_bus_id=bus_id_market,
                         market_time_series_minute_resolution=market_time_interval_in_hours,
                         export_prices_in_pounds_per_kilowatt_hour=export_prices_in_pounds_per_kilowatt_hour,
                         peak_period_import_prices_in_pounds_per_kilowatt_hour=
@@ -190,15 +190,15 @@ market = Markets.Market(network_bus_id=bus_id_market,
                         frequency_response_price_in_pounds_per_kilowatt_hour)
 
 # STEP 5: setup the energy system
-energy_system = EnergySystem.EnergySystem(storage_assets=storage_assets,
-                                          non_dispatchable_assets=non_distpachable_assets,
-                                          network=network,
-                                          market=market,
-                                          simulation_time_series_resolution_in_hours=
+energy_system = energy_system.EnergySystem(storage_assets=storage_assets,
+                                           non_dispatchable_assets=non_distpachable_assets,
+                                           network=network,
+                                           market=market,
+                                           simulation_time_series_resolution_in_hours=
                                           simulation_time_series_resolution_in_hours,
-                                          energy_management_system_time_series_resolution_in_hours=
+                                           energy_management_system_time_series_resolution_in_hours=
                                           energy_management_system_time_series_resolution_in_hours,
-                                          building_assets=building_assets)
+                                           building_assets=building_assets)
 
 # STEP 6: simulate the energy system:
 output = energy_system.simulate_network()

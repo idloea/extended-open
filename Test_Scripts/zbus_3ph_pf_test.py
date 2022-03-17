@@ -10,9 +10,9 @@ import time
 #set the directory one level up to be able to import from OxEMF_Files folders
 path = os.path.dirname(os.path.dirname(__file__)) 
 os.chdir(path) 
-from src.Network_3ph_pf import Network_3ph
+from src.network_3_phase_pf import ThreePhaseNetwork
 
-net_ieee13 = Network_3ph()
+net_ieee13 = ThreePhaseNetwork()
 
 bus_columns = ['name','number','load_type','connect','Pa','Pb','Pc','Qa','Qb','Qc']
 bus_index = range(net_ieee13.N_buses)
@@ -109,16 +109,16 @@ for bus_i in range(0,len(net_ieee13.bus_df)):
     aph_index = (bus_i)*3
     bph_index = (bus_i)*3+1
     cph_index = (bus_i)*3+2
-    a_ph_hand = plt.scatter(bus_i,np.abs(net_ieee13.v_net_res[aph_index])/net_ieee13.Vslack_ph,color='C0',marker='x')
-    b_ph_hand = plt.scatter(bus_i,np.abs(net_ieee13.v_net_res[bph_index])/net_ieee13.Vslack_ph,color='C1',marker='x')
-    c_ph_hand = plt.scatter(bus_i,np.abs(net_ieee13.v_net_res[cph_index])/net_ieee13.Vslack_ph,color='C2',marker='x')
+    a_ph_hand = plt.scatter(bus_i, np.abs(net_ieee13.v_net_res[aph_index]) / net_ieee13.slack_bus_phase_voltage_in_volts, color='C0', marker='x')
+    b_ph_hand = plt.scatter(bus_i, np.abs(net_ieee13.v_net_res[bph_index]) / net_ieee13.slack_bus_phase_voltage_in_volts, color='C1', marker='x')
+    c_ph_hand = plt.scatter(bus_i, np.abs(net_ieee13.v_net_res[cph_index]) / net_ieee13.slack_bus_phase_voltage_in_volts, color='C2', marker='x')
 for bus_i in range(0,len(net_ieee13.bus_df)):
     aph_index = (bus_i)*3
     bph_index = (bus_i)*3+1
     cph_index = (bus_i)*3+2
-    a_ph_lin_hand = plt.scatter(bus_i,net_ieee13.v_net_lin_abs_res[aph_index]/net_ieee13.Vslack_ph,s=35,facecolors='none',edgecolor='C0')
-    b_ph_lin_hand = plt.scatter(bus_i,net_ieee13.v_net_lin_abs_res[bph_index]/net_ieee13.Vslack_ph,s=35,facecolors='none',edgecolor='C1')
-    c_ph_lin_hand = plt.scatter(bus_i,net_ieee13.v_net_lin_abs_res[cph_index]/net_ieee13.Vslack_ph,s=35,facecolors='none',edgecolor='C2')
+    a_ph_lin_hand = plt.scatter(bus_i, net_ieee13.v_net_lin_abs_res[aph_index] / net_ieee13.slack_bus_phase_voltage_in_volts, s=35, facecolors='none', edgecolor='C0')
+    b_ph_lin_hand = plt.scatter(bus_i, net_ieee13.v_net_lin_abs_res[bph_index] / net_ieee13.slack_bus_phase_voltage_in_volts, s=35, facecolors='none', edgecolor='C1')
+    c_ph_lin_hand = plt.scatter(bus_i, net_ieee13.v_net_lin_abs_res[cph_index] / net_ieee13.slack_bus_phase_voltage_in_volts, s=35, facecolors='none', edgecolor='C2')
 
 #plt.plot(net_ieee13.v_abs_min/net_ieee13.Vslack_ph,'--')
 #plt.plot(net_ieee13.v_abs_max/net_ieee13.Vslack_ph,'--')

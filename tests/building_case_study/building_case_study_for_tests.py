@@ -11,9 +11,9 @@ from os.path import normpath
 import pandas as pd
 import pandapower as pp
 import numpy as np
-import src.Assets as Assets
-import src.Markets as Markets
-import src.EnergySystem as EnergySystem
+import src.assets as Assets
+import src.markets as Markets
+import src.energy_system as EnergySystem
 from src.electric_vehicles import ElectricVehicleFleet
 from src.folder_management import create_results_folder
 from src.read import read_open_csv_files
