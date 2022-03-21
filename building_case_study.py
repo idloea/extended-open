@@ -195,9 +195,9 @@ energy_system = energy_system.EnergySystem(storage_assets=storage_assets,
                                            network=network,
                                            market=market,
                                            simulation_time_series_resolution_in_hours=
-                                          simulation_time_series_resolution_in_hours,
+                                           simulation_time_series_resolution_in_hours,
                                            energy_management_system_time_series_resolution_in_hours=
-                                          energy_management_system_time_series_resolution_in_hours,
+                                           energy_management_system_time_series_resolution_in_hours,
                                            building_assets=building_assets)
 
 # STEP 6: simulate the energy system:
