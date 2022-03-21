@@ -156,7 +156,7 @@ class EnergySystem:
         # lower triangle matrix summing powers
         asum = pic.new_param('asum', asum_np)
 
-        # lbuilding thermal model constraints
+        # linear building thermal model constraints
         for non_dispatchable_asset in range(number_of_buildings):
             # maximum heating constraint
             problem.add_constraint(heating_active_power_in_kilowatts[:, non_dispatchable_asset] <= self.building_assets[
@@ -184,64 +184,48 @@ class EnergySystem:
                 controllable_assets_active_power_in_kilowatts[:, non_dispatchable_asset] ==
                 cooling_and_heating_active_power_in_kilowatts)
 
-            for t in range(
+            alpha = self.building_assets[non_dispatchable_asset].alpha
+            beta = self.building_assets[non_dispatchable_asset].beta
+            gamma = self.building_assets[non_dispatchable_asset].gamma
+            for energy_management_system_time_interval_per_day in range(
                     self.number_of_energy_management_system_time_intervals_per_day):
-                if t == 0:
+                if energy_management_system_time_interval_per_day == 0:
                     # initial temperature constraint
                     problem.add_constraint(
                         building_internal_temperature_in_celsius_degrees[
-                            t, non_dispatchable_asset] ==
+                            energy_management_system_time_interval_per_day, non_dispatchable_asset] ==
                         self.building_assets[non_dispatchable_asset].initial_inside_degree_celsius)
                 else:
                     # Inside temperature is a function of heating/cooling and
                     # outside temperature. Alpha, beta and gamma are parameters
                     # derived from the R and C values of the building.
-                    # Relation between alpha, beta, gamma, R and C can be found
-                    # in the BuildingAsset class in the assets.py file
-                    # building_internal_temperature_in_celsius_degrees = building_internal_temperature_in_celsius_degrees[
-                    #     t, non_dispatchable_asset]
-                    # alpha = self.building_assets[non_dispatchable_asset].alpha
-                    # previous_building_internal_temperature_in_celsius_degrees = \
-                    #     building_internal_temperature_in_celsius_degrees[
-                    #         t - 1, non_dispatchable_asset]
-                    # beta = self.building_assets[non_dispatchable_asset].beta
-                    # chiller_coefficient_of_performance = \
-                    #     self.building_assets[non_dispatchable_asset].chiller_coefficient_of_performance
-                    # previous_cooling_active_power_in_kilowatts = \
-                    #     cooling_active_power_in_kilowatts[
-                    #         t - 1, non_dispatchable_asset]
-                    # heat_pump_coefficient_of_performance = \
-                    #     self.building_assets[non_dispatchable_asset].heat_pump_coefficient_of_performance
-                    # previous_heating_active_power_in_kilowatts = \
-                    #     heating_active_power_in_kilowatts[
-                    #         t - 1, non_dispatchable_asset]
-                    # gamma = self.building_assets[non_dispatchable_asset].gamma
-                    # ambient_temperature_in_degree_celsius = \
-                    #     self.building_assets[non_dispatchable_asset].ambient_temperature_in_degree_celsius[
-                    #         t - 1]
+                    previous_building_internal_temperature_in_celsius_degrees = \
+                        building_internal_temperature_in_celsius_degrees[
+                            energy_management_system_time_interval_per_day - 1, non_dispatchable_asset]
+                    chiller_coefficient_of_performance = \
+                        self.building_assets[non_dispatchable_asset].chiller_coefficient_of_performance
+                    previous_cooling_active_power_in_kilowatts = \
+                        cooling_active_power_in_kilowatts[
+                            energy_management_system_time_interval_per_day - 1, non_dispatchable_asset]
+                    heat_pump_coefficient_of_performance = \
+                        self.building_assets[non_dispatchable_asset].heat_pump_coefficient_of_performance
+                    previous_heating_active_power_in_kilowatts = \
+                        heating_active_power_in_kilowatts[
+                            energy_management_system_time_interval_per_day - 1, non_dispatchable_asset]
+                    previous_ambient_temperature_in_degree_celsius = \
+                        self.building_assets[non_dispatchable_asset].ambient_temperature_in_degree_celsius[
+                            energy_management_system_time_interval_per_day - 1]
 
-                    # temperature_constraint = alpha * previous_building_internal_temperature_in_celsius_degrees - \
-                    #                          beta * chiller_coefficient_of_performance * \
-                    #                          previous_cooling_active_power_in_kilowatts + \
-                    #                          beta * heat_pump_coefficient_of_performance * \
-                    #                          previous_heating_active_power_in_kilowatts + \
-                    #                          gamma * ambient_temperature_in_degree_celsius
+                    temperature_constraint = \
+                        alpha * previous_building_internal_temperature_in_celsius_degrees \
+                        - beta * chiller_coefficient_of_performance * previous_cooling_active_power_in_kilowatts \
+                        + beta * heat_pump_coefficient_of_performance * previous_heating_active_power_in_kilowatts \
+                        + gamma * previous_ambient_temperature_in_degree_celsius
 
                     problem.add_constraint(
-                        building_internal_temperature_in_celsius_degrees[t, non_dispatchable_asset] == \
-                        self.building_assets[non_dispatchable_asset]. \
-                        alpha * building_internal_temperature_in_celsius_degrees[t - 1, non_dispatchable_asset] \
-                        - self.building_assets[non_dispatchable_asset]. \
-                        beta * self.building_assets[non_dispatchable_asset]. \
-                        chiller_coefficient_of_performance * cooling_active_power_in_kilowatts[
-                            t - 1, non_dispatchable_asset] \
-                        + self.building_assets[non_dispatchable_asset]. \
-                        beta * self.building_assets[non_dispatchable_asset]. \
-                        heat_pump_coefficient_of_performance * heating_active_power_in_kilowatts[
-                            t - 1, non_dispatchable_asset] \
-                        + self.building_assets[non_dispatchable_asset]. \
-                        gamma * self.building_assets[non_dispatchable_asset]. \
-                        ambient_temperature_in_degree_celsius[t - 1])
+                        building_internal_temperature_in_celsius_degrees[
+                            energy_management_system_time_interval_per_day,
+                            non_dispatchable_asset] == temperature_constraint)
 
         # linear battery model constraints
         for non_dispatchable_asset in range(number_of_storage_assets):
@@ -277,43 +261,43 @@ class EnergySystem:
                                        non_dispatchable_asset].required_terminal_energy_level_in_kilowatt_hour \
                                    - self.storage_assets[non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
         # import/export constraints
-        for t in range(
+        for energy_management_system_time_interval_per_day in range(
                 self.number_of_energy_management_system_time_intervals_per_day):
             # power balance
             problem.add_constraint(
-                sum(controllable_assets_active_power_in_kilowatts[t, :]) +
+                sum(controllable_assets_active_power_in_kilowatts[energy_management_system_time_interval_per_day, :]) +
                 active_power_in_kilowatts_at_energy_management_resolution[
-                    t] == \
-                active_power_imports_in_kilowatts[t] -
-                active_power_exports_in_kilowatts[t])
+                    energy_management_system_time_interval_per_day] == \
+                active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day] -
+                active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day])
             # maximum import constraint
-            problem.add_constraint(active_power_imports_in_kilowatts[t] <=
-                                   self.market.max_import_kilowatts[t])
-            # maximum import constraint
-            problem.add_constraint(
-                active_power_imports_in_kilowatts[t] >= 0)
+            problem.add_constraint(active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day] <=
+                                   self.market.max_import_kilowatts[energy_management_system_time_interval_per_day])
             # maximum import constraint
             problem.add_constraint(
-                active_power_exports_in_kilowatts[t] <= -
-                self.market.max_export_kilowatts[t])
+                active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day] >= 0)
             # maximum import constraint
             problem.add_constraint(
-                active_power_exports_in_kilowatts[t] >= 0)
+                active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day] <= -
+                self.market.max_export_kilowatts[energy_management_system_time_interval_per_day])
+            # maximum import constraint
+            problem.add_constraint(
+                active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day] >= 0)
             # maximum demand dummy variable constraint
             problem.add_constraint(max_active_power_demand_in_kilowatts >= active_power_imports_in_kilowatts[
-                t] -
-                                   active_power_exports_in_kilowatts[t])
+                energy_management_system_time_interval_per_day] -
+                                   active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day])
         if self.market.frequency_response_active is not None:
             FR_window = self.market.frequency_response_active
             FR_SoC_max = self.market.max_frequency_response_state_of_charge
             FR_SoC_min = self.market.min_frequency_response_state_of_charge
-            for t in range(
+            for energy_management_system_time_interval_per_day in range(
                     self.number_of_energy_management_system_time_intervals_per_day):
                 if FR_window:
                     for non_dispatchable_asset in range(number_of_storage_assets):
                         # final energy constraint
                         problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
-                                               * asum[t, :]
+                                               * asum[energy_management_system_time_interval_per_day, :]
                                                * controllable_assets_active_power_in_kilowatts[:,
                                                  number_of_buildings + non_dispatchable_asset]
                                                <= (FR_SoC_max
@@ -323,7 +307,7 @@ class EnergySystem:
                                                    non_dispatchable_asset].initial_energy_level_in_kilowatt_hour)
                         # final energy constraint
                         problem.add_constraint(self.energy_management_system_time_series_resolution_in_hours
-                                               * asum[t, :]
+                                               * asum[energy_management_system_time_interval_per_day, :]
                                                * controllable_assets_active_power_in_kilowatts[:,
                                                  number_of_buildings + non_dispatchable_asset]
                                                >= (FR_SoC_min
