@@ -117,7 +117,7 @@ def _create_a_test_building_asset() -> List[BuildingAsset]:
                                    building_thermal_resistance_in_degree_celsius_per_kilowatts,
                                    heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
                                    chiller_coefficient_of_performance=chiller_coefficient_of_performance,
-                                   ambient_degree_celsius=ambient_degree_celsius,
+                                   ambient_temperature_in_degree_celsius=ambient_degree_celsius,
                                    bus_id=bus_id,
                                    simulation_time_series_hour_resolution=simulation_time_series_hour_resolution,
                                    energy_management_system_time_series_resolution_in_hours=

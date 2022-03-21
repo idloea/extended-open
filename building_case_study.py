@@ -161,7 +161,7 @@ building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_cels
                                 building_thermal_resistance_in_degree_celsius_per_kilowatts,
                                 heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
                                 chiller_coefficient_of_performance=chiller_coefficient_of_performance,
-                                ambient_degree_celsius=ambient_degree_celsius,
+                                ambient_temperature_in_degree_celsius=ambient_degree_celsius,
                                 bus_id=bus_id_building,
                                 simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
                                 energy_management_system_time_series_resolution_in_hours=

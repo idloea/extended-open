@@ -68,7 +68,7 @@ class BuildingAsset(Asset):
         Coefficient of performance of the heat pump (N/A)
     chiller_coefficient_of_performance : float
         Coefficient of performance of the chiller (N/A)
-    ambient_degree_celsius : numpy.ndarray
+    ambient_temperature_in_degree_celsius : numpy.ndarray
         Ambient temperature (Degree C)
     alpha : float
         Coefficient of previous temperature in the temperature dynamics
@@ -100,7 +100,7 @@ class BuildingAsset(Asset):
                  building_thermal_resistance_in_degree_celsius_per_kilowatts: float,
                  heat_pump_coefficient_of_performance: float,
                  chiller_coefficient_of_performance: float,
-                 ambient_degree_celsius: float,
+                 ambient_temperature_in_degree_celsius: float,
                  bus_id: int,
                  simulation_time_series_hour_resolution: float,
                  energy_management_system_time_series_resolution_in_hours: float):
@@ -134,12 +134,12 @@ class BuildingAsset(Asset):
                       building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius)
         self.active_power_in_kilowatts = np.zeros(self.number_of_time_intervals_per_day)   # input powers over the time series (kW)
         self.reactive_power = np.zeros(self.number_of_time_intervals_per_day)   # reactive powers over the time series (kW)
-        self.max_inside_degree_celsius = max_inside_degree_celsius * \
-                                         np.ones(self.number_of_energy_management_system_time_intervals_per_day)
-        self.min_inside_degree_celsius = min_inside_degree_celsius * \
-                                         np.ones(self.number_of_energy_management_system_time_intervals_per_day)
-        self.ambient_degree_celsius = ambient_degree_celsius * \
-                                      np.ones(self.number_of_energy_management_system_time_intervals_per_day)
+        self.max_inside_degree_celsius = max_inside_degree_celsius * np.ones(
+            self.number_of_energy_management_system_time_intervals_per_day)
+        self.min_inside_degree_celsius = min_inside_degree_celsius * np.ones(
+            self.number_of_energy_management_system_time_intervals_per_day)
+        self.ambient_temperature_in_degree_celsius = ambient_temperature_in_degree_celsius * np.ones(
+            self.number_of_energy_management_system_time_intervals_per_day)
 
     def update_control(self, active_power):
         """
