@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from typing import List
+from typing import List, Optional
 from src.assets import NonDispatchableAsset, StorageAsset, BuildingAsset
-from src.energy_system import EnergySystem
+from src.energy_system import EnergySystem, get_temperature_constraint_for_no_initial_time
 from src.markets import Market
 from src.network_3_phase_pf import ThreePhaseNetwork
 
@@ -127,7 +127,7 @@ def _create_a_test_building_asset() -> List[BuildingAsset]:
 
 
 def _create_a_test_energy_system(non_dispatchable_asset_1: NonDispatchableAsset,
-                                 non_dispatchable_asset_2: NonDispatchableAsset) -> EnergySystem:
+                                 non_dispatchable_asset_2: Optional[NonDispatchableAsset] = None) -> EnergySystem:
     storage_assets = _create_a_test_storage_asset()
     non_dispatchable_assets = [non_dispatchable_asset_1, non_dispatchable_asset_2]
     network = _create_a_test_network()
@@ -167,3 +167,27 @@ class TestEnergySystem(unittest.TestCase):
         expected_result = np.array([2, 2, 2])
         result = energy_system._get_non_dispatchable_assets_active_power_in_kilowatts()
         np.testing.assert_equal(expected_result, result)
+
+    def test_get_temperature_constraint_for_no_initial_time(self):
+        alpha = 0.1
+        beta = 0.1
+        gamma = 0.1
+        previous_building_internal_temperature_in_celsius_degrees = 17.5
+        chiller_coefficient_of_performance = 3
+        previous_cooling_active_power_in_kilowatts = 500
+        heat_pump_coefficient_of_performance = 3.5
+        previous_heating_active_power_in_kilowatts = 500
+        previous_ambient_temperature_in_degree_celsius = 18
+
+        result = \
+            get_temperature_constraint_for_no_initial_time(
+                alpha=alpha, beta=beta, gamma=gamma, previous_building_internal_temperature_in_celsius_degrees=
+                previous_building_internal_temperature_in_celsius_degrees,
+                chiller_coefficient_of_performance=chiller_coefficient_of_performance,
+                previous_cooling_active_power_in_kilowatts=previous_cooling_active_power_in_kilowatts,
+                heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
+                previous_heating_active_power_in_kilowatts=previous_heating_active_power_in_kilowatts,
+                previous_ambient_temperature_in_degree_celsius=previous_ambient_temperature_in_degree_celsius)
+
+        expected_result = 28.55
+        self.assertEqual(expected_result, result)

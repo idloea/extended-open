@@ -40,6 +40,23 @@ from src.network_3_phase_pf import ThreePhaseNetwork
 from src.time_intervals import get_number_of_time_intervals_per_day
 
 
+def get_temperature_constraint_for_no_initial_time(alpha: float, beta: float, gamma: float,
+                                                   previous_building_internal_temperature_in_celsius_degrees: float,
+                                                   chiller_coefficient_of_performance: float,
+                                                   previous_cooling_active_power_in_kilowatts: float,
+                                                   heat_pump_coefficient_of_performance: float,
+                                                   previous_heating_active_power_in_kilowatts: float,
+                                                   previous_ambient_temperature_in_degree_celsius: float):
+
+    temperature_constraint = \
+        alpha * previous_building_internal_temperature_in_celsius_degrees \
+        - beta * chiller_coefficient_of_performance * previous_cooling_active_power_in_kilowatts \
+        + beta * heat_pump_coefficient_of_performance * previous_heating_active_power_in_kilowatts \
+        + gamma * previous_ambient_temperature_in_degree_celsius
+
+    return temperature_constraint
+
+
 class EnergySystem:
 
     def __init__(self,
@@ -215,12 +232,17 @@ class EnergySystem:
                     previous_ambient_temperature_in_degree_celsius = \
                         self.building_assets[non_dispatchable_asset].ambient_temperature_in_degree_celsius[
                             energy_management_system_time_interval_per_day - 1]
-
                     temperature_constraint = \
-                        alpha * previous_building_internal_temperature_in_celsius_degrees \
-                        - beta * chiller_coefficient_of_performance * previous_cooling_active_power_in_kilowatts \
-                        + beta * heat_pump_coefficient_of_performance * previous_heating_active_power_in_kilowatts \
-                        + gamma * previous_ambient_temperature_in_degree_celsius
+                        get_temperature_constraint_for_no_initial_time(
+                            alpha=alpha, beta=beta, gamma=gamma,
+                            previous_building_internal_temperature_in_celsius_degrees=
+                            previous_building_internal_temperature_in_celsius_degrees,
+                            chiller_coefficient_of_performance=chiller_coefficient_of_performance,
+                            previous_cooling_active_power_in_kilowatts=previous_cooling_active_power_in_kilowatts,
+                            heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
+                            previous_heating_active_power_in_kilowatts=previous_heating_active_power_in_kilowatts,
+                            previous_ambient_temperature_in_degree_celsius=
+                            previous_ambient_temperature_in_degree_celsius)
 
                     problem.add_constraint(
                         building_internal_temperature_in_celsius_degrees[

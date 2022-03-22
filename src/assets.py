@@ -43,53 +43,7 @@ class Asset:
 
 
 class BuildingAsset(Asset):
-    """
-    A building asset (use for flexibility from building HVAC)
-
-    Parameters
-    ----------
-    max_inside_degree_celsius : float
-        Maximum temperature inside the building (Degree C)
-    Tmin = float
-        Minimum temperature inside the building (Degree C)
-    max_consumed_electric_heating_kilowatts : float
-        Maximum power consumed by electrical heating (kW)
-    max_consumed_electric_cooling_kilowatts : float
-        Maximum power consumed by electrical cooling (kW)
-    deltat: float
-        Time interval after which system is allowed to change decisions (h)
-    initial_inside_degree_celsius : float
-        Initial temperature inside the buidling (Degree C)
-    building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius : float
-        Thermal capacitance of building (kWh/Degree C)
-    building_thermal_resistance_in_degree_celsius_per_kilowatts : float
-        Thermal resistance of building to outside environment(Degree C/kW)
-    heat_pump_coefficient_of_performance : float
-        Coefficient of performance of the heat pump (N/A)
-    chiller_coefficient_of_performance : float
-        Coefficient of performance of the chiller (N/A)
-    ambient_temperature_in_degree_celsius : numpy.ndarray
-        Ambient temperature (Degree C)
-    alpha : float
-        Coefficient of previous temperature in the temperature dynamics
-        equation (N/A)
-    beta : float
-        Coefficient of power consumed to heat/cool the building in the
-        temperature dynamics equation (Degree C/kW)
-    gamma : float
-        Coefficient of ambient temperature in the temperature dynamics
-        equation (N/A)
-    Pnet : numpy.ndarray
-        Input real power (kW)
-    Qnet : numpy.ndarray
-        Input reactive power (kVAR)
-
-    Returns
-    -------
-    Asset
-
-
-    """
+    """ A building asset (use for flexibility from building HVAC) """
     def __init__(self,
                  max_inside_degree_celsius: float,
                  min_inside_degree_celsius: float,
