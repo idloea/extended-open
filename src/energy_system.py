@@ -139,29 +139,29 @@ class EnergySystem:
 
         # STEP 1: set up decision variables
         controllable_assets_active_power_in_kilowatts = \
-            problem.add_variable(name='controllable_assets_active_power_in_kilowatts', size=
-            (self.number_of_energy_management_system_time_intervals_per_day,
-             number_of_dispatchable_assets), vtype='continuous')
+            problem.add_variable(name='controllable_assets_active_power_in_kilowatts',
+                                 size=(self.number_of_energy_management_system_time_intervals_per_day,
+                                       number_of_dispatchable_assets), vtype='continuous')
         if number_of_buildings > 0:
             cooling_active_power_in_kilowatts = \
-                problem.add_variable(name='cooling_active_power_in_kilowatts', size=
-                (self.number_of_energy_management_system_time_intervals_per_day,
-                 number_of_buildings), vtype='continuous')
+                problem.add_variable(name='cooling_active_power_in_kilowatts',
+                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
+                                           number_of_buildings), vtype='continuous')
             heating_active_power_in_kilowatts = \
-                problem.add_variable(name='heating_active_power_in_kilowatts', size=
-                (self.number_of_energy_management_system_time_intervals_per_day,
-                 number_of_buildings), vtype='continuous')
+                problem.add_variable(name='heating_active_power_in_kilowatts',
+                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
+                                           number_of_buildings), vtype='continuous')
             building_internal_temperature_in_celsius_degrees = \
-                problem.add_variable(name='building_internal_temperature_in_celsius_degrees', size=
-                (self.number_of_energy_management_system_time_intervals_per_day,
-                 number_of_buildings), vtype='continuous')
+                problem.add_variable(name='building_internal_temperature_in_celsius_degrees',
+                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
+                                           number_of_buildings), vtype='continuous')
         active_power_imports_in_kilowatts = \
-            problem.add_variable(name='active_power_imports_in_kilowatts', size=
-            (self.number_of_energy_management_system_time_intervals_per_day, 1),
+            problem.add_variable(name='active_power_imports_in_kilowatts',
+                                 size=(self.number_of_energy_management_system_time_intervals_per_day, 1),
                                  vtype='continuous')
         active_power_exports_in_kilowatts = \
-            problem.add_variable(name='active_power_exports_in_kilowatts', size=
-            (self.number_of_energy_management_system_time_intervals_per_day, 1),
+            problem.add_variable(name='active_power_exports_in_kilowatts',
+                                 size=(self.number_of_energy_management_system_time_intervals_per_day, 1),
                                  vtype='continuous')
         # (positive) maximum demand dummy variable
         max_active_power_demand_in_kilowatts = problem.add_variable(name='max_active_power_demand_in_kilowatts', size=1,
@@ -170,7 +170,7 @@ class EnergySystem:
         asum_np = np.tril(np.ones([self.number_of_energy_management_system_time_intervals_per_day,
                                    self.number_of_energy_management_system_time_intervals_per_day])).astype('double')
         # lower triangle matrix summing powers
-        asum = pic.new_param('asum', asum_np)
+        asum = pic.Constant('asum', asum_np)
 
         self.add_linear_building_thermal_model_constraints_to_the_problem(
             number_of_buildings=number_of_buildings, problem=problem,
@@ -1565,54 +1565,54 @@ class EnergySystem:
                 'P_demand_ems': P_demand_ems}
 
     def add_linear_building_thermal_model_constraints_to_the_problem(
-            self, number_of_buildings: int, problem, heating_active_power_in_kilowatts: float,
+            self, number_of_buildings: int, problem: pic.Problem, heating_active_power_in_kilowatts: float,
             cooling_active_power_in_kilowatts: float, building_internal_temperature_in_celsius_degrees: float,
             controllable_assets_active_power_in_kilowatts: float):
 
         # linear building thermal model constraints
-        for building in range(number_of_buildings):
+        for number_of_building in range(number_of_buildings):
             # maximum heating constraint
-            problem.add_constraint(heating_active_power_in_kilowatts[:, building] <= self.building_assets[
-                building].max_consumed_electric_heating_kilowatts)
+            problem.add_constraint(heating_active_power_in_kilowatts[:, number_of_building] <= self.building_assets[
+                number_of_building].max_consumed_electric_heating_kilowatts)
             # maximum cooling constraint
-            problem.add_constraint(cooling_active_power_in_kilowatts[:, building] <= self.building_assets[
-                building].max_consumed_electric_cooling_kilowatts)
+            problem.add_constraint(cooling_active_power_in_kilowatts[:, number_of_building] <= self.building_assets[
+                number_of_building].max_consumed_electric_cooling_kilowatts)
             # minimum heating constraint
-            problem.add_constraint(heating_active_power_in_kilowatts[:, building] >= 0)
+            problem.add_constraint(heating_active_power_in_kilowatts[:, number_of_building] >= 0)
             # minimum cooling constraint
-            problem.add_constraint(cooling_active_power_in_kilowatts[:, building] >= 0)
+            problem.add_constraint(cooling_active_power_in_kilowatts[:, number_of_building] >= 0)
             # maximum temperature constraint
             problem.add_constraint(
-                building_internal_temperature_in_celsius_degrees[:, building] <= self.building_assets[
-                    building].max_inside_degree_celsius)
+                building_internal_temperature_in_celsius_degrees[:, number_of_building] <= self.building_assets[
+                    number_of_building].max_inside_degree_celsius)
             # minimum temperature constraint
             problem.add_constraint(
-                building_internal_temperature_in_celsius_degrees[:, building] >= self.building_assets[
-                    building].min_inside_degree_celsius)
+                building_internal_temperature_in_celsius_degrees[:, number_of_building] >= self.building_assets[
+                    number_of_building].min_inside_degree_celsius)
             # power consumption is the sum of heating and cooling
             cooling_and_heating_active_power_in_kilowatts = \
-                cooling_active_power_in_kilowatts[:, building] + \
-                heating_active_power_in_kilowatts[:, building]
+                cooling_active_power_in_kilowatts[:, number_of_building] + \
+                heating_active_power_in_kilowatts[:, number_of_building]
             problem.add_constraint(
-                controllable_assets_active_power_in_kilowatts[:, building] ==
+                controllable_assets_active_power_in_kilowatts[:, number_of_building] ==
                 cooling_and_heating_active_power_in_kilowatts)
 
-            self.add_temperature_constraint_to_problem(building=building, problem=problem,
-                                                       building_internal_temperature_in_celsius_degrees=
-                                                       building_internal_temperature_in_celsius_degrees,
-                                                       cooling_active_power_in_kilowatts=
-                                                       cooling_active_power_in_kilowatts,
-                                                       heating_active_power_in_kilowatts=
-                                                       heating_active_power_in_kilowatts)
+            self.add_temperature_constraints_to_problem(number_of_building=number_of_building, problem=problem,
+                                                        building_internal_temperature_in_celsius_degrees=
+                                                        building_internal_temperature_in_celsius_degrees,
+                                                        cooling_active_power_in_kilowatts=
+                                                        cooling_active_power_in_kilowatts,
+                                                        heating_active_power_in_kilowatts=
+                                                        heating_active_power_in_kilowatts)
 
-    def add_temperature_constraint_to_problem(self, building, problem,
-                                              building_internal_temperature_in_celsius_degrees: float,
-                                              cooling_active_power_in_kilowatts: float,
-                                              heating_active_power_in_kilowatts: float):
+    def add_temperature_constraints_to_problem(self, number_of_building: int, problem: pic.Problem,
+                                               building_internal_temperature_in_celsius_degrees: float,
+                                               cooling_active_power_in_kilowatts: float,
+                                               heating_active_power_in_kilowatts: float):
 
-        alpha = self.building_assets[building].alpha
-        beta = self.building_assets[building].beta
-        gamma = self.building_assets[building].gamma
+        alpha = self.building_assets[number_of_building].alpha
+        beta = self.building_assets[number_of_building].beta
+        gamma = self.building_assets[number_of_building].gamma
 
         for energy_management_system_time_interval_per_day in range(
                 self.number_of_energy_management_system_time_intervals_per_day):
@@ -1620,27 +1620,27 @@ class EnergySystem:
                 # initial temperature constraint
                 problem.add_constraint(
                     building_internal_temperature_in_celsius_degrees[
-                        energy_management_system_time_interval_per_day, building] ==
-                    self.building_assets[building].initial_inside_degree_celsius)
+                        energy_management_system_time_interval_per_day, number_of_building] ==
+                    self.building_assets[number_of_building].initial_inside_degree_celsius)
             else:
                 # Inside temperature is a function of heating/cooling and
                 # outside temperature. Alpha, beta and gamma are parameters
                 # derived from the R and C values of the building.
                 previous_building_internal_temperature_in_celsius_degrees = \
                     building_internal_temperature_in_celsius_degrees[
-                        energy_management_system_time_interval_per_day - 1, building]
+                        energy_management_system_time_interval_per_day - 1, number_of_building]
                 chiller_coefficient_of_performance = \
-                    self.building_assets[building].chiller_coefficient_of_performance
+                    self.building_assets[number_of_building].chiller_coefficient_of_performance
                 previous_cooling_active_power_in_kilowatts = \
                     cooling_active_power_in_kilowatts[
-                        energy_management_system_time_interval_per_day - 1, building]
+                        energy_management_system_time_interval_per_day - 1, number_of_building]
                 heat_pump_coefficient_of_performance = \
-                    self.building_assets[building].heat_pump_coefficient_of_performance
+                    self.building_assets[number_of_building].heat_pump_coefficient_of_performance
                 previous_heating_active_power_in_kilowatts = \
                     heating_active_power_in_kilowatts[
-                        energy_management_system_time_interval_per_day - 1, building]
+                        energy_management_system_time_interval_per_day - 1, number_of_building]
                 previous_ambient_temperature_in_degree_celsius = \
-                    self.building_assets[building].ambient_temperature_in_degree_celsius[
+                    self.building_assets[number_of_building].ambient_temperature_in_degree_celsius[
                         energy_management_system_time_interval_per_day - 1]
                 temperature_constraint = \
                     get_temperature_constraint_for_no_initial_time(
@@ -1657,76 +1657,81 @@ class EnergySystem:
                 problem.add_constraint(
                     building_internal_temperature_in_celsius_degrees[
                         energy_management_system_time_interval_per_day,
-                        building] == temperature_constraint)
+                        number_of_building] == temperature_constraint)
 
     def add_linear_battery_model_constraints_to_the_problem(
-            self, number_of_storage_assets: int, problem, controllable_assets_active_power_in_kilowatts: float,
-            number_of_buildings: int, asum):
+            self, number_of_storage_assets: int, problem: pic.Problem,
+            controllable_assets_active_power_in_kilowatts: float, number_of_buildings: int, asum: pic.Constant):
 
         # linear battery model constraints
-        for storage_asset in range(number_of_storage_assets):
+        for number_of_storage_asset in range(number_of_storage_assets):
             # maximum power constraint
             problem.add_constraint(
-                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
-                <= self.storage_assets[storage_asset].max_import_kilowatts)
+                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
+                <= self.storage_assets[number_of_storage_asset].max_import_kilowatts)
             # minimum power constraint
             problem.add_constraint(
-                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
-                >= self.storage_assets[storage_asset].max_export_kilowatts)
+                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
+                >= self.storage_assets[number_of_storage_asset].max_export_kilowatts)
             # maximum energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * asum *
-                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
-                <= self.storage_assets[storage_asset].max_energy_in_kilowatt_hour
-                - self.storage_assets[storage_asset].initial_energy_level_in_kilowatt_hour)
+                controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
+                <= self.storage_assets[number_of_storage_asset].max_energy_in_kilowatt_hour
+                - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
             # minimum energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * asum
-                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset] >=
-                self.storage_assets[storage_asset].min_energy_in_kilowatt_hour
-                - self.storage_assets[storage_asset].initial_energy_level_in_kilowatt_hour)
+                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset] >=
+                self.storage_assets[number_of_storage_asset].min_energy_in_kilowatt_hour
+                - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
             # final energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours *
                 asum[self.energy_management_system_time_series_resolution_in_hours - 1, :]
-                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
-                == self.storage_assets[storage_asset].required_terminal_energy_level_in_kilowatt_hour
-                - self.storage_assets[storage_asset].initial_energy_level_in_kilowatt_hour)
+                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
+                == self.storage_assets[number_of_storage_asset].required_terminal_energy_level_in_kilowatt_hour
+                - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
 
     def add_import_and_export_constraints_to_the_problem(
-            self, problem, controllable_assets_active_power_in_kilowatts: float,
+            self, problem: pic.Problem, controllable_assets_active_power_in_kilowatts: float,
             active_power_in_kilowatts_at_energy_management_resolution: float, active_power_imports_in_kilowatts: float,
             active_power_exports_in_kilowatts: float, max_active_power_demand_in_kilowatts: float):
 
-        for energy_management_system_time_interval_per_day in range(
+        for number_of_energy_management_system_time_interval_per_day in range(
                 self.number_of_energy_management_system_time_intervals_per_day):
             # power balance
             problem.add_constraint(
-                sum(controllable_assets_active_power_in_kilowatts[energy_management_system_time_interval_per_day, :]) +
-                active_power_in_kilowatts_at_energy_management_resolution[energy_management_system_time_interval_per_day]
-                == active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day]
-                - active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day])
+                sum(controllable_assets_active_power_in_kilowatts[
+                    number_of_energy_management_system_time_interval_per_day, :]) +
+                active_power_in_kilowatts_at_energy_management_resolution[
+                    number_of_energy_management_system_time_interval_per_day]
+                == active_power_imports_in_kilowatts[number_of_energy_management_system_time_interval_per_day]
+                - active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day])
             # maximum import constraint
-            problem.add_constraint(active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day] <=
-                                   self.market.max_import_kilowatts[energy_management_system_time_interval_per_day])
-            # maximum import constraint
-            problem.add_constraint(
-                active_power_imports_in_kilowatts[energy_management_system_time_interval_per_day] >= 0)
-            # maximum import constraint
-            problem.add_constraint(
-                active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day]
-                <= - self.market.max_export_kilowatts[energy_management_system_time_interval_per_day])
+            problem.add_constraint(active_power_imports_in_kilowatts[
+                                       number_of_energy_management_system_time_interval_per_day] <=
+                                   self.market.max_import_kilowatts[
+                                       number_of_energy_management_system_time_interval_per_day])
             # maximum import constraint
             problem.add_constraint(
-                active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day] >= 0)
+                active_power_imports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] >= 0)
+            # maximum import constraint
+            problem.add_constraint(
+                active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day]
+                <= - self.market.max_export_kilowatts[number_of_energy_management_system_time_interval_per_day])
+            # maximum import constraint
+            problem.add_constraint(
+                active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] >= 0)
             # maximum demand dummy variable constraint
             problem.add_constraint(max_active_power_demand_in_kilowatts >= active_power_imports_in_kilowatts[
-                energy_management_system_time_interval_per_day]
-                                   - active_power_exports_in_kilowatts[energy_management_system_time_interval_per_day])
+                number_of_energy_management_system_time_interval_per_day]
+                                   - active_power_exports_in_kilowatts[
+                                       number_of_energy_management_system_time_interval_per_day])
 
     def add_frequency_response_constraints_to_the_problem(
-            self, number_of_storage_assets: int, problem, asum, controllable_assets_active_power_in_kilowatts: float,
-            number_of_buildings: int):
+            self, number_of_storage_assets: int, problem: pic.Problem, asum: pic.Constant,
+            controllable_assets_active_power_in_kilowatts: float, number_of_buildings: int):
 
         if self.market.frequency_response_active is not None:
             frequency_response_window = self.market.frequency_response_active
@@ -1745,24 +1750,25 @@ class EnergySystem:
                         min_state_of_charge_for_frequency_response=min_state_of_charge_for_frequency_response)
 
     def get_final_energy_constraints(
-            self, number_of_storage_assets: int, problem, asum, energy_management_system_time_interval_per_day,
-            controllable_assets_active_power_in_kilowatts: float, number_of_buildings: int,
-            max_state_of_charge_for_frequency_response: float, min_state_of_charge_for_frequency_response: float
-                                     ):
-        for storage_asset in range(number_of_storage_assets):
+            self, number_of_storage_assets: int, problem: pic.Problem, asum: pic.Constant,
+            energy_management_system_time_interval_per_day, controllable_assets_active_power_in_kilowatts: float,
+            number_of_buildings: int, max_state_of_charge_for_frequency_response: float,
+            min_state_of_charge_for_frequency_response: float):
+
+        for number_of_storage_asset in range(number_of_storage_assets):
             # final energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours
                 * asum[energy_management_system_time_interval_per_day, :]
-                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
+                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
                 <= (max_state_of_charge_for_frequency_response
-                    * self.storage_assets[storage_asset].max_energy_in_kilowatt_hour)
-                - self.storage_assets[storage_asset].initial_energy_level_in_kilowatt_hour)
+                    * self.storage_assets[number_of_storage_asset].max_energy_in_kilowatt_hour)
+                - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
             # final energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours
                 * asum[energy_management_system_time_interval_per_day, :]
-                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + storage_asset]
+                * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
                 >= (min_state_of_charge_for_frequency_response
-                    * self.storage_assets[storage_asset].max_energy_in_kilowatt_hour)
-                - self.storage_assets[storage_asset].initial_energy_level_in_kilowatt_hour)
+                    * self.storage_assets[number_of_storage_asset].max_energy_in_kilowatt_hour)
+                - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
