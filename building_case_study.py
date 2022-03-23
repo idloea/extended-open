@@ -204,9 +204,9 @@ energy_system = energy_system.EnergySystem(storage_assets=storage_assets,
 output = energy_system.simulate_network()
 buses_voltage_angle_in_degrees = output['buses_Vang']
 buses_active_power_in_kilowatts = output['buses_Pnet']
-buses_reactive_power = output['buses_Qnet']
+buses_reactive_power_in_kilovolt_ampere_reactive = output['buses_Qnet']
 market_active_power_in_kilowatts = output['Pnet_market']
-market_reactive_power = output['Qnet_market']
+market_reactive_power_in_kilovolt_ampere_reactive = output['Qnet_market']
 buses_voltage_in_per_unit = output['buses_Vpu']
 energy_management_system_imported_active_power_in_kilowatts = output['P_import_ems']
 energy_management_system_exported_active_power_in_kilowatts = output['P_export_ems']

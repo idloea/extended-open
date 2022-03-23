@@ -283,11 +283,11 @@ class EnergySystem:
         Output : dictionary
             The following numpy.ndarrays are present depending upon asset mix:
                 buses_Vpu : Voltage magnitude at bus (V)
-                buses_Vang : Voltage angle at bus (rad)
-                buses_Pnet : Real power at bus (kW)
-                buses_Qnet : Reactive power at bus (kVAR)
-                Pnet_market : Real power seen by the market (kW)
-                Qnet_market : Reactive power seen by the market (kVAR)
+                buses_voltage_angle_in_degrees : Voltage angle at bus (rad)
+                buses_active_power_in_kilowatts : Real power at bus (kW)
+                buses_reactive_power_in_kilovolt_ampere_reactive : Reactive power at bus (kVAR)
+                market_active_power_in_kilowatts : Real power seen by the market (kW)
+                market_reactive_power_in_kilovolt_ampere_reactive : Reactive power seen by the market (kVAR)
                 storage_asset_charge_or_discharge_power_in_kilowatts : Charge/discharge power for storage assets at energy
                     management time resolution (kW)
                 building_power_consumption_in_kilowatts :Builfing power consumption at energy management
@@ -365,36 +365,49 @@ class EnergySystem:
             reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, network_bus_id] += self.non_dispatchable_assets[
                 i].reactive_power
 
-        buses_Vpu = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
-        buses_Vang = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
-        buses_Pnet = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
-        buses_Qnet = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
-        Pnet_market = np.zeros(self.number_of_time_intervals_per_day)
-        Qnet_market = np.zeros(self.number_of_time_intervals_per_day)
-        # print(active_power_bus_demand_in_kilowatts)
+        buses_voltage_in_per_unit = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
+        buses_voltage_angle_in_degrees = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
+        buses_active_power_in_kilowatts = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
+        buses_reactive_power_in_kilovolt_ampere_reactive = np.zeros([self.number_of_time_intervals_per_day,
+                                                                     number_of_buses])
+        market_active_power_in_kilowatts = np.zeros(self.number_of_time_intervals_per_day)
+        market_reactive_power_in_kilovolt_ampere_reactive = np.zeros(self.number_of_time_intervals_per_day)
+
         simulation_start_time = datetime.datetime.now()
         print('*** SIMULATING THE NETWORK ***')
-        for t in range(self.number_of_time_intervals_per_day):
+        for number_of_time_interval_per_day in range(self.number_of_time_intervals_per_day):
             # for each time interval:
-            # set up a copy of the network for simulation interval t
-            network_t = copy.deepcopy(self.network)
+            # set up a copy of the network for simulation interval number_of_time_interval_per_day
+            network_copy = copy.deepcopy(self.network)
             for network_bus_id in range(number_of_buses):
-                P_t = active_power_bus_demand_in_kilowatts[t, network_bus_id]
-                Q_t = reactive_power_bus_demand_in_kilovolt_ampere_reactive[t, network_bus_id]
+                specific_active_power_bus_demand_in_kilowatts = \
+                    active_power_bus_demand_in_kilowatts[number_of_time_interval_per_day, network_bus_id]
+                specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive = \
+                    reactive_power_bus_demand_in_kilovolt_ampere_reactive[number_of_time_interval_per_day,
+                                                                          network_bus_id]
                 # add P,Q loads to the network copy
-                pp.create_load(network_t, network_bus_id, P_t / 1e3, Q_t / 1e3)
+                pp.create_load(network_copy, network_bus_id, specific_active_power_bus_demand_in_kilowatts / 1e3,
+                               specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive / 1e3)
             # run the power flow simulation
-            pp.runpp(network_t, max_iteration=100)  # or “nr”
-            if t % 100 == 0:
-                print('network sim complete for t = ' \
-                      + str(t) + ' of ' + str(self.number_of_time_intervals_per_day))
-            Pnet_market[t] = network_t.res_ext_grid['p_mw'][0] * 1e3
-            Qnet_market[t] = network_t.res_ext_grid['q_mvar'][0] * 1e3
-            for bus_i in range(number_of_buses):
-                buses_Vpu[t, bus_i] = network_t.res_bus['vm_pu'][bus_i]
-                buses_Vang[t, bus_i] = network_t.res_bus['va_degree'][bus_i]
-                buses_Pnet[t, bus_i] = network_t.res_bus['p_mw'][bus_i] * 1e3
-                buses_Qnet[t, bus_i] = network_t.res_bus['q_mvar'][bus_i] * 1e3
+            max_iteration = 100
+            pp.runpp(net=network_copy, max_iteration=max_iteration)  # or “nr”
+
+            if number_of_time_interval_per_day % 100 == 0:
+                print('network sim complete for number_of_time_interval_per_day = '
+                      + str(number_of_time_interval_per_day) + ' of ' + str(self.number_of_time_intervals_per_day))
+            market_active_power_in_kilowatts[number_of_time_interval_per_day] = \
+                network_copy.res_ext_grid['p_mw'][0] * 1e3
+            market_reactive_power_in_kilovolt_ampere_reactive[number_of_time_interval_per_day] = \
+                network_copy.res_ext_grid['q_mvar'][0] * 1e3
+            for number_of_bus in range(number_of_buses):
+                buses_voltage_in_per_unit[number_of_time_interval_per_day, number_of_bus] = \
+                    network_copy.res_bus['vm_pu'][number_of_bus]
+                buses_voltage_angle_in_degrees[number_of_time_interval_per_day, number_of_bus] = \
+                    network_copy.res_bus['va_degree'][number_of_bus]
+                buses_active_power_in_kilowatts[number_of_time_interval_per_day, number_of_bus] = \
+                    network_copy.res_bus['p_mw'][number_of_bus] * 1e3
+                buses_reactive_power_in_kilovolt_ampere_reactive[number_of_time_interval_per_day, number_of_bus] = \
+                    network_copy.res_bus['q_mvar'][number_of_bus] * 1e3
 
         print('*** NETWORK SIMULATION COMPLETE ***')
         simulation_end_time = datetime.datetime.now()
@@ -402,39 +415,47 @@ class EnergySystem:
         print('*** SIMULATION TIME: ', simulation_time, '***')
 
         if number_of_electric_vehicles > 0 and number_of_buildings > 0:
-            output = {'buses_Vpu': buses_Vpu,
-                      'buses_Vang': buses_Vang,
-                      'buses_Pnet': buses_Pnet,
-                      'buses_Qnet': buses_Qnet,
-                      'Pnet_market': Pnet_market,
-                      'Qnet_market': Qnet_market,
-                      'P_ES_val': storage_asset_charge_or_discharge_power_in_kilowatts,
-                      'P_BLDG_ems': building_power_consumption_in_kilowatts,
-                      'P_import_ems': imported_active_power_in_kilowatts,
-                      'P_export_ems': exported_active_power_in_kilowatts,
-                      'P_demand_ems': active_power_demand_in_kilowatts}
+            output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
+                      'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
+                      'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
+                      'buses_reactive_power_in_kilovolt_ampere_reactive':
+                          buses_reactive_power_in_kilovolt_ampere_reactive,
+                      'market_active_power_in_kilowatts': market_active_power_in_kilowatts,
+                      'market_reactive_power_in_kilovolt_ampere_reactive':
+                          market_reactive_power_in_kilovolt_ampere_reactive,
+                      'storage_asset_charge_or_discharge_power_in_kilowatts':
+                          storage_asset_charge_or_discharge_power_in_kilowatts,
+                      'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts,
+                      'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
+                      'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,
+                      'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts}
         elif number_of_electric_vehicles == 0 and number_of_buildings > 0:
-            output = {'buses_Vpu': buses_Vpu,
-                      'buses_Vang': buses_Vang,
-                      'buses_Pnet': buses_Pnet,
-                      'buses_Qnet': buses_Qnet,
-                      'Pnet_market': Pnet_market,
-                      'Qnet_market': Qnet_market,
-                      'P_BLDG_ems': building_power_consumption_in_kilowatts,
-                      'P_import_ems': imported_active_power_in_kilowatts,
-                      'P_export_ems': exported_active_power_in_kilowatts,
-                      'P_demand_ems': active_power_demand_in_kilowatts}
+            output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
+                      'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
+                      'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
+                      'buses_reactive_power_in_kilovolt_ampere_reactive':
+                          buses_reactive_power_in_kilovolt_ampere_reactive,
+                      'market_active_power_in_kilowatts': market_active_power_in_kilowatts,
+                      'market_reactive_power_in_kilovolt_ampere_reactive':
+                          market_reactive_power_in_kilovolt_ampere_reactive,
+                      'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts,
+                      'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
+                      'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,
+                      'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts}
         elif number_of_electric_vehicles > 0 and number_of_buildings == 0:
-            output = {'buses_Vpu': buses_Vpu,
-                      'buses_Vang': buses_Vang,
-                      'buses_Pnet': buses_Pnet,
-                      'buses_Qnet': buses_Qnet,
-                      'Pnet_market': Pnet_market,
-                      'Qnet_market': Qnet_market,
-                      'P_ES_val': storage_asset_charge_or_discharge_power_in_kilowatts,
-                      'P_import_ems': imported_active_power_in_kilowatts,
-                      'P_export_ems': exported_active_power_in_kilowatts,
-                      'P_demand_ems': active_power_demand_in_kilowatts}
+            output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
+                      'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
+                      'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
+                      'buses_reactive_power_in_kilovolt_ampere_reactive':
+                          buses_reactive_power_in_kilovolt_ampere_reactive,
+                      'market_active_power_in_kilowatts': market_active_power_in_kilowatts,
+                      'market_reactive_power_in_kilovolt_ampere_reactive':
+                          market_reactive_power_in_kilovolt_ampere_reactive,
+                      'storage_asset_charge_or_discharge_power_in_kilowatts':
+                          storage_asset_charge_or_discharge_power_in_kilowatts,
+                      'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
+                      'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,
+                      'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts}
         else:
             raise ValueError('No dispatchable assets.')
 

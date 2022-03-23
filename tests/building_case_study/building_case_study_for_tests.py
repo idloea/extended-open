@@ -229,16 +229,17 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 6: simulate the energy system:
     #######################################
     output = energy_system.simulate_network()
-    buses_voltage_angle_in_degrees = output['buses_Vang']
-    buses_active_power_in_kilowatts = output['buses_Pnet']
-    buses_reactive_power = output['buses_Qnet']
-    market_active_power_in_kilowatts = output['Pnet_market']
-    market_reactive_power = output['Qnet_market']
-    buses_voltage_in_per_unit = output['buses_Vpu']
-    energy_management_system_imported_active_power_in_kilowatts = output['P_import_ems']
-    energy_management_system_exported_active_power_in_kilowatts = output['P_export_ems']
-    building_energy_management_system_active_power_in_kilowatts = output['P_BLDG_ems']
-    energy_management_system_active_power_demand_in_kilowatt = output['P_demand_ems']
+    buses_voltage_angle_in_degrees = output['buses_voltage_angle_in_degrees']
+    buses_active_power_in_kilowatts = output['buses_active_power_in_kilowatts']
+    buses_reactive_power_in_kilovolt_ampere_reactive = output['buses_reactive_power_in_kilovolt_ampere_reactive']
+    market_active_power_in_kilowatts = output['market_active_power_in_kilowatts']
+    market_reactive_power_in_kilovolt_ampere_reactive = output['market_reactive_power_in_kilovolt_ampere_reactive']
+    buses_voltage_in_per_unit = output['buses_voltage_in_per_unit']
+    imported_active_power_in_kilowatts = output['imported_active_power_in_kilowatts']
+    exported_active_power_in_kilowatts = output['exported_active_power_in_kilowatts']
+    building_power_consumption_in_kilowatts = \
+        output['building_power_consumption_in_kilowatts']
+    active_power_demand_in_kilowatts = output['active_power_demand_in_kilowatts']
     active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
     for i in range(len(non_distpachable_assets)):
         bus_id = non_distpachable_assets[i].bus_id
@@ -258,11 +259,11 @@ def get_building_case_original_results(is_winter: bool):
             buses_voltage_in_per_unit[0],
             buses_voltage_angle_in_degrees[0],
             buses_active_power_in_kilowatts[0],
-            buses_reactive_power[0],
+            buses_reactive_power_in_kilovolt_ampere_reactive[0],
             market_active_power_in_kilowatts[0],
-            market_reactive_power[0],
-            energy_management_system_imported_active_power_in_kilowatts[0],
-            energy_management_system_exported_active_power_in_kilowatts[0],
-            building_energy_management_system_active_power_in_kilowatts[0],
-            energy_management_system_active_power_demand_in_kilowatt[0],
+            market_reactive_power_in_kilovolt_ampere_reactive[0],
+            imported_active_power_in_kilowatts[0],
+            exported_active_power_in_kilowatts[0],
+            building_power_consumption_in_kilowatts[0],
+            active_power_demand_in_kilowatts[0],
             active_power_demand_base_in_kilowatts[0]]

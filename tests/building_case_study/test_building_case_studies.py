@@ -22,10 +22,10 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
         expected_P_demand_ems = 25.933799999999998
         expected_P_demand_base = 29.218000000000004
 
-        revenue, buses_Vpu, buses_Vang, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_building_case_original_results(is_winter=is_winter)
+        revenue, buses_Vpu, buses_voltage_angle_in_degrees, buses_Pnet, buses_Qnet, Pnet_market, Qnet_market, P_import_ems, P_export_ems, P_BLDG_ems, P_demand_ems, P_demand_base = get_building_case_original_results(is_winter=is_winter)
 
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
-        np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)
+        np.testing.assert_almost_equal(expected_buses_Vang, buses_voltage_angle_in_degrees)
         np.testing.assert_almost_equal(expected_buses_Pnet, buses_Pnet)
         np.testing.assert_almost_equal(expected_buses_Qnet, buses_Qnet)
         self.assertAlmostEqual(expected_Pnet_market, Pnet_market)
