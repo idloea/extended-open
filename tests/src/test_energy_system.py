@@ -127,10 +127,9 @@ def _create_a_test_building_asset() -> List[BuildingAsset]:
     return [building_asset]
 
 
-def _create_a_test_energy_system(non_dispatchable_asset_1: NonDispatchableAsset,
-                                 non_dispatchable_asset_2: Optional[NonDispatchableAsset] = None) -> EnergySystem:
+def _create_a_test_energy_system(non_dispatchable_asset: List[NonDispatchableAsset]) -> EnergySystem:
     storage_assets = _create_a_test_storage_asset()
-    non_dispatchable_assets = [non_dispatchable_asset_1, non_dispatchable_asset_2]
+    non_dispatchable_assets = non_dispatchable_asset
     network = _create_a_test_network()
     market = _create_a_test_market()
     simulation_time_series_resolution_in_hours = 0.1
@@ -162,8 +161,8 @@ class TestEnergySystem(unittest.TestCase):
             active_power_in_kilowatts=active_power_in_kilowatts,
             reactive_power_in_kilovolt_ampere_reactive=reactive_power_in_kilovolt_ampere_reactive)
 
-        energy_system = _create_a_test_energy_system(non_dispatchable_asset_1=non_dispatchable_asset_1,
-                                                     non_dispatchable_asset_2=non_dispatchable_asset_2)
+        energy_system = _create_a_test_energy_system(non_dispatchable_asset=
+                                                     [non_dispatchable_asset_1, non_dispatchable_asset_2])
 
         expected_result = np.array([2, 2, 2])
         result = energy_system._get_non_dispatchable_assets_active_power_in_kilowatts()
