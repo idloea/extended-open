@@ -29,6 +29,8 @@ time series.
 """
 
 import copy
+import datetime
+import time
 from typing import List
 import pandapower as pp
 import numpy as np
@@ -214,8 +216,14 @@ class EnergySystem:
         # STEP 4: solve the optimisation
 
         print('*** SOLVING THE OPTIMISATION PROBLEM ***')
+        optimization_start_time = datetime.datetime.now()
         problem.solve(verbose=0)
+        optimization_end_time = datetime.datetime.now()
+        print('*** END TIME: ', optimization_start_time, '***')
+        optimization_time = optimization_end_time - optimization_start_time
         print('*** OPTIMISATION COMPLETE ***')
+        print('*** OPTIMISATION TIME: ', optimization_time, '***')
+
         controllable_assets_active_power_in_kilowatts = controllable_assets_active_power_in_kilowatts.value
         active_power_imports_in_kilowatts = active_power_imports_in_kilowatts.value
         active_power_exports_in_kilowatts = active_power_exports_in_kilowatts.value
