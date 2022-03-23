@@ -217,6 +217,11 @@ building_power_consumption_in_kilowatts = \
 active_power_demand_in_kilowatts = \
     output['active_power_demand_in_kilowatts']
 active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
-for i in range(len(non_distpachable_assets)):
-    bus_id = non_distpachable_assets[i].bus_id
-    active_power_demand_base_in_kilowatts += non_distpachable_assets[i].active_power_in_kilowatts
+
+for non_dispatchable_asset in range(len(non_distpachable_assets)):
+    bus_id = non_distpachable_assets[non_dispatchable_asset].bus_id
+    active_power_demand_base_in_kilowatts += non_distpachable_assets[non_dispatchable_asset].active_power_in_kilowatts
+
+revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
+print('Revenue:', revenue)
+
