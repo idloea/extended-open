@@ -219,7 +219,6 @@ class EnergySystem:
         optimization_start_time = datetime.datetime.now()
         problem.solve(verbose=0)
         optimization_end_time = datetime.datetime.now()
-        print('*** END TIME: ', optimization_start_time, '***')
         optimization_time = optimization_end_time - optimization_start_time
         print('*** OPTIMISATION COMPLETE ***')
         print('*** OPTIMISATION TIME: ', optimization_time, '***')
@@ -232,28 +231,37 @@ class EnergySystem:
 
         if number_of_buildings > 0:
             # Store internal temperature inside object
-            T_bldg_val = building_internal_temperature_in_celsius_degrees.value
-            for b in range(number_of_buildings):
-                self.building_assets[b].T_int = T_bldg_val[:, b]
+            building_internal_temperature_in_celsius_degrees = building_internal_temperature_in_celsius_degrees.value
+            for number_of_building in range(number_of_buildings):
+                self.building_assets[number_of_building].building_internal_temperature_in_celsius_degrees = \
+                    building_internal_temperature_in_celsius_degrees[:, number_of_building]
 
+        active_power_consumed_by_the_buildings_in_kilowatts = \
+            controllable_assets_active_power_in_kilowatts[:, :number_of_buildings]
         if number_of_storage_assets > 0 and number_of_buildings > 0:
-            output = {'P_BLDG_val': controllable_assets_active_power_in_kilowatts[:, :number_of_buildings],
-                      'P_ES_val': controllable_assets_active_power_in_kilowatts[:,
-                                  number_of_buildings:number_of_storage_assets + number_of_buildings],
+            output = {
+                'active_power_consumed_by_the_buildings_in_kilowatts':
+                    active_power_consumed_by_the_buildings_in_kilowatts,
+                'charge_discharge_power_for_storage_assets_in_kilowatts':
+                    controllable_assets_active_power_in_kilowatts[
+                                :, number_of_buildings:number_of_storage_assets + number_of_buildings],
+                'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
+                'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
+                'active_power_in_kilowatts_at_energy_management_resolution':
+                    active_power_in_kilowatts_at_energy_management_resolution}
+        elif number_of_storage_assets == 0 and number_of_buildings > 0:
+            output = {'active_power_consumed_by_the_buildings_in_kilowatts':
+                          active_power_consumed_by_the_buildings_in_kilowatts,
                       'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                       'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
                       'active_power_in_kilowatts_at_energy_management_resolution':
                           active_power_in_kilowatts_at_energy_management_resolution}
-        elif number_of_storage_assets == 0 and number_of_buildings > 0:
-            output = {'P_BLDG_val': controllable_assets_active_power_in_kilowatts[:, :number_of_buildings],
-                      'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
-                      'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                      'active_power_in_kilowatts_at_energy_management_resolution': active_power_in_kilowatts_at_energy_management_resolution}
         elif number_of_storage_assets > 0 and number_of_buildings == 0:
-            output = {'P_ES_val': controllable_assets_active_power_in_kilowatts[:, :number_of_storage_assets],
+            output = {'charge_discharge_power_for_storage_assets_in_kilowatts': controllable_assets_active_power_in_kilowatts[:, :number_of_storage_assets],
                       'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                       'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                      'active_power_in_kilowatts_at_energy_management_resolution': active_power_in_kilowatts_at_energy_management_resolution}
+                      'active_power_in_kilowatts_at_energy_management_resolution':
+                          active_power_in_kilowatts_at_energy_management_resolution}
         else:
             raise ValueError('No dispatchable assets.')
 
@@ -303,10 +311,10 @@ class EnergySystem:
         exported_active_power_in_kilowatts = energy_management_system_output['active_power_exports_in_kilowatts']
         if number_of_electric_vehicles > 0:
             storage_asset_charge_or_discharge_power_in_kilowatts = \
-                energy_management_system_output['P_ES_val']
+                energy_management_system_output['charge_discharge_power_for_storage_assets_in_kilowatts']
         if number_of_buildings > 0:
             building_power_consumption_in_kilowatts = \
-                energy_management_system_output['P_BLDG_val']
+                energy_management_system_output['active_power_consumed_by_the_buildings_in_kilowatts']
         active_power_demand_in_kilowatts = \
             energy_management_system_output['active_power_in_kilowatts_at_energy_management_resolution']
         # convert P_ES and P_BLDG signals to system time-series scale
@@ -364,6 +372,7 @@ class EnergySystem:
         Pnet_market = np.zeros(self.number_of_time_intervals_per_day)
         Qnet_market = np.zeros(self.number_of_time_intervals_per_day)
         # print(active_power_bus_demand_in_kilowatts)
+        simulation_start_time = datetime.datetime.now()
         print('*** SIMULATING THE NETWORK ***')
         for t in range(self.number_of_time_intervals_per_day):
             # for each time interval:
@@ -388,6 +397,9 @@ class EnergySystem:
                 buses_Qnet[t, bus_i] = network_t.res_bus['q_mvar'][bus_i] * 1e3
 
         print('*** NETWORK SIMULATION COMPLETE ***')
+        simulation_end_time = datetime.datetime.now()
+        simulation_time = simulation_end_time - simulation_start_time
+        print('*** SIMULATION TIME: ', simulation_time, '***')
 
         if number_of_electric_vehicles > 0 and number_of_buildings > 0:
             output = {'buses_Vpu': buses_Vpu,
