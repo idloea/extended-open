@@ -1,7 +1,7 @@
 import numpy as np
-
 from src import assets, markets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
+from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files
 import pandapower as pp
 
@@ -223,5 +223,11 @@ for non_dispatchable_asset in range(len(non_distpachable_assets)):
     active_power_demand_base_in_kilowatts += non_distpachable_assets[non_dispatchable_asset].active_power_in_kilowatts
 
 revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
-print('Revenue:', revenue)
+print('Revenue in pounds:', revenue)
+
+plot_demand_base_and_total_imported_power(simulation_time_series_resolution_in_hours=
+                                          simulation_time_series_resolution_in_hours,
+                                          number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                                          active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
+                                          market_active_power_in_kilowatts=market_active_power_in_kilowatts)
 
