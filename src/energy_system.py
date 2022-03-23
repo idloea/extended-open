@@ -198,19 +198,21 @@ class EnergySystem:
             controllable_assets_active_power_in_kilowatts=controllable_assets_active_power_in_kilowatts,
             number_of_buildings=number_of_buildings)
 
-        #######################################
-        ### STEP 3: set up objective
-        #######################################
-        problem.set_objective('min',
-                              self.market.max_demand_charge_in_pounds_per_kWh * max_active_power_demand_in_kilowatts + \
-                              sum(self.market.import_prices_in_pounds_per_kWh[t] * active_power_imports_in_kilowatts[
-                                  t] + \
-                                  -self.market.export_price_time_series_in_pounds_per_kWh[t] *
-                                  active_power_exports_in_kilowatts[t] \
-                                  for t in range(self.number_of_energy_management_system_time_intervals_per_day)))
-        #######################################
-        ### STEP 3: solve the optimisation
-        #######################################
+        # STEP 3: set up objective
+        max_demand_charge_in_pounds = \
+            self.market.max_demand_charge_in_pounds_per_kWh * max_active_power_demand_in_kilowatts
+
+        import_and_export_cost_in_pounds = sum(
+            self.market.import_prices_in_pounds_per_kWh[t] * active_power_imports_in_kilowatts[t]
+            - self.market.export_price_time_series_in_pounds_per_kWh[t]  # Negative as it is a profit
+            * active_power_exports_in_kilowatts[t]
+            for t in range(self.number_of_energy_management_system_time_intervals_per_day))
+
+        expression = max_demand_charge_in_pounds + import_and_export_cost_in_pounds
+        problem.set_objective(direction='min', expression=expression)
+
+        # STEP 4: solve the optimisation
+
         print('*** SOLVING THE OPTIMISATION PROBLEM ***')
         problem.solve(verbose=0)
         print('*** OPTIMISATION COMPLETE ***')
