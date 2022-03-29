@@ -109,8 +109,8 @@ pp.create_ext_grid(network, bus=bus_1, vm_pu=1.0, name="Grid Connection")
 high_voltage_bus = bus_1
 low_voltage_bus = bus_2
 
-transformer_apparent_power_in_mega_volt_amper = 0.4
-trafo_std_type = f"{transformer_apparent_power_in_mega_volt_amper} MVA {grid_1_voltage_level_in_kilo_volts}" \
+transformer_apparent_power_in_mega_volt_ampere = 0.4
+trafo_std_type = f"{transformer_apparent_power_in_mega_volt_ampere} MVA {grid_1_voltage_level_in_kilo_volts}" \
                  f"/{grid_2_voltage_level_in_kilo_volts} kV"
 trafo = pp.create_transformer(network, hv_bus=high_voltage_bus, lv_bus=low_voltage_bus, std_type=trafo_std_type,
                               name="Trafo")
@@ -127,12 +127,12 @@ building_assets = []
 non_distpachable_assets = []
 
 photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
-photovoltaic_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
+photovoltaic_reactive_power_in_kilovolt_ampere = np.zeros(number_of_time_intervals_per_day)
 
 non_dispatchable_photovoltaic_asset = assets.NonDispatchableAsset(
     simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
     active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts,
-    reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere_reactive)
+    reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere)
 non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
 
 electric_load_active_power_in_kilowatts = np.sum(electric_loads, 1)
