@@ -390,7 +390,7 @@ class EnergySystem:
             pp.runpp(net=network_copy, max_iteration=max_iteration)  # or “nr”
 
             if number_of_time_interval_per_day % 100 == 0:
-                print('network sim complete for number_of_time_interval_per_day = '
+                print('network simulation complete for number_of_time_interval_per_day = '
                       + str(number_of_time_interval_per_day) + ' of ' + str(self.number_of_time_intervals_per_day))
             market_active_power_in_kilowatts[number_of_time_interval_per_day] = \
                 network_copy.res_ext_grid['p_mw'][0] * 1e3
