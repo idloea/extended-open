@@ -35,6 +35,7 @@ from typing import List
 import pandapower as pp
 import numpy as np
 import picos as pic
+from picos import RealVariable
 
 from src.assets import NonDispatchableAsset, StorageAsset
 from src.markets import Market
@@ -140,34 +141,28 @@ class EnergySystem:
                 non_dispatchable_assets_active_power_in_kilowatts=non_dispatchable_assets_active_power_in_kilowatts)
 
         # STEP 1: set up decision variables
-        controllable_assets_active_power_in_kilowatts = \
-            problem.add_variable(name='controllable_assets_active_power_in_kilowatts',
-                                 size=(self.number_of_energy_management_system_time_intervals_per_day,
-                                       number_of_dispatchable_assets), vtype='continuous')
+        controllable_assets_active_power_in_kilowatts = RealVariable(
+            name='controllable_assets_active_power_in_kilowatts',
+            shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_dispatchable_assets))
         if number_of_buildings > 0:
-            cooling_active_power_in_kilowatts = \
-                problem.add_variable(name='cooling_active_power_in_kilowatts',
-                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
-                                           number_of_buildings), vtype='continuous')
-            heating_active_power_in_kilowatts = \
-                problem.add_variable(name='heating_active_power_in_kilowatts',
-                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
-                                           number_of_buildings), vtype='continuous')
-            building_internal_temperature_in_celsius_degrees = \
-                problem.add_variable(name='building_internal_temperature_in_celsius_degrees',
-                                     size=(self.number_of_energy_management_system_time_intervals_per_day,
-                                           number_of_buildings), vtype='continuous')
-        active_power_imports_in_kilowatts = \
-            problem.add_variable(name='active_power_imports_in_kilowatts',
-                                 size=(self.number_of_energy_management_system_time_intervals_per_day, 1),
-                                 vtype='continuous')
-        active_power_exports_in_kilowatts = \
-            problem.add_variable(name='active_power_exports_in_kilowatts',
-                                 size=(self.number_of_energy_management_system_time_intervals_per_day, 1),
-                                 vtype='continuous')
+            cooling_active_power_in_kilowatts = RealVariable(
+                name='cooling_active_power_in_kilowatts',
+                shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings))
+            heating_active_power_in_kilowatts = RealVariable(
+                name='heating_active_power_in_kilowatts',
+                shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings))
+            building_internal_temperature_in_celsius_degrees = RealVariable(
+                name='building_internal_temperature_in_celsius_degrees',
+                shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings))
+        active_power_imports_in_kilowatts = RealVariable(
+            name='active_power_imports_in_kilowatts',
+            shape=(self.number_of_energy_management_system_time_intervals_per_day, 1))
+        active_power_exports_in_kilowatts = RealVariable(
+            name='active_power_exports_in_kilowatts',
+            shape=(self.number_of_energy_management_system_time_intervals_per_day, 1))
         # (positive) maximum demand dummy variable
-        max_active_power_demand_in_kilowatts = problem.add_variable(name='max_active_power_demand_in_kilowatts', size=1,
-                                                                    vtype='continuous')
+        max_active_power_demand_in_kilowatts = RealVariable(
+            name='max_active_power_demand_in_kilowatts', shape=1)
         # STEP 2: set up constraints
         asum_np = np.tril(np.ones([self.number_of_energy_management_system_time_intervals_per_day,
                                    self.number_of_energy_management_system_time_intervals_per_day])).astype('double')
@@ -217,7 +212,7 @@ class EnergySystem:
 
         print('*** SOLVING THE OPTIMISATION PROBLEM ***')
         optimization_start_time = datetime.datetime.now()
-        problem.solve(verbose=0)
+        problem.solve(verbosity=0)
         optimization_end_time = datetime.datetime.now()
         optimization_time = optimization_end_time - optimization_start_time
         print('*** OPTIMISATION COMPLETE ***')
@@ -244,7 +239,7 @@ class EnergySystem:
                     active_power_consumed_by_the_buildings_in_kilowatts,
                 'charge_discharge_power_for_storage_assets_in_kilowatts':
                     controllable_assets_active_power_in_kilowatts[
-                                :, number_of_buildings:number_of_storage_assets + number_of_buildings],
+                    :, number_of_buildings:number_of_storage_assets + number_of_buildings],
                 'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                 'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
                 'active_power_in_kilowatts_at_energy_management_resolution':
@@ -257,11 +252,13 @@ class EnergySystem:
                       'active_power_in_kilowatts_at_energy_management_resolution':
                           active_power_in_kilowatts_at_energy_management_resolution}
         elif number_of_storage_assets > 0 and number_of_buildings == 0:
-            output = {'charge_discharge_power_for_storage_assets_in_kilowatts': controllable_assets_active_power_in_kilowatts[:, :number_of_storage_assets],
-                      'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
-                      'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                      'active_power_in_kilowatts_at_energy_management_resolution':
-                          active_power_in_kilowatts_at_energy_management_resolution}
+            output = {
+                'charge_discharge_power_for_storage_assets_in_kilowatts': controllable_assets_active_power_in_kilowatts[
+                                                                          :, :number_of_storage_assets],
+                'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
+                'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
+                'active_power_in_kilowatts_at_energy_management_resolution':
+                    active_power_in_kilowatts_at_energy_management_resolution}
         else:
             raise ValueError('No dispatchable assets.')
 
