@@ -1,10 +1,15 @@
-# Data paths
+# CASE:
+# United Kingdom summer case without flexibility
+
+# Data
 data_path: "Data/Building/"
 photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"
 electric_load_data_file: "Loads_1min_2013JUN.csv"
 
-# Parameters
+# Winter/summer
 is_winter: False
+
+# Photovoltaic generation
 rated_photovoltaic_kilowatts: 400
 
 # Time series resolutions
@@ -31,20 +36,21 @@ chiller_coefficient_of_performance: 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
 building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 
-# Cost parameters
-# TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
-export_prices_in_pounds_per_kilowatt_hour: 0.04  # money received of net exports
-peak_period_import_prices_in_pounds_per_kilowatt_hour: 0.07
+# Cost parameters (update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021)
+export_prices_in_euros_per_kilowatt_hour: 0.047  # money received of net exports
+peak_period_import_prices_in_euros_per_kilowatt_hour: 0.083
+valley_period_import_prices_in_euros_per_kilowatt_hour: 0.18
+demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
 peak_period_hours_per_day: 7
-valley_period_import_prices_in_pounds_per_kilowatt_hour: 0.15
 valley_period_hours_per_day: 17
-demand_charge_in_pounds_per_kilowatt: 0.10  # price per kW for the maximum demand
 max_import_kilowatts: 500
 max_export_kilowatts: -500
+
+# Flexibility
 offered_kilowatts_in_frequency_response: 0
-max_frequency_response_state_of_charge: 0.6
+max_frequency_response_state_of_charge: 0.7
 min_frequency_response_state_of_charge: 0.4
-frequency_response_price_in_pounds_per_kilowatt_hour: 0.005
+frequency_response_price_in_euros_per_kilowatt_hour: 0.0059
 
 # Grid parameters
 grid_1_voltage_level_in_kilo_volts: 20

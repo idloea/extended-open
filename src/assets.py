@@ -125,7 +125,7 @@ class StorageAsset(Asset):
                  number_of_energy_management_system_time_intervals_per_day: int,
                  phases=[0, 1, 2],
                  absolute_active_power_in_kilowatts=None,
-                 battery_degradation_ratio_in_pounds_per_kilowatt_hour=None,
+                 battery_degradation_ratio_in_euros_per_kilowatt_hour=None,
                  charging_efficiency=1,
                  charging_efficiency_for_the_optimizer=1):
         Asset.__init__(self, bus_id, simulation_time_series_hour_resolution, number_of_time_intervals_per_day)
@@ -146,8 +146,8 @@ class StorageAsset(Asset):
             number_of_energy_management_system_time_intervals_per_day
         self.active_power_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
         self.reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
-        self.battery_degradation_ratio_in_pounds_per_kilowatt_hour = \
-            battery_degradation_ratio_in_pounds_per_kilowatt_hour or 0
+        self.battery_degradation_ratio_in_euros_per_kilowatt_hour = \
+            battery_degradation_ratio_in_euros_per_kilowatt_hour or 0
         self.charging_efficiency = charging_efficiency * np.ones(100)
         self.charging_efficiency_for_the_optimizer = charging_efficiency_for_the_optimizer
 

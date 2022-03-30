@@ -60,35 +60,35 @@ def _create_a_test_network() -> ThreePhaseNetwork:
 def _create_a_test_market() -> Market:
     network_bus_id = 1
     market_time_series_minute_resolution = 0.1
-    export_prices_in_pounds_per_kilowatt_hour = 5.5
-    peak_period_import_prices_in_pounds_per_kilowatt_hour = 10.5
+    export_prices_in_euros_per_kilowatt_hour = 5.5
+    peak_period_import_prices_in_euros_per_kilowatt_hour = 10.5
     peak_period_hours_per_day = 20
-    valley_period_import_prices_in_pounds_per_kilowatt_hour = 3.5
+    valley_period_import_prices_in_euros_per_kilowatt_hour = 3.5
     valley_period_hours_per_day = 4
-    max_demand_charge_in_pounds_per_kWh = 20.5
+    max_demand_charge_in_euros_per_kWh = 20.5
     max_import_kilowatts = 500
     max_export_kilowatts = 500
     offered_kW_in_frequency_response = 0
     max_frequency_response_state_of_charge = 1
     min_frequency_response_state_of_charge = 0
-    frequency_response_price_in_pounds_per_kilowatt_hour = 7.5
+    frequency_response_price_in_euros_per_kilowatt_hour = 7.5
     market = Market(network_bus_id=network_bus_id,
                     market_time_series_minute_resolution=market_time_series_minute_resolution,
-                    export_prices_in_pounds_per_kilowatt_hour=export_prices_in_pounds_per_kilowatt_hour,
-                    peak_period_import_prices_in_pounds_per_kilowatt_hour=
-                    peak_period_import_prices_in_pounds_per_kilowatt_hour,
+                    export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
+                    peak_period_import_prices_in_euros_per_kilowatt_hour=
+                    peak_period_import_prices_in_euros_per_kilowatt_hour,
                     peak_period_hours_per_day=peak_period_hours_per_day,
-                    valley_period_import_prices_in_pounds_per_kilowatt_hour=
-                    valley_period_import_prices_in_pounds_per_kilowatt_hour,
+                    valley_period_import_prices_in_euros_per_kilowatt_hour=
+                    valley_period_import_prices_in_euros_per_kilowatt_hour,
                     valley_period_hours_per_day=valley_period_hours_per_day,
-                    max_demand_charge_in_pounds_per_kWh=max_demand_charge_in_pounds_per_kWh,
+                    max_demand_charge_in_euros_per_kWh=max_demand_charge_in_euros_per_kWh,
                     max_import_kilowatts=max_import_kilowatts,
                     max_export_kilowatts=max_export_kilowatts,
                     offered_kW_in_frequency_response=offered_kW_in_frequency_response,
                     max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                     min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                    frequency_response_price_in_pounds_per_kilowatt_hour=
-                    frequency_response_price_in_pounds_per_kilowatt_hour)
+                    frequency_response_price_in_euros_per_kilowatt_hour=
+                    frequency_response_price_in_euros_per_kilowatt_hour)
 
     return market
 

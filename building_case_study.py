@@ -6,7 +6,7 @@ from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files
 import pandapower as pp
 
-case_data = load_case(case_file='uk_building_summer.yaml')
+case_data = load_case(case_file='002.yaml')
 data_path = case_data["data_path"]
 
 # STEP 0: Load Data
@@ -81,18 +81,19 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts = \
 market_time_interval_in_hours = energy_management_system_time_series_resolution_in_hours
 
 # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
-export_prices_in_pounds_per_kilowatt_hour = case_data["export_prices_in_pounds_per_kilowatt_hour"]  # money received of net exports
-peak_period_import_prices_in_pounds_per_kilowatt_hour = case_data["peak_period_import_prices_in_pounds_per_kilowatt_hour"]
+export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
+peak_period_import_prices_in_euros_per_kilowatt_hour = case_data["peak_period_import_prices_in_euros_per_kilowatt_hour"]
 peak_period_hours_per_day = case_data["peak_period_hours_per_day"]
-valley_period_import_prices_in_pounds_per_kilowatt_hour = case_data["valley_period_import_prices_in_pounds_per_kilowatt_hour"]
+valley_period_import_prices_in_euros_per_kilowatt_hour = \
+    case_data["valley_period_import_prices_in_euros_per_kilowatt_hour"]
 valley_period_hours_per_day = case_data["valley_period_hours_per_day"]
-demand_charge_in_pounds_per_kilowatt = case_data["demand_charge_in_pounds_per_kilowatt"]  # price per kW for the maximum demand
+demand_charge_in_euros_per_kilowatt = case_data["demand_charge_in_euros_per_kilowatt"]
 max_import_kilowatts = case_data["max_import_kilowatts"]
 max_export_kilowatts = case_data["max_export_kilowatts"]
 offered_kilowatts_in_frequency_response = case_data["offered_kilowatts_in_frequency_response"]
 max_frequency_response_state_of_charge = case_data["max_frequency_response_state_of_charge"]
 min_frequency_response_state_of_charge = case_data["min_frequency_response_state_of_charge"]
-frequency_response_price_in_pounds_per_kilowatt_hour = case_data["frequency_response_price_in_pounds_per_kilowatt_hour"]
+frequency_response_price_in_euros_per_kilowatt_hour = case_data["frequency_response_price_in_euros_per_kilowatt_hour"]
 
 # STEP 2: setup the network
 network = pp.create_empty_network()
@@ -176,21 +177,21 @@ building_assets.append(building)
 bus_id_market = bus_1
 market = markets.Market(network_bus_id=bus_id_market,
                         market_time_series_minute_resolution=market_time_interval_in_hours,
-                        export_prices_in_pounds_per_kilowatt_hour=export_prices_in_pounds_per_kilowatt_hour,
-                        peak_period_import_prices_in_pounds_per_kilowatt_hour=
-                        peak_period_import_prices_in_pounds_per_kilowatt_hour,
+                        export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
+                        peak_period_import_prices_in_euros_per_kilowatt_hour=
+                        peak_period_import_prices_in_euros_per_kilowatt_hour,
                         peak_period_hours_per_day=peak_period_hours_per_day,
-                        valley_period_import_prices_in_pounds_per_kilowatt_hour=
-                        valley_period_import_prices_in_pounds_per_kilowatt_hour,
+                        valley_period_import_prices_in_euros_per_kilowatt_hour=
+                        valley_period_import_prices_in_euros_per_kilowatt_hour,
                         valley_period_hours_per_day=valley_period_hours_per_day,
-                        max_demand_charge_in_pounds_per_kWh=demand_charge_in_pounds_per_kilowatt,
+                        max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
                         max_import_kilowatts=max_import_kilowatts,
                         max_export_kilowatts=max_export_kilowatts,
                         offered_kW_in_frequency_response=offered_kilowatts_in_frequency_response,
                         max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                         min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                        frequency_response_price_in_pounds_per_kilowatt_hour=
-                        frequency_response_price_in_pounds_per_kilowatt_hour)
+                        frequency_response_price_in_euros_per_kilowatt_hour=
+                        frequency_response_price_in_euros_per_kilowatt_hour)
 
 # STEP 5: setup the energy system
 energy_system = energy_system.EnergySystem(storage_assets=storage_assets,
@@ -226,7 +227,7 @@ for non_dispatchable_asset in range(len(non_distpachable_assets)):
     active_power_demand_base_in_kilowatts += non_distpachable_assets[non_dispatchable_asset].active_power_in_kilowatts
 
 revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
-print('Revenue in pounds:', revenue)
+print('Revenue in euros:', revenue)
 
 plot_demand_base_and_total_imported_power(simulation_time_series_resolution_in_hours=
                                           simulation_time_series_resolution_in_hours,

@@ -113,20 +113,20 @@ def get_building_case_original_results(is_winter: bool):
     market_time_interval_in_hours = energy_management_system_time_series_hour_resolution
     # market and EMS have same length
     # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
-    prices_export_in_pounds_per_kilowatt_hour = 0.04  # money received of net exports
-    peak_period_import_prices_in_pounds_per_kilowatt_hour = 0.07
+    prices_export_in_euros_per_kilowatt_hour = 0.04  # money received of net exports
+    peak_period_import_prices_in_euros_per_kilowatt_hour = 0.07
     peak_period_hours_per_day = 7
-    valley_period_import_prices_in_pounds_per_kilowatt_hour = 0.15
+    valley_period_import_prices_in_euros_per_kilowatt_hour = 0.15
     valley_period_hours_per_day = 17
 
-    demand_charge_in_pounds_per_kilowatt = 0.10  # for the maximum power import over the day
+    demand_charge_in_euros_per_kilowatt = 0.10  # for the maximum power import over the day
     max_import_kilowatts = 500  # maximum import power
     max_export_kilowatts = -500  # maximum export power
 
     offered_kilowatts_in_frequency_response = 0
     max_frequency_response_state_of_charge = 0.6
     min_frequency_response_state_of_charge = 0.4
-    frequency_response_price_in_pounds_per_kilowatt_hour = 0.005
+    frequency_response_price_in_euros_per_kilowatt_hour = 0.005
     #######################################
     ### STEP 2: setup the network
     #######################################
@@ -199,19 +199,19 @@ def get_building_case_original_results(is_winter: bool):
     bus_id_market = bus_1
     market = Markets.Market(network_bus_id=bus_id_market,
                             market_time_series_minute_resolution=market_time_interval_in_hours,
-                            export_prices_in_pounds_per_kilowatt_hour=prices_export_in_pounds_per_kilowatt_hour,
-                            peak_period_import_prices_in_pounds_per_kilowatt_hour=peak_period_import_prices_in_pounds_per_kilowatt_hour,
+                            export_prices_in_euros_per_kilowatt_hour=prices_export_in_euros_per_kilowatt_hour,
+                            peak_period_import_prices_in_euros_per_kilowatt_hour=peak_period_import_prices_in_euros_per_kilowatt_hour,
                             peak_period_hours_per_day=peak_period_hours_per_day,
-                            valley_period_import_prices_in_pounds_per_kilowatt_hour=valley_period_import_prices_in_pounds_per_kilowatt_hour,
+                            valley_period_import_prices_in_euros_per_kilowatt_hour=valley_period_import_prices_in_euros_per_kilowatt_hour,
                             valley_period_hours_per_day=valley_period_hours_per_day,
-                            max_demand_charge_in_pounds_per_kWh=demand_charge_in_pounds_per_kilowatt,
+                            max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
                             max_import_kilowatts=max_import_kilowatts,
                             max_export_kilowatts=max_export_kilowatts,
                             offered_kW_in_frequency_response=offered_kilowatts_in_frequency_response,
                             max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
                             min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                            frequency_response_price_in_pounds_per_kilowatt_hour=
-                            frequency_response_price_in_pounds_per_kilowatt_hour)
+                            frequency_response_price_in_euros_per_kilowatt_hour=
+                            frequency_response_price_in_euros_per_kilowatt_hour)
 
     #######################################
     # STEP 5: setup the energy system

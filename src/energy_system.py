@@ -196,16 +196,16 @@ class EnergySystem:
             number_of_buildings=number_of_buildings)
 
         # STEP 3: set up objective
-        max_demand_charge_in_pounds = \
-            self.market.max_demand_charge_in_pounds_per_kWh * max_active_power_demand_in_kilowatts
+        max_demand_charge_in_euros = \
+            self.market.max_demand_charge_in_euros_per_kWh * max_active_power_demand_in_kilowatts
 
-        import_and_export_cost_in_pounds = sum(
-            self.market.import_prices_in_pounds_per_kWh[t] * active_power_imports_in_kilowatts[t]
-            - self.market.export_price_time_series_in_pounds_per_kWh[t]  # Negative as it is a profit
+        import_and_export_cost_in_euros = sum(
+            self.market.import_prices_in_euros_per_kWh[t] * active_power_imports_in_kilowatts[t]
+            - self.market.export_price_time_series_in_euros_per_kWh[t]  # Negative as it is a profit
             * active_power_exports_in_kilowatts[t]
             for t in range(self.number_of_energy_management_system_time_intervals_per_day))
 
-        expression = max_demand_charge_in_pounds + import_and_export_cost_in_pounds
+        expression = max_demand_charge_in_euros + import_and_export_cost_in_euros
         problem.set_objective(direction='min', expression=expression)
 
         # STEP 4: solve the optimisation
@@ -636,7 +636,7 @@ class EnergySystem:
                                    * P_max_demand
                                    + sum(sum(self.dt_ems
                                              * self.storage_assets[
-                                                 i].battery_degradation_rate_in_pounds_per_kilowatt_hour
+                                                 i].battery_degradation_rate_in_euros_per_kilowatt_hour
                                              * (P_ES_ch[t, i] + P_ES_dis[t, i]) \
                                              for i in range(N_ES))
                                          + self.dt_ems
@@ -1035,15 +1035,15 @@ class EnergySystem:
         # coeff for objective terminal soft constraint
         terminal_const = 1e3
         prices_import = pic.new_param('prices_import',
-                                      self.market.import_prices_in_pounds_per_kWh)
+                                      self.market.import_prices_in_euros_per_kWh)
         prices_export = pic.new_param('prices_export',
-                                      self.market.export_price_time_series_in_pounds_per_kWh)
+                                      self.market.export_price_time_series_in_euros_per_kWh)
 
-        prob.set_objective('min', self.market.max_demand_charge_in_pounds_per_kWh * \
+        prob.set_objective('min', self.market.max_demand_charge_in_euros_per_kWh * \
                            (P_max_demand + P_max_demand_pre_t0) +
                            sum(sum(
                                self.energy_management_system_time_series_resolution_in_hours * self.storage_assets[i]. \
-                                   battery_degradation_rate_in_pounds_per_kilowatt_hour * (P_ES_ch[t, i] +
+                                   battery_degradation_rate_in_euros_per_kilowatt_hour * (P_ES_ch[t, i] +
                                                                                            P_ES_dis[t, i]) \
                                for i in range(N_ES)) \
                                + self.energy_management_system_time_series_resolution_in_hours * prices_import[t0 + t] *
