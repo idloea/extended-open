@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from src import assets, markets, energy_system
 from src.configuration import load_case
@@ -6,7 +8,8 @@ from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files
 import pandapower as pp
 
-case_data = load_case(case_file='002.yaml')
+yaml_file = sys.argv[1]
+case_data = load_case(case_file=yaml_file)
 data_path = case_data["data_path"]
 
 # STEP 0: Load Data
