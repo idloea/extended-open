@@ -21,15 +21,15 @@ from abc import ABC, abstractmethod
 from src.time_intervals import get_number_of_time_intervals_per_day
 
 
+
+
+
 class Market(ABC):
     def __init__(self,
                  network_bus_id: int,
-                 market_time_series_minute_resolution: float,
+                 market_time_series_resolution_in_minutes: float,
                  export_prices_in_euros_per_kilowatt_hour: float,
-                 peak_period_import_prices_in_euros_per_kilowatt_hour: float,
-                 peak_period_hours_per_day: int,
-                 valley_period_import_prices_in_euros_per_kilowatt_hour: float,
-                 valley_period_hours_per_day: int,
+                 import_periods: List[dict],
                  max_demand_charge_in_euros_per_kWh: float,
                  max_import_kilowatts: float,
                  max_export_kilowatts: float,
@@ -39,26 +39,22 @@ class Market(ABC):
                  frequency_response_price_in_euros_per_kilowatt_hour: float):
 
         self.network_bus_id = network_bus_id
-        self.market_time_series_minute_resolution = market_time_series_minute_resolution
-        self.number_of_market_time_intervals = \
-            get_number_of_time_intervals_per_day(self.market_time_series_minute_resolution)
-        self.number_of_energy_management_system_time_intervals_per_day = self.number_of_market_time_intervals
+        self.market_time_series_resolution_in_minutes = market_time_series_resolution_in_minutes
+        self.number_of_market_time_intervals_per_day = \
+            get_number_of_time_intervals_per_day(self.market_time_series_resolution_in_minutes)
+        self.number_of_energy_management_system_time_intervals_per_day = self.number_of_market_time_intervals_per_day
 
         self.export_prices_in_euros_per_kilowatt_hour = export_prices_in_euros_per_kilowatt_hour
         self.export_price_time_series_in_euros_per_kWh = self._get_export_prices_for_each_market_interval()
 
-        self.peak_period_import_prices = peak_period_import_prices_in_euros_per_kilowatt_hour
-        self.peak_period_hours_per_day = peak_period_hours_per_day
-        self.valley_period_import_prices = valley_period_import_prices_in_euros_per_kilowatt_hour
-        self.valley_period_hours_per_day = valley_period_hours_per_day
+        self.import_periods = import_periods
+
         self.max_demand_charge_in_euros_per_kWh = max_demand_charge_in_euros_per_kWh
 
-        self.peak_import_prices_in_euros_per_kWh = self._get_peak_period_import_prices()
-        self.valley_import_prices_in_euros_per_kWh = self._get_valley_period_import_prices()
-        self.import_prices_in_euros_per_kWh = self._get_prices_in_euros_per_kilowatts()
+        self.import_prices_in_euros_per_kilowatt_hour = self._get_prices_in_euros_per_kilowatts()
 
-        self.max_import_kilowatts = max_import_kilowatts * np.ones(self.number_of_market_time_intervals)
-        self.max_export_kilowatts = max_export_kilowatts * np.ones(self.number_of_market_time_intervals)
+        self.max_import_kilowatts = max_import_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
+        self.max_export_kilowatts = max_export_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
 
         self.frequency_response_price_in_euros_per_kilowatt_hour = offered_kW_in_frequency_response
         self.frequency_response_active = self._is_frequency_response_active()
@@ -72,7 +68,7 @@ class Market(ABC):
         Calculate revenue according to simulation results
         """
         self.average_imported_kilowatts = self._get_average_imported_kilowatts(
-            total_import_kW=total_import_kW, simulation_time_interval_in_minutes=simulation_time_interval_in_minutes)
+            total_imports_in_kilowatts=total_import_kW, simulation_time_interval_in_minutes=simulation_time_interval_in_minutes)
 
         imported_kilowatts = self._get_imported_kilowatts_from_the_market()
         exported_kilowatts = self._get_exported_kilowatts_to_the_market()
@@ -91,7 +87,7 @@ class Market(ABC):
         return float(revenue_without_frequency_response + total_frequency_response_revenue)
 
     def _get_export_prices_for_each_market_interval(self) -> np.array:
-        return self.export_prices_in_euros_per_kilowatt_hour * np.ones(self.number_of_market_time_intervals)
+        return self.export_prices_in_euros_per_kilowatt_hour * np.ones(self.number_of_market_time_intervals_per_day)
 
     def _get_imported_kilowatts_from_the_market(self) -> np.array:
         imported_kilowatts = self.average_imported_kilowatts
@@ -101,20 +97,22 @@ class Market(ABC):
         exported_kilowatts = -self.average_imported_kilowatts
         return np.maximum(exported_kilowatts, 0)
 
-    def _get_average_imported_kilowatts(self, total_import_kW: float, simulation_time_interval_in_minutes: float):
-        average_imported_kilowatts = np.zeros(self.number_of_market_time_intervals)
-        market_time_intervals_range = range(self.number_of_market_time_intervals)
+    def _get_average_imported_kilowatts(self, total_imports_in_kilowatts: float,
+                                        simulation_time_interval_in_minutes: float) -> np.array:
+        average_imported_kilowatts = np.zeros(self.number_of_market_time_intervals_per_day)
+        market_time_intervals_range = range(self.number_of_market_time_intervals_per_day)
         for market_time_interval in market_time_intervals_range:
-            time_indexes = (market_time_interval * self.market_time_series_minute_resolution / simulation_time_interval_in_minutes
-                            + np.arange(0, self.market_time_series_minute_resolution /
-                                        simulation_time_interval_in_minutes)).astype(int)
-            average_imported_kilowatts[market_time_interval] = np.mean(total_import_kW[time_indexes])
+            time_indexes = (
+                    market_time_interval * self.market_time_series_resolution_in_minutes /
+                    simulation_time_interval_in_minutes + np.arange(0, self.market_time_series_resolution_in_minutes /
+                                                                    simulation_time_interval_in_minutes)).astype(int)
+            average_imported_kilowatts[market_time_interval] = np.mean(total_imports_in_kilowatts[time_indexes])
         return average_imported_kilowatts
 
     def _get_revenue_between_import_and_export_kilowatts(self, imported_kilowatts: np.array,
-                                                         exported_kilowatts) -> List:
+                                                         exported_kilowatts: np.array) -> List:
         revenues = []
-        for time_interval in range(self.number_of_market_time_intervals):
+        for time_interval in range(self.number_of_market_time_intervals_per_day):
             import_revenue = self._get_import_revenue(time_interval=time_interval,
                                                       imported_kilowatts=imported_kilowatts)
             export_revenue = self._get_export_revenue(time_interval=time_interval,
@@ -128,18 +126,18 @@ class Market(ABC):
             total_frequency_response_revenue = self.frequency_response_price_in_euros_per_kWh * \
                                                self.frequency_response_price_in_euros_per_kilowatt_hour * \
                                                np.count_nonzero(self.frequency_response_active) * \
-                                               self.market_time_series_minute_resolution
+                                               self.market_time_series_resolution_in_minutes
         else:
             total_frequency_response_revenue = 0
         return total_frequency_response_revenue
 
     def _get_import_revenue(self, time_interval: int, imported_kilowatts: np.array):
-        return self.import_prices_in_euros_per_kWh[time_interval] * imported_kilowatts[time_interval] * \
-               self.market_time_series_minute_resolution
+        return self.import_prices_in_euros_per_kilowatt_hour[time_interval] * imported_kilowatts[time_interval] * \
+               self.market_time_series_resolution_in_minutes
 
     def _get_export_revenue(self, time_interval: int, exported_kilowatts: np.array):
         return self.export_price_time_series_in_euros_per_kWh[time_interval] * exported_kilowatts[time_interval] * \
-               self.market_time_series_minute_resolution
+               self.market_time_series_resolution_in_minutes
 
     def _is_frequency_response_active(self):
         if self.frequency_response_price_in_euros_per_kilowatt_hour > 0:
@@ -148,15 +146,22 @@ class Market(ABC):
             frequency_response_active = False
         return frequency_response_active
 
-    def _get_peak_period_import_prices(self):
-        peak_period_percentage_per_day = self.peak_period_hours_per_day / 24
-        return self.peak_period_import_prices * np.ones(int(self.number_of_market_time_intervals *
-                                                            peak_period_percentage_per_day))
-
-    def _get_valley_period_import_prices(self):
-        valley_period_percentage_per_day = self.valley_period_hours_per_day / 24
-        return self.valley_period_import_prices * np.ones(int(self.number_of_market_time_intervals *
-                                                              valley_period_percentage_per_day))
-
     def _get_prices_in_euros_per_kilowatts(self):
-        return np.hstack((self.peak_import_prices_in_euros_per_kWh, self.valley_import_prices_in_euros_per_kWh))
+        import_costs_in_euros_per_day_and_period = self.get_import_costs_in_euros_per_day_and_period()
+        import_costs_in_euros_per_day_values_list = []
+        for import_costs_in_euros_per_day in import_costs_in_euros_per_day_and_period:
+            import_costs_in_euros_per_day_values = import_costs_in_euros_per_day.values()
+            import_costs_in_euros_per_day_values_list.append(import_costs_in_euros_per_day_values)
+        return np.hstack((import_costs_in_euros_per_day_values_list[0],
+                          import_costs_in_euros_per_day_values_list[1],
+                          import_costs_in_euros_per_day_values_list[2]))
+
+    def get_import_costs_in_euros_per_day_and_period(self):
+        import_periods = self.import_periods
+        for import_period in import_periods:
+            period_key = list(import_period.keys())[0]
+            period_values = list(import_period.values())[0]
+            period_duration_in_hours = period_values[0]
+            period_price_in_euros_per_kilowatt_hour = period_values[1]
+            period_cost_in_euros_per_day = period_duration_in_hours * period_price_in_euros_per_kilowatt_hour
+        return {period_key: period_cost_in_euros_per_day}

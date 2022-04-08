@@ -6,6 +6,7 @@ from src.assets import NonDispatchableAsset, StorageAsset, BuildingAsset
 from src.energy_system import EnergySystem, get_temperature_constraint_for_no_initial_time
 from src.markets import Market
 from src.network_3_phase_pf import ThreePhaseNetwork
+from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 def _create_a_non_dispatchable_test_asset(active_power_in_kilowatts: np.ndarray,
@@ -61,10 +62,22 @@ def _create_a_test_market() -> Market:
     network_bus_id = 1
     market_time_series_minute_resolution = 0.1
     export_prices_in_euros_per_kilowatt_hour = 5.5
-    peak_period_import_prices_in_euros_per_kilowatt_hour = 10.5
-    peak_period_hours_per_day = 20
-    valley_period_import_prices_in_euros_per_kilowatt_hour = 3.5
-    valley_period_hours_per_day = 4
+    period_one_name = 'peak'
+    period_one_hours = 20
+    period_one_euros_per_kilowatt_hour = 10.5
+    period_two_name = 'valley'
+    period_two_hours = 4
+    period_two_euros_per_kilowatt_hour = 3.5
+
+    period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
+                                                                       period_duration_in_hours=period_one_hours,
+                                                                       period_price_in_euros_per_kilowatt_hour=
+                                                                       period_one_euros_per_kilowatt_hour)
+    period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
+                                                                       period_duration_in_hours=period_two_hours,
+                                                                       period_price_in_euros_per_kilowatt_hour=
+                                                                       period_two_euros_per_kilowatt_hour)
+    import_periods = [period_one, period_two]
     max_demand_charge_in_euros_per_kWh = 20.5
     max_import_kilowatts = 500
     max_export_kilowatts = 500
@@ -73,14 +86,9 @@ def _create_a_test_market() -> Market:
     min_frequency_response_state_of_charge = 0
     frequency_response_price_in_euros_per_kilowatt_hour = 7.5
     market = Market(network_bus_id=network_bus_id,
-                    market_time_series_minute_resolution=market_time_series_minute_resolution,
+                    market_time_series_resolution_in_minutes=market_time_series_minute_resolution,
                     export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
-                    peak_period_import_prices_in_euros_per_kilowatt_hour=
-                    peak_period_import_prices_in_euros_per_kilowatt_hour,
-                    peak_period_hours_per_day=peak_period_hours_per_day,
-                    valley_period_import_prices_in_euros_per_kilowatt_hour=
-                    valley_period_import_prices_in_euros_per_kilowatt_hour,
-                    valley_period_hours_per_day=valley_period_hours_per_day,
+                    import_periods=import_periods,
                     max_demand_charge_in_euros_per_kWh=max_demand_charge_in_euros_per_kWh,
                     max_import_kilowatts=max_import_kilowatts,
                     max_export_kilowatts=max_export_kilowatts,

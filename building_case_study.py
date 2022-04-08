@@ -179,7 +179,7 @@ building_assets.append(building)
 # STEP 4: setup the market
 bus_id_market = bus_1
 market = markets.Market(network_bus_id=bus_id_market,
-                        market_time_series_minute_resolution=market_time_interval_in_hours,
+                        market_time_series_resolution_in_minutes=market_time_interval_in_hours,
                         export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
                         peak_period_import_prices_in_euros_per_kilowatt_hour=
                         peak_period_import_prices_in_euros_per_kilowatt_hour,

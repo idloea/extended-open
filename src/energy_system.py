@@ -200,7 +200,7 @@ class EnergySystem:
             self.market.max_demand_charge_in_euros_per_kWh * max_active_power_demand_in_kilowatts
 
         import_and_export_cost_in_euros = sum(
-            self.market.import_prices_in_euros_per_kWh[t] * active_power_imports_in_kilowatts[t]
+            self.market.import_prices_in_euros_per_kilowatt_hour[t] * active_power_imports_in_kilowatts[t]
             - self.market.export_price_time_series_in_euros_per_kWh[t]  # Negative as it is a profit
             * active_power_exports_in_kilowatts[t]
             for t in range(self.number_of_energy_management_system_time_intervals_per_day))
@@ -1035,7 +1035,7 @@ class EnergySystem:
         # coeff for objective terminal soft constraint
         terminal_const = 1e3
         prices_import = pic.new_param('prices_import',
-                                      self.market.import_prices_in_euros_per_kWh)
+                                      self.market.import_prices_in_euros_per_kilowatt_hour)
         prices_export = pic.new_param('prices_export',
                                       self.market.export_price_time_series_in_euros_per_kWh)
 

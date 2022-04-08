@@ -198,7 +198,7 @@ def get_building_case_original_results(is_winter: bool):
     #######################################
     bus_id_market = bus_1
     market = Markets.Market(network_bus_id=bus_id_market,
-                            market_time_series_minute_resolution=market_time_interval_in_hours,
+                            market_time_series_resolution_in_minutes=market_time_interval_in_hours,
                             export_prices_in_euros_per_kilowatt_hour=prices_export_in_euros_per_kilowatt_hour,
                             peak_period_import_prices_in_euros_per_kilowatt_hour=peak_period_import_prices_in_euros_per_kilowatt_hour,
                             peak_period_hours_per_day=peak_period_hours_per_day,
