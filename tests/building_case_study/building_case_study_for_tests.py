@@ -17,6 +17,7 @@ import src.energy_system as EnergySystem
 from src.electric_vehicles import ElectricVehicleFleet
 from src.folder_management import create_results_folder
 from src.read import read_open_csv_files
+from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 ### Case Study: Building HVAC flexibility
@@ -114,10 +115,23 @@ def get_building_case_original_results(is_winter: bool):
     # market and EMS have same length
     # TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
     prices_export_in_euros_per_kilowatt_hour = 0.04  # money received of net exports
-    peak_period_import_prices_in_euros_per_kilowatt_hour = 0.07
-    peak_period_hours_per_day = 7
-    valley_period_import_prices_in_euros_per_kilowatt_hour = 0.15
-    valley_period_hours_per_day = 17
+
+    period_one_name = 'peak'
+    period_one_hours = 7
+    period_one_euros_per_kilowatt_hour = 0.07
+    period_two_name = 'valley'
+    period_two_hours = 17
+    period_two_euros_per_kilowatt_hour = 0.15
+
+    period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
+                                                                       period_duration_in_hours=period_one_hours,
+                                                                       period_price_in_euros_per_kilowatt_hour=
+                                                                       period_one_euros_per_kilowatt_hour)
+    period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
+                                                                       period_duration_in_hours=period_two_hours,
+                                                                       period_price_in_euros_per_kilowatt_hour=
+                                                                       period_two_euros_per_kilowatt_hour)
+    import_periods = [period_one, period_two]
 
     demand_charge_in_euros_per_kilowatt = 0.10  # for the maximum power import over the day
     max_import_kilowatts = 500  # maximum import power
@@ -200,10 +214,7 @@ def get_building_case_original_results(is_winter: bool):
     market = Markets.Market(network_bus_id=bus_id_market,
                             market_time_series_resolution_in_minutes=market_time_interval_in_hours,
                             export_prices_in_euros_per_kilowatt_hour=prices_export_in_euros_per_kilowatt_hour,
-                            peak_period_import_prices_in_euros_per_kilowatt_hour=peak_period_import_prices_in_euros_per_kilowatt_hour,
-                            peak_period_hours_per_day=peak_period_hours_per_day,
-                            valley_period_import_prices_in_euros_per_kilowatt_hour=valley_period_import_prices_in_euros_per_kilowatt_hour,
-                            valley_period_hours_per_day=valley_period_hours_per_day,
+                            import_periods=import_periods,
                             max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
                             max_import_kilowatts=max_import_kilowatts,
                             max_export_kilowatts=max_export_kilowatts,

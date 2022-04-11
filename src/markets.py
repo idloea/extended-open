@@ -51,7 +51,7 @@ class Market(ABC):
 
         self.max_demand_charge_in_euros_per_kWh = max_demand_charge_in_euros_per_kWh
 
-        self.import_prices_in_euros_per_kilowatt_hour = self._get_prices_in_euros_per_kilowatts()
+        self.import_prices_in_euros_per_kilowatt_hour = self._get_import_prices_in_euros_per_kilowatts()
 
         self.max_import_kilowatts = max_import_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
         self.max_export_kilowatts = max_export_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
@@ -146,22 +146,23 @@ class Market(ABC):
             frequency_response_active = False
         return frequency_response_active
 
-    def _get_prices_in_euros_per_kilowatts(self):
+    def _get_import_prices_in_euros_per_kilowatts(self) -> np.ndarray:
         import_costs_in_euros_per_day_and_period = self.get_import_costs_in_euros_per_day_and_period()
-        import_costs_in_euros_per_day_values_list = []
-        for import_costs_in_euros_per_day in import_costs_in_euros_per_day_and_period:
-            import_costs_in_euros_per_day_values = import_costs_in_euros_per_day.values()
-            import_costs_in_euros_per_day_values_list.append(import_costs_in_euros_per_day_values)
-        return np.hstack((import_costs_in_euros_per_day_values_list[0],
-                          import_costs_in_euros_per_day_values_list[1],
-                          import_costs_in_euros_per_day_values_list[2]))
+        return np.hstack(import_costs_in_euros_per_day_and_period)
 
-    def get_import_costs_in_euros_per_day_and_period(self):
+    def get_import_costs_in_euros_per_day_and_period(self) -> List:
         import_periods = self.import_periods
+        import_period_cost_in_euros_per_day_list = []
         for import_period in import_periods:
-            period_key = list(import_period.keys())[0]
-            period_values = list(import_period.values())[0]
-            period_duration_in_hours = period_values[0]
-            period_price_in_euros_per_kilowatt_hour = period_values[1]
-            period_cost_in_euros_per_day = period_duration_in_hours * period_price_in_euros_per_kilowatt_hour
-        return {period_key: period_cost_in_euros_per_day}
+            import_period_values = list(import_period.values())[0]
+            import_period_duration_in_hours = import_period_values[0]
+            import_period_percentage_per_day = import_period_duration_in_hours / 24
+            number_of_market_intervals_for_import_period = \
+                import_period_percentage_per_day * self.number_of_market_time_intervals_per_day
+            period_price_in_euros_per_kilowatt_hour = import_period_values[1]
+            period_price_in_euros_per_kilowatt_hour_array = \
+                period_price_in_euros_per_kilowatt_hour * np.ones(int(number_of_market_intervals_for_import_period))
+            period_cost_in_euros_per_day = \
+                import_period_duration_in_hours * period_price_in_euros_per_kilowatt_hour_array
+            import_period_cost_in_euros_per_day_list.append(period_cost_in_euros_per_day)
+        return import_period_cost_in_euros_per_day_list

@@ -73,31 +73,13 @@ class TestMarkets(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_get_period_cost_in_euros_per_kilowatt_per_day(self):
-        period_name = 'peak'
-        period_duration_in_hours = 10
-        period_price_in_euros_per_kilowatt_hour = 0.3
-
-        period = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_name,
-                                                                       period_duration_in_hours=
-                                                                       period_duration_in_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_price_in_euros_per_kilowatt_hour)
-        import_periods = [period]
-        test_market = create_market(import_periods=import_periods)
-        result = test_market.get_import_costs_in_euros_per_day_and_period()
-        expected_result = {'peak': 3.0}
-        self.assertEqual(expected_result, result)
-
-    def test_xyz(self):
         period_one_name = 'peak'
-        period_one_hours = 7
-        period_one_euros_per_kilowatt_hour = 0.3
+        period_one_hours = 14
+        period_one_euros_per_kilowatt_hour = 1.0
         period_two_name = 'valley'
-        period_two_hours = 7
-        period_two_euros_per_kilowatt_hour = 0.1
-        period_three_name = 'another'
-        period_three_hours = 10
-        period_three_euros_per_kilowatt_hour = 0.2
+        period_two_hours = 10
+        period_two_euros_per_kilowatt_hour = 2.0
+
         period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
                                                                            period_duration_in_hours=period_one_hours,
                                                                            period_price_in_euros_per_kilowatt_hour=
@@ -106,20 +88,10 @@ class TestMarkets(unittest.TestCase):
                                                                            period_duration_in_hours=period_two_hours,
                                                                            period_price_in_euros_per_kilowatt_hour=
                                                                            period_two_euros_per_kilowatt_hour)
-        period_three = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_three_name,
-                                                                             period_duration_in_hours=
-                                                                             period_three_hours,
-                                                                             period_price_in_euros_per_kilowatt_hour=
-                                                                             period_three_euros_per_kilowatt_hour)
-        import_periods = [period_one, period_two, period_three]
-
+        import_periods = [period_one, period_two]
         test_market = create_market(import_periods=import_periods)
-
-        period_one_import_costs_in_euro_per_day = {'peak', 2.1}
-        period_two_import_costs_in_euro_per_day = {'valley', 0.7}
-        period_three_import_costs_in_euro_per_day = {'another_period', 2}
-        expected_result = [period_one_import_costs_in_euro_per_day,
-                           period_two_import_costs_in_euro_per_day,
-                           period_three_import_costs_in_euro_per_day]
-        result = get_costs_in_euros_per_day_and_period()
+        result = test_market.get_import_costs_in_euros_per_day_and_period()
+        first_array = np.ones(shape=14) * 14
+        second_array = np.ones(shape=10) * 20
+        expected_result = [first_array, second_array]
         np.testing.assert_equal(expected_result, result)
