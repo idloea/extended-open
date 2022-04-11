@@ -17,7 +17,6 @@ import src.energy_system as EnergySystem
 from src.electric_vehicles import ElectricVehicleFleet
 from src.folder_management import create_results_folder
 from src.read import read_open_csv_files
-from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 ### Case Study: Building HVAC flexibility
@@ -25,9 +24,9 @@ from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_
 def get_building_case_original_results(is_winter: bool):
     results_path = 'Results/Building_Case_Study/'
     create_results_folder(results_path=results_path)
-    ### STEP 0: Load Data
+    ### STEP 0: Load data
 
-    building_data_path = "Data/Building/"
+    building_data_path = "data/Building/"
 
     winter_photovoltaic_data_file = "PVpu_1min_2014JAN.csv"
     winter_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(path=building_data_path,
@@ -123,15 +122,8 @@ def get_building_case_original_results(is_winter: bool):
     period_two_hours = 17
     period_two_euros_per_kilowatt_hour = 0.15
 
-    period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
-                                                                       period_duration_in_hours=period_one_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_one_euros_per_kilowatt_hour)
-    period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
-                                                                       period_duration_in_hours=period_two_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_two_euros_per_kilowatt_hour)
-    import_periods = [period_one, period_two]
+    import_periods = [{period_one_name: [period_one_hours, period_one_euros_per_kilowatt_hour]},
+                      {period_two_name: [period_two_hours, period_two_euros_per_kilowatt_hour]}]
 
     demand_charge_in_euros_per_kilowatt = 0.10  # for the maximum power import over the day
     max_import_kilowatts = 500  # maximum import power

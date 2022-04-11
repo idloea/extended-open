@@ -6,7 +6,6 @@ from src.assets import NonDispatchableAsset, StorageAsset, BuildingAsset
 from src.energy_system import EnergySystem, get_temperature_constraint_for_no_initial_time
 from src.markets import Market
 from src.network_3_phase_pf import ThreePhaseNetwork
-from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 def _create_a_non_dispatchable_test_asset(active_power_in_kilowatts: np.ndarray,
@@ -68,16 +67,9 @@ def _create_a_test_market() -> Market:
     period_two_name = 'valley'
     period_two_hours = 4
     period_two_euros_per_kilowatt_hour = 3.5
+    import_periods = [{period_one_name: [period_one_hours, period_one_euros_per_kilowatt_hour]},
+                      {period_two_name: [period_two_hours, period_two_euros_per_kilowatt_hour]}]
 
-    period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
-                                                                       period_duration_in_hours=period_one_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_one_euros_per_kilowatt_hour)
-    period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
-                                                                       period_duration_in_hours=period_two_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_two_euros_per_kilowatt_hour)
-    import_periods = [period_one, period_two]
     max_demand_charge_in_euros_per_kWh = 20.5
     max_import_kilowatts = 500
     max_export_kilowatts = 500

@@ -16,7 +16,7 @@ import time
 
 feeder = '13BusOxEmf'
 
-ntwxs = os.path.join(path,'Data','Networks')
+ntwxs = os.path.join(path,'data','Networks')
 dir0 = os.path.join(ntwxs,feeder+'_dss')
 sn0 = os.path.join(dir0,feeder)
 

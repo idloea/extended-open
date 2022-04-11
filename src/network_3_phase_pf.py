@@ -1149,7 +1149,7 @@ class ThreePhaseNetwork:
         # os.path.dirname(os.path.dirname(path))
         path = os.path.dirname(os.path.abspath(__file__))
         path = os.path.dirname(os.path.dirname(__file__))
-        self.feederLoc = os.path.join(path, 'Data', 'Networks',
+        self.feederLoc = os.path.join(path, 'data', 'Networks',
                                       ntwkName + '_dss', ntwkName)
 
         # LOAD dataframes and correct formatting V V V V

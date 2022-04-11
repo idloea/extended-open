@@ -1,6 +1,5 @@
 import unittest
-from src.time_intervals import get_number_of_time_intervals_per_day, \
-    get_period_with_name_hour_and_euros_per_kilowatt_hour, get_period_hours, get_period_cost_per_hour
+from src.time_intervals import get_number_of_time_intervals_per_day, get_period_hours, get_period_cost_per_hour
 
 
 class TimeIntervals(unittest.TestCase):
@@ -15,11 +14,7 @@ class TimeIntervals(unittest.TestCase):
         period_name = 'peak'
         period_duration_in_hours = 7
         period_price_in_euros_per_kilowatt_hour = 0.3
-        period = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_name,
-                                                                       period_duration_in_hours=
-                                                                       period_duration_in_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_price_in_euros_per_kilowatt_hour)
+        period = {period_name: [period_duration_in_hours, period_price_in_euros_per_kilowatt_hour]}
         expected_result = 7
         result = get_period_hours(period=period)
         self.assertEqual(expected_result, result)
@@ -28,11 +23,7 @@ class TimeIntervals(unittest.TestCase):
         period_name = 'peak'
         period_duration_in_hours = 7
         period_price_in_euros_per_kilowatt_hour = 0.3
-        period = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_name,
-                                                                       period_duration_in_hours=
-                                                                       period_duration_in_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_price_in_euros_per_kilowatt_hour)
+        period = {period_name: [period_duration_in_hours, period_price_in_euros_per_kilowatt_hour]}
         expected_result = 0.3
         result = get_period_cost_per_hour(period=period)
         self.assertEqual(expected_result, result)

@@ -1,7 +1,7 @@
 import os
 import yaml
 
-case_path = 'Data/cases'
+case_path = 'data/cases'
 
 
 def load_case(case_file: str):

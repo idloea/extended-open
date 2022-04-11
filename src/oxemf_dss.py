@@ -35,14 +35,14 @@ from miscDssFncs import get_ckt, tp2mat, tp_2_ar, get_sYsD
 def dssConvert(feeder,dssName):
     path = os.path.dirname(os.path.dirname(sys.argv[0]))
     if feeder[0]!='n':
-        ntwxs = os.path.join(path,'Data','networks')
+        ntwxs = os.path.join(path,'data','networks')
         fn_ckt = os.path.join(ntwxs,'opendssNetworks',feeder,dssName)
         dir0 = os.path.join(ntwxs,feeder+'_dss')
         sn0 = os.path.join(dir0,feeder)
     else:
         ntwk_no = feeder.split('_')[0][1:]
         fdr_no = feeder.split('_')[1]
-        ntwxs = os.path.join(path,'Data','networks')
+        ntwxs = os.path.join(path,'data','networks')
         fn_ckt = os.path.join(ntwxs,'opendssNetworks','network_'+ntwk_no,'Feeder_'+fdr_no,dssName)
         dir0 = os.path.join(ntwxs,feeder+'_dss')
         sn0 = os.path.join(dir0,feeder)

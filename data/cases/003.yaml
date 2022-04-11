@@ -1,13 +1,13 @@
 # CASE:
-# United Kingdom winter case without flexibility
+# Spanish summer case without flexibility
 
-# Data
-data_path: "Data/Building/"
-photovoltaic_generation_data_file: "PVpu_1min_2014JAN.csv"
-electric_load_data_file: "Loads_1min_2014JAN.csv"
+# data
+data_path: "data/Building/"
+photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"  # TODO: change with Spanish PV generation
+electric_load_data_file: "Loads_1min_2013JUN.csv"
 
 # Winter/summer
-is_winter: True
+is_winter: False
 
 # Photovoltaic generation
 rated_photovoltaic_kilowatts: 400
@@ -36,11 +36,11 @@ chiller_coefficient_of_performance: 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
 building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 
-# Cost parameters (update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021)
-export_prices_in_euros_per_kilowatt_hour: 0.04  # money received of net exports
-peak_period_import_prices_in_euros_per_kilowatt_hour: 0.07
-valley_period_import_prices_in_euros_per_kilowatt_hour: 0.15
-demand_charge_in_euros_per_kilowatt: 0.10  # price per kW for the maximum demand
+# Cost parameters
+export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
+peak_period_import_prices_in_euros_per_kilowatt_hour: 0.083
+valley_period_import_prices_in_euros_per_kilowatt_hour: 0.18
+demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
 peak_period_hours_per_day: 7
 valley_period_hours_per_day: 17
 max_import_kilowatts: 500

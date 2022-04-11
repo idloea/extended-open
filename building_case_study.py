@@ -12,7 +12,7 @@ yaml_file = sys.argv[1]
 case_data = load_case(case_file=yaml_file)
 data_path = case_data["data_path"]
 
-# STEP 0: Load Data
+# STEP 0: Load data
 photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file"]
 photovoltaic_generation_in_per_unit = read_open_csv_files(path=data_path,
                                                           csv_file=photovoltaic_generation_data_file)
@@ -83,8 +83,12 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts = \
 
 market_time_interval_in_hours = energy_management_system_time_series_resolution_in_hours
 
-# TODO: update prices from https://www.ofgem.gov.uk/publications/feed-tariff-fit-tariff-table-1-april-2021
+
 export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
+import_periods = case_data["import_periods"]
+import_prices_in_euros_per_kilowatt_hour = []
+import_period_hours_per_day = []
+
 peak_period_import_prices_in_euros_per_kilowatt_hour = case_data["peak_period_import_prices_in_euros_per_kilowatt_hour"]
 peak_period_hours_per_day = case_data["peak_period_hours_per_day"]
 valley_period_import_prices_in_euros_per_kilowatt_hour = \

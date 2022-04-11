@@ -3,7 +3,6 @@ import numpy as np
 from typing import List
 
 from src.markets import Market
-from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 def create_market(import_periods: List[dict]) -> Market:
@@ -42,11 +41,7 @@ class TestMarkets(unittest.TestCase):
         period_price_in_euros_per_kilowatt_hour = 0.3
 
         expected_result = {'peak': [7, 0.3]}
-        result = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_name,
-                                                                       period_duration_in_hours=
-                                                                       period_duration_in_hours,
-                                                                       period_price_in_euros_per_kilowatt_hour=
-                                                                       period_price_in_euros_per_kilowatt_hour)
+        result = {period_name: [period_duration_in_hours, period_price_in_euros_per_kilowatt_hour]}
 
         self.assertEqual(expected_result, result)
 
@@ -57,16 +52,8 @@ class TestMarkets(unittest.TestCase):
         period_two_name = 'valley'
         period_two_hours = 10
         period_two_euros_per_kilowatt_hour = 2.0
-
-        period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
-                                                                           period_duration_in_hours=period_one_hours,
-                                                                           period_price_in_euros_per_kilowatt_hour=
-                                                                           period_one_euros_per_kilowatt_hour)
-        period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
-                                                                           period_duration_in_hours=period_two_hours,
-                                                                           period_price_in_euros_per_kilowatt_hour=
-                                                                           period_two_euros_per_kilowatt_hour)
-        import_periods = [period_one, period_two]
+        import_periods = [{period_one_name: [period_one_hours, period_one_euros_per_kilowatt_hour]},
+                          {period_two_name: [period_two_hours, period_two_euros_per_kilowatt_hour]}]
         test_market = create_market(import_periods=import_periods)
         result = test_market.get_import_costs_in_euros_per_day_and_period()
         first_array = np.ones(shape=14) * 1.0

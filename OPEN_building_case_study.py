@@ -43,7 +43,7 @@ if not os.path.isdir(path_string):
     os.makedirs(path_string)
 
 #######################################
-### STEP 0: Load Data
+### STEP 0: Load data
 #######################################
 
 choice = 0
@@ -54,14 +54,14 @@ if choice == '1':
 else:
     winterFlag = True
 
-PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
+PV_data_path = os.path.join("data/Building/", "PVpu_1min_2014JAN.csv")
 PVpu_raw_wtr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2014JAN.csv")
+Loads_data_path = os.path.join("data/Building/", "Loads_1min_2014JAN.csv")
 Loads_raw_wtr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
 
-PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
+PV_data_path = os.path.join("data/Building/", "PVpu_1min_2013JUN.csv")
 PVpu_raw_smr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2013JUN.csv")
+Loads_data_path = os.path.join("data/Building/", "Loads_1min_2013JUN.csv")
 Loads_raw_smr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
 
 PVtotal_smr = np.sum(PVpu_raw_smr, 1)
