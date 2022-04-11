@@ -162,7 +162,5 @@ class Market(ABC):
             period_price_in_euros_per_kilowatt_hour = import_period_values[1]
             period_price_in_euros_per_kilowatt_hour_array = \
                 period_price_in_euros_per_kilowatt_hour * np.ones(int(number_of_market_intervals_for_import_period))
-            period_cost_in_euros_per_day = \
-                import_period_duration_in_hours * period_price_in_euros_per_kilowatt_hour_array
-            import_period_cost_in_euros_per_day_list.append(period_cost_in_euros_per_day)
+            import_period_cost_in_euros_per_day_list.append(period_price_in_euros_per_kilowatt_hour_array)
         return import_period_cost_in_euros_per_day_list

@@ -72,7 +72,7 @@ class TestMarkets(unittest.TestCase):
         expected_result = [{'peak': [14, 0.3]}, {'valley': [10, 0.1]}]
         self.assertEqual(expected_result, result)
 
-    def test_get_period_cost_in_euros_per_kilowatt_per_day(self):
+    def test_get_import_costs_in_euros_per_day_and_period(self):
         period_one_name = 'peak'
         period_one_hours = 14
         period_one_euros_per_kilowatt_hour = 1.0
@@ -91,7 +91,7 @@ class TestMarkets(unittest.TestCase):
         import_periods = [period_one, period_two]
         test_market = create_market(import_periods=import_periods)
         result = test_market.get_import_costs_in_euros_per_day_and_period()
-        first_array = np.ones(shape=14) * 14
-        second_array = np.ones(shape=10) * 20
+        first_array = np.ones(shape=14) * 1.0
+        second_array = np.ones(shape=10) * 2.0
         expected_result = [first_array, second_array]
         np.testing.assert_equal(expected_result, result)
