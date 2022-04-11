@@ -11,11 +11,6 @@ def get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name: str, peri
     return {period_name: [period_duration_in_hours, period_price_in_euros_per_kilowatt_hour]}
 
 
-def get_daily_periods_with_name_hour_and_euros_per_kilowatt_hour(periods: List[dict]) -> List[dict]:
-    check_sum_of_daily_periods_in_hours_equals_twenty_four(periods=periods)
-    return periods
-
-
 def check_sum_of_daily_periods_in_hours_equals_twenty_four(periods: List[dict]):
     period_durations_in_hours = []
     for period in periods:

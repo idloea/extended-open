@@ -3,8 +3,7 @@ import numpy as np
 from typing import List
 
 from src.markets import Market
-from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour, \
-    get_daily_periods_with_name_hour_and_euros_per_kilowatt_hour
+from src.time_intervals import get_period_with_name_hour_and_euros_per_kilowatt_hour
 
 
 def create_market(import_periods: List[dict]) -> Market:
@@ -49,27 +48,6 @@ class TestMarkets(unittest.TestCase):
                                                                        period_price_in_euros_per_kilowatt_hour=
                                                                        period_price_in_euros_per_kilowatt_hour)
 
-        self.assertEqual(expected_result, result)
-
-    def test_get_daily_periods_with_name_hour_and_euros_per_kilowatt_hour(self):
-        period_one_name = 'peak'
-        period_one_hours = 14
-        period_one_euros_per_kilowatt_hour = 0.3
-        period_two_name = 'valley'
-        period_two_hours = 10
-        period_two_euros_per_kilowatt_hour = 0.1
-
-        period_one = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_one_name,
-                                                                           period_duration_in_hours=period_one_hours,
-                                                                           period_price_in_euros_per_kilowatt_hour=
-                                                                           period_one_euros_per_kilowatt_hour)
-        period_two = get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name=period_two_name,
-                                                                           period_duration_in_hours=period_two_hours,
-                                                                           period_price_in_euros_per_kilowatt_hour=
-                                                                           period_two_euros_per_kilowatt_hour)
-        periods = [period_one, period_two]
-        result = get_daily_periods_with_name_hour_and_euros_per_kilowatt_hour(periods=periods)
-        expected_result = [{'peak': [14, 0.3]}, {'valley': [10, 0.1]}]
         self.assertEqual(expected_result, result)
 
     def test_get_import_costs_in_euros_per_day_and_period(self):

@@ -1203,98 +1203,10 @@ class EnergySystem:
                 # store power flow results as a list of network objects
                 PF_network_res.append(network_t)
         print('*** MPC SIMULATION COMPLETE ***')
-        return {'PF_network_res': PF_network_res, \
-                'P_ES_ems': P_ES_ems, \
-                'P_import_ems': P_import_ems, \
-                'P_export_ems': P_export_ems, \
-                'P_demand_ems': P_demand_ems}
-
-    def simulate_network_3phPF_lean(self, ems_type='3ph'):
-        """
-        run the EMS in open loop and simulate a 3-phase AC network
-        """
-        #######################################
-        ### STEP 1: solve the optimisation
-        #######################################
-        t0 = 0
-        if ems_type == 'copper_plate':
-            # self.EMS_copper_plate()
-            output_ems = self.EMS_copper_plate_t0_c1deg(t0)
-        else:
-            # self.EMS_copper_plate()
-            output_ems = self.EMS_3ph_linear_t0(t0)
-
-        # output_ems = self.EMS_copper_plate
-        P_import_ems = output_ems['active_power_imports_in_kilowatts']
-        P_export_ems = output_ems['active_power_exports_in_kilowatts']
-        P_ES_ems = output_ems['P_ES_val']
-        P_demand_ems = output_ems['active_power_in_kilowatts_at_energy_management_resolution']
-
-        # convert P_EV signals to system time-series scale
-        N_ESs = len(self.storage_assets)  # number of EVs
-        N_nondispatch = len(self.non_dispatchable_assets)  # number of EVs
-        P_ESs = np.zeros([self.number_of_time_intervals_per_day, N_ESs])
-        for t in range(self.number_of_time_intervals_per_day):
-            t_ems = int(t / (self.dt_ems / self.simulation_time_series_resolution_in_hours))
-            P_ESs[t, :] = P_ES_ems[t_ems, :]
-        #######################################
-        ### STEP 2: update the controllable assets
-        #######################################
-        for i in range(N_ESs):
-            self.storage_assets[i].update_control(P_ESs[:, i])
-        #######################################
-        ### STEP 3: simulate the network
-        #######################################
-        N_buses = self.network.N_buses
-        N_phases = self.network.N_phases
-        P_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses, N_phases])
-        Q_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses, N_phases])
-        # calculate the total real and reactive power demand at each bus phase
-        for i in range(N_ESs):
-            bus_id = self.storage_assets[i].network_bus_id
-            phases_i = self.storage_assets[i].phases
-            N_phases_i = np.size(phases_i)
-            for ph_i in np.nditer(phases_i):
-                P_demand_buses[:, bus_id, ph_i] += (self.storage_assets[i].active_power_in_kilowatts
-                                                    / N_phases_i)
-                Q_demand_buses[:, bus_id, ph_i] += (self.storage_assets[i].reactive_power
-                                                    / N_phases_i)
-        for i in range(N_nondispatch):
-            bus_id = self.non_dispatchable_assets[i].network_bus_id
-            phases_i = self.non_dispatchable_assets[i].phases
-            N_phases_i = np.size(phases_i)
-            for ph_i in np.nditer(phases_i):
-                P_demand_buses[:, bus_id, ph_i] \
-                    += (self.non_dispatchable_assets[i].active_power_in_kilowatts / N_phases_i)
-                Q_demand_buses[:, bus_id, ph_i] \
-                    += (self.non_dispatchable_assets[i].reactive_power / N_phases_i)
-        # Store power flow results as a list of network objects
-
-        PF_network_res = []
-        print('*** SIMULATING THE NETWORK ***')
-        for t in range(self.number_of_time_intervals_per_day):
-            # for each time interval:
-            # set up a copy of the network for simulation interval t
-            network_t = copy.deepcopy(self.network)
-            network_t.clear_loads()
-            for bus_id in range(N_buses):
-                for ph_i in range(N_phases):
-                    Pph_t = P_demand_buses[t, bus_id, ph_i]
-                    Qph_t = Q_demand_buses[t, bus_id, ph_i]
-                    # add P,Q loads to the network copy
-                    network_t.set_load(bus_id, ph_i, Pph_t, Qph_t)
-            # run the power flow simulation
-            network_t.zbus_pf()
-            if t % 1 == 0:
-                print('network sim complete for t = '
-                      + str(t) + ' of ' + str(self.number_of_time_intervals_per_day))
-            PF_network_res.append(network_t.res_bus_df)
-        print('*** NETWORK SIMULATION COMPLETE ***')
-
-        return {'PF_network_res': PF_network_res, \
-                'P_ES_ems': P_ES_ems, \
-                'P_import_ems': P_import_ems, \
-                'P_export_ems': P_export_ems, \
+        return {'PF_network_res': PF_network_res,
+                'P_ES_ems': P_ES_ems,
+                'P_import_ems': P_import_ems,
+                'P_export_ems': P_export_ems,
                 'P_demand_ems': P_demand_ems}
 
     def add_linear_building_thermal_model_constraints_to_the_problem(
