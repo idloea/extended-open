@@ -1,15 +1,14 @@
 import sys
-
 import numpy as np
 from src import assets, markets, energy_system
-from src.configuration import load_case
 from src.electric_vehicles import ElectricVehicleFleet
 from src.plot.plots import plot_demand_base_and_total_imported_power
-from src.read import read_open_csv_files
+from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 
 yaml_file = sys.argv[1]
-case_data = load_case(case_file=yaml_file)
+file_path = 'data/cases'
+case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
 data_path = case_data["data_path"]
 
 # STEP 0: Load data
