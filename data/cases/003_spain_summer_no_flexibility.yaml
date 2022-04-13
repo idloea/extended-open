@@ -38,8 +38,15 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 
 # Cost parameters
 export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
-# TODO: find the correct import prices and hours for the case
-import_periods: [{'one': [6, 0.083]}, {'two': [6, 0.18]}, {'three': [6, 0.20]}, {'four': [6, 0.001]}]
+# Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
+# Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
+# Model day = Monday in July (La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf)
+import_periods: [{'P1': [9, 0.1395]},
+                 {'P2': [7, 0.1278]},
+                 {'P3': [0, 0.1110]},
+                 {'P4': [0, 0.1014]},
+                 {'P5': [0, 0.0927]},
+                 {'P6': [8, 0.0871]}]
 demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
 max_import_kilowatts: 500
 max_export_kilowatts: -500
