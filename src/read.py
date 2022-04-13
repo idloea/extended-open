@@ -16,7 +16,3 @@ def read_case_data_from_yaml_file(file_path: str, file_name: str):
     return case
 
 
-def get_import_periods_from_yaml(file_path: str, file_name: str) -> List[dict]:
-    case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=file_name)
-    return case_data['import_periods']
-

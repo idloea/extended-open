@@ -38,11 +38,9 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 
 # Cost parameters
 export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
-peak_period_import_prices_in_euros_per_kilowatt_hour: 0.083
-valley_period_import_prices_in_euros_per_kilowatt_hour: 0.18
+# TODO: find the correct import prices and hours for the case
+import_periods: [{'one': [6, 0.083]}, {'two': [6, 0.18]}, {'three': [6, 0.20]}, {'four': [6, 0.001]}]
 demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
-peak_period_hours_per_day: 7
-valley_period_hours_per_day: 17
 max_import_kilowatts: 500
 max_export_kilowatts: -500
 

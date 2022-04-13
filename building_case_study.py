@@ -85,14 +85,6 @@ market_time_interval_in_hours = energy_management_system_time_series_resolution_
 
 export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
 import_periods = case_data["import_periods"]
-import_prices_in_euros_per_kilowatt_hour = []
-import_period_hours_per_day = []
-
-peak_period_import_prices_in_euros_per_kilowatt_hour = case_data["peak_period_import_prices_in_euros_per_kilowatt_hour"]
-peak_period_hours_per_day = case_data["peak_period_hours_per_day"]
-valley_period_import_prices_in_euros_per_kilowatt_hour = \
-    case_data["valley_period_import_prices_in_euros_per_kilowatt_hour"]
-valley_period_hours_per_day = case_data["valley_period_hours_per_day"]
 demand_charge_in_euros_per_kilowatt = case_data["demand_charge_in_euros_per_kilowatt"]
 max_import_kilowatts = case_data["max_import_kilowatts"]
 max_export_kilowatts = case_data["max_export_kilowatts"]
@@ -184,12 +176,7 @@ bus_id_market = bus_1
 market = markets.Market(network_bus_id=bus_id_market,
                         market_time_series_resolution_in_minutes=market_time_interval_in_hours,
                         export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
-                        peak_period_import_prices_in_euros_per_kilowatt_hour=
-                        peak_period_import_prices_in_euros_per_kilowatt_hour,
-                        peak_period_hours_per_day=peak_period_hours_per_day,
-                        valley_period_import_prices_in_euros_per_kilowatt_hour=
-                        valley_period_import_prices_in_euros_per_kilowatt_hour,
-                        valley_period_hours_per_day=valley_period_hours_per_day,
+                        import_periods=import_periods,
                         max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
                         max_import_kilowatts=max_import_kilowatts,
                         max_export_kilowatts=max_export_kilowatts,
