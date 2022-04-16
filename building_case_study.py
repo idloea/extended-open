@@ -5,7 +5,6 @@ from src.electric_vehicles import ElectricVehicleFleet
 from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
-
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
 
 yaml_file = sys.argv[1]
@@ -225,9 +224,9 @@ for non_dispatchable_asset in range(len(non_distpachable_assets)):
 revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
 print('Revenue in euros:', revenue)
 
-plot_demand_base_and_total_imported_power(simulation_time_series_resolution_in_hours=
-                                          simulation_time_series_resolution_in_hours,
-                                          number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                          active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
-                                          market_active_power_in_kilowatts=market_active_power_in_kilowatts)
+plot_demand_base_and_total_imported_power(
+    simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
+    number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+    active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
+    market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=yaml_file)
 

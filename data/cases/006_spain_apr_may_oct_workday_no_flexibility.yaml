@@ -1,5 +1,5 @@
 # CASE:
-# Spanish case without flexibility for no workdays
+# Spanish case without flexibility for April, May, and October workdays
 
 # data
 data_path: "data/Building/"
@@ -44,9 +44,9 @@ export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smar
 import_periods: [{'P1': [0, 0.1395]},
                  {'P2': [0, 0.1278]},
                  {'P3': [0, 0.1110]},
-                 {'P4': [0, 0.1014]},
-                 {'P5': [0, 0.0927]},
-                 {'P6': [24, 0.0871]}]
+                 {'P4': [9, 0.1014]},
+                 {'P5': [7, 0.0927]},
+                 {'P6': [8 , 0.0871]}]
 demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
 max_import_kilowatts: 500
 max_export_kilowatts: -500

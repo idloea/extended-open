@@ -1,5 +1,5 @@
 # CASE:
-# Spanish case without flexibility for no workdays
+# Spanish case without flexibility for January, February, and December workdays
 
 # data
 data_path: "data/Building/"
@@ -41,12 +41,12 @@ export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smar
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
 # Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
-import_periods: [{'P1': [0, 0.1395]},
-                 {'P2': [0, 0.1278]},
+import_periods: [{'P1': [9, 0.1395]},
+                 {'P2': [7, 0.1278]},
                  {'P3': [0, 0.1110]},
                  {'P4': [0, 0.1014]},
                  {'P5': [0, 0.0927]},
-                 {'P6': [24, 0.0871]}]
+                 {'P6': [8 , 0.0871]}]
 demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
 max_import_kilowatts: 500
 max_export_kilowatts: -500
