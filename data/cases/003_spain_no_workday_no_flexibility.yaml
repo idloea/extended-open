@@ -40,7 +40,7 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
-# Model day = Monday in July (La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf)
+# Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
 import_periods: [{'P1': [0, 0.1395]},
                  {'P2': [0, 0.1278]},
                  {'P3': [0, 0.1110]},

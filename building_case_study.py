@@ -6,6 +6,8 @@ from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 
+from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
+
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
 case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
@@ -85,6 +87,7 @@ market_time_interval_in_hours = energy_management_system_time_series_resolution_
 
 export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
 import_periods = case_data["import_periods"]
+check_sum_of_daily_periods_in_hours_equals_twenty_four(periods=import_periods)
 demand_charge_in_euros_per_kilowatt = case_data["demand_charge_in_euros_per_kilowatt"]
 max_import_kilowatts = case_data["max_import_kilowatts"]
 max_export_kilowatts = case_data["max_export_kilowatts"]

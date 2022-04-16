@@ -6,11 +6,6 @@ def get_number_of_time_intervals_per_day(time_series_resolution_in_hours: float)
     return int(hours_per_day / time_series_resolution_in_hours)
 
 
-def get_period_with_name_hour_and_euros_per_kilowatt_hour(period_name: str, period_duration_in_hours: int,
-                                                          period_price_in_euros_per_kilowatt_hour: float) -> dict:
-    return {period_name: [period_duration_in_hours, period_price_in_euros_per_kilowatt_hour]}
-
-
 def check_sum_of_daily_periods_in_hours_equals_twenty_four(periods: List[dict]):
     period_durations_in_hours = []
     for period in periods:
