@@ -23,7 +23,3 @@ def check_sum_of_daily_periods_in_hours_equals_twenty_four(periods: List[dict]):
 
 def get_period_hours(period: dict) -> int:
     return list(period.values())[0][0]
-
-
-def get_period_cost_per_hour(period: dict) -> float:  # TODO: move somewhere else or rename the file?
-    return list(period.values())[0][1]

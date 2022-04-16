@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 from typing import List
-
 from src.markets import Market
 
 

@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
-import picos as pic
-from typing import List, Optional
+from typing import List
 from src.assets import NonDispatchableAsset, StorageAsset, BuildingAsset
 from src.energy_system import EnergySystem, get_temperature_constraint_for_no_initial_time
 from src.markets import Market
