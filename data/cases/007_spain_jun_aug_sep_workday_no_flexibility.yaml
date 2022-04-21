@@ -4,7 +4,8 @@
 # data
 data_path: "data/Building/"
 photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file: "Loads_1min_2013JUN.csv"  # TODO: change to more realistic case
+electric_load_data_file: "Loads_1min_2013JUN.csv"  # TODO: change to more realistic case (Check OPENStudio). Take the US
+                                                   # default buildings from their energy department
 
 # Winter/summer
 is_winter: False
@@ -26,7 +27,7 @@ electric_vehicle_departure_time_start: 5
 electric_vehicle_departure_time_end: 8
 
 # Building parameters
-max_inside_degree_celsius: 18
+max_inside_degree_celsius: 18  # TODO: check max and min temperature in RITE for offices
 min_inside_degree_celsius: 16
 initial_inside_degree_celsius: 17
 max_consumed_electric_heating_kilowatts: 90
@@ -40,14 +41,15 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
-# Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
+# Periods from here: https://www.electricadealginet.com/wp-content/uploads/7-Industrias-tarifas-6.1-a-6.4.pdf
 import_periods: [{'P1': [0, 0.1395]},
                  {'P2': [0, 0.1278]},
                  {'P3': [9, 0.1110]},
                  {'P4': [7, 0.1014]},
                  {'P5': [0, 0.0927]},
                  {'P6': [8 , 0.0871]}]
-demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
+demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand (power term). This probably per day
+# TODO: get the demand_charge_in_euros_per_kilowatt for Spain in the BOE (it is annual there)
 max_import_kilowatts: 500
 max_export_kilowatts: -500
 

@@ -95,7 +95,7 @@ max_frequency_response_state_of_charge = case_data["max_frequency_response_state
 min_frequency_response_state_of_charge = case_data["min_frequency_response_state_of_charge"]
 frequency_response_price_in_euros_per_kilowatt_hour = case_data["frequency_response_price_in_euros_per_kilowatt_hour"]
 
-# STEP 2: setup the network
+# STEP 2: set up the network
 network = pp.create_empty_network()
 
 grid_1_voltage_level_in_kilo_volts: int = case_data["grid_1_voltage_level_in_kilo_volts"]
