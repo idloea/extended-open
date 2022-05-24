@@ -26,9 +26,9 @@ electric_vehicle_departure_time_start: 5
 electric_vehicle_departure_time_end: 8
 
 # Building parameters
-max_inside_degree_celsius: 18
-min_inside_degree_celsius: 16
-initial_inside_degree_celsius: 17
+max_inside_degree_celsius: 25  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
+min_inside_degree_celsius: 21  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
+initial_inside_degree_celsius: 171
 max_consumed_electric_heating_kilowatts: 90
 max_consumed_electric_cooling_kilowatts: 200
 heat_pump_coefficient_of_performance: 3
