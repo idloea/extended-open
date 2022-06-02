@@ -5,6 +5,7 @@ from src.electric_vehicles import ElectricVehicleFleet
 from src.plot.plots import plot_demand_base_and_total_imported_power
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
+from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
 
 yaml_file = sys.argv[1]
@@ -71,6 +72,9 @@ if not electric_vehicle_fleet.is_electric_vehicle_fleet_feasible_for_the_system:
 max_inside_degree_celsius = case_data["max_inside_degree_celsius"]
 min_inside_degree_celsius = case_data["min_inside_degree_celsius"]
 initial_inside_degree_celsius = case_data["initial_inside_degree_celsius"]
+check_initial_inside_degree_celsius(initial_inside_degree_celsius=initial_inside_degree_celsius,
+                                    max_inside_degree_celsius=max_inside_degree_celsius,
+                                    min_inside_degree_celsius=min_inside_degree_celsius)
 max_consumed_electric_heating_kilowatts = case_data["max_consumed_electric_heating_kilowatts"]
 max_consumed_electric_cooling_kilowatts = case_data["max_consumed_electric_cooling_kilowatts"]
 heat_pump_coefficient_of_performance = case_data["heat_pump_coefficient_of_performance"]
@@ -82,7 +86,6 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts = \
     case_data["building_thermal_resistance_in_degree_celsius_per_kilowatts"]
 
 market_time_interval_in_hours = energy_management_system_time_series_resolution_in_hours
-
 
 export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
 import_periods = case_data["import_periods"]
@@ -229,4 +232,3 @@ plot_demand_base_and_total_imported_power(
     number_of_time_intervals_per_day=number_of_time_intervals_per_day,
     active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
     market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=yaml_file)
-
