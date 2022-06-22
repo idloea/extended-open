@@ -1,19 +1,16 @@
 import unittest
 import datetime
 import pandas as pd
-
 from src.data_conversion import convert_10_min_data_to_1_min_data
+from src.read import read_meteo_navarra_solar_radiation_data
 
 
 class DataConversion(unittest.TestCase):
 
-    def test_convert_10_min_data_to_1_min_data(self):
+    @staticmethod
+    def test_convert_10_min_data_to_1_min_data():
         file_path = 'data/solar_radiation/pamplona/10_min/2021_2022_pamplona_upna_10_min_solar_radiation.xlsx'
-        data = pd.read_excel(file_path, engine='openpyxl')
-        data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-        data.sort_values(by=['Timestamp'], inplace=True)
-        data['Date'] = data['Timestamp'].dt.to_period('D')
-        data = data.set_index('Timestamp')
+        data = read_meteo_navarra_solar_radiation_data(file_path=file_path)
         result = convert_10_min_data_to_1_min_data(data=data)
         result_sample = result.sample(random_state=50)
         date_time_string = '2021-01-09 12:01:00'

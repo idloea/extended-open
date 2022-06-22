@@ -16,3 +16,11 @@ def read_case_data_from_yaml_file(file_path: str, file_name: str):
     return case
 
 
+def read_meteo_navarra_solar_radiation_data(file_path: str) -> pd.DataFrame:
+    """Read 10 min data from Meteo Navarra (http://meteo.navarra.es/energiasrenovables/estacionradiacion.cfm)"""
+    data = pd.read_excel(file_path, engine='openpyxl')
+    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+    data.sort_values(by=['Timestamp'], inplace=True)
+    data['Date'] = data['Timestamp'].dt.to_period('D')
+    data = data.set_index('Timestamp')
+    return data
