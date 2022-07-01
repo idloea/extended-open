@@ -7,17 +7,27 @@ from src.read import read_meteo_navarra_solar_radiation_data
 
 class DataConversion(unittest.TestCase):
 
-    @staticmethod
-    def test_convert_10_min_data_to_1_min_data():
+    def setUp(self):
         file_path = 'data/solar_radiation/pamplona/10_min/2021_2022_pamplona_upna_10_min_solar_radiation.xlsx'
-        data = read_meteo_navarra_solar_radiation_data(file_path=file_path)
-        result = convert_10_min_data_to_1_min_data(data=data)
-        result_sample = result.sample(random_state=50)
-        date_time_string = '2021-01-09 12:01:00'
-        index = datetime.datetime.strptime(date_time_string, '%Y-%m-%d %H:%M:%S')
-        expected_data = {'Measured_radiation_W/m2': 117.4, 'Direct_radiation_W/m2': 1.3,
-                         'Reflected_radiation_W/m2': 4.5, 'Diffused_radiation_W/m2': 101.4,
-                         'Global_radiation_W/m2': 107.2, 'Date': datetime.datetime(2021, 1, 9)}
-        expected_result = pd.DataFrame(data=expected_data, index=pd.Series(index))
-        expected_result['Date'] = expected_result['Date'].dt.to_period('D')
-        pd.testing.assert_frame_equal(expected_result, result_sample)
+        self.data = read_meteo_navarra_solar_radiation_data(file_path=file_path)
+
+    def test_convert_10_min_data_to_1_min_data(self):
+        data_with_1_min_frequency = convert_10_min_data_to_1_min_data(data=self.data)
+        time_delta = pd.Timedelta(1, 'minute')
+        data_with_1_min_frequency_index = data_with_1_min_frequency.index
+        first_minute = data_with_1_min_frequency_index[0]
+        second_minute = data_with_1_min_frequency_index[1]
+        first_minute_delta = second_minute - first_minute
+        last_minute = data_with_1_min_frequency_index[-1]
+        second_last_minute = data_with_1_min_frequency_index[-2]
+        last_minute_delta = last_minute - second_last_minute
+
+        self.assertEqual(time_delta, first_minute_delta)
+        self.assertEqual(time_delta, last_minute_delta)
+
+    def test_convert_10_min_data_to_1_min_data_length(self):
+        filtered_data = self.data[self.data['Date'] == '2021-01-07']
+        data_1_min = convert_10_min_data_to_1_min_data(data=filtered_data)
+        result = len(data_1_min)
+        expected_result = 24 * 60
+        self.assertEqual(expected_result, result)
