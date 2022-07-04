@@ -2,9 +2,9 @@
 # Spanish case without flexibility for January, February, and December workdays
 
 # data
-data_path: "data/Building/"
-photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file: "Loads_1min_2013JUN.csv"  # TODO: change to more realistic case
+data_path: "data/"
+photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2022-01-01_pamplona.csv"  # TODO: change with Spanish PV generation
+electric_load_data_file: "Building/Loads_1min_2013JUN.csv"  # TODO: change to more realistic case
 
 # Winter/summer
 is_winter: False
