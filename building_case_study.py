@@ -2,7 +2,7 @@ import sys
 import numpy as np
 from src import assets, markets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
-from src.plot.plots import plot_demand_base_and_total_imported_power
+from src.plot.plots import plot_demand_base_and_total_imported_power, plot_building_internal_temperature
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
@@ -38,6 +38,8 @@ energy_management_system_time_series_resolution_in_minutes = \
     case_data["energy_management_system_time_series_resolution_in_minutes"]
 energy_management_system_time_series_resolution_in_hours = \
     energy_management_system_time_series_resolution_in_minutes / 60
+number_of_energy_management_time_intervals_per_day = int(hours_per_day /
+                                                         energy_management_system_time_series_resolution_in_hours)
 
 # Electric Vehicle (EV) parameters
 seed = 1000  # Used by OPEN originally
@@ -232,3 +234,13 @@ plot_demand_base_and_total_imported_power(
     number_of_time_intervals_per_day=number_of_time_intervals_per_day,
     active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
     market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=yaml_file)
+
+
+number_of_buildings = len(building_assets)
+plot_building_internal_temperature(number_of_buildings=number_of_buildings,
+                                   energy_management_system_time_series_resolution_in_hours=
+                                   energy_management_system_time_series_resolution_in_hours,
+                                   number_of_energy_management_time_intervals_per_day=
+                                   number_of_energy_management_time_intervals_per_day,
+                                   building_assets=building_assets)
+
