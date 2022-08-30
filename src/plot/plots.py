@@ -63,9 +63,8 @@ def plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
                                                  energy_management_system_time_series_resolution_in_hours: float,
                                                  number_of_energy_management_time_intervals_per_day: int,
                                                  building_assets: List[BuildingAsset],
-                                                 max_consumed_electric_heating_kilowatts: int = None,
-                                                 max_consumed_electric_cooling_kilowatts: int = None,
-                                                 ) -> None:
+                                                 max_consumed_electric_heating_kilowatts: int or None,
+                                                 max_consumed_electric_cooling_kilowatts: int or None) -> None:
     plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
     hours = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day)
 
