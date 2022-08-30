@@ -1,5 +1,4 @@
 import unittest
-import datetime
 import pandas as pd
 from src.data_conversion import convert_10_min_data_to_1_min_data
 from src.read import read_meteo_navarra_solar_radiation_data

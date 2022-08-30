@@ -66,7 +66,8 @@ class BuildingAsset(Asset):
         self.min_inside_degree_celsius = min_inside_degree_celsius
         self.max_consumed_electric_heating_kilowatts = max_consumed_electric_heating_kilowatts
         self.max_consumed_electric_cooling_kilowatts = max_consumed_electric_cooling_kilowatts
-        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_resolution_in_hours
+        self.energy_management_system_time_series_hour_resolution = \
+            energy_management_system_time_series_resolution_in_hours
         self.initial_inside_degree_celsius = initial_inside_degree_celsius
         self.building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = \
             building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius
@@ -74,7 +75,8 @@ class BuildingAsset(Asset):
             building_thermal_resistance_in_degree_celsius_per_kilowatts
         self.heat_pump_coefficient_of_performance = heat_pump_coefficient_of_performance
         self.chiller_coefficient_of_performance = chiller_coefficient_of_performance
-        self.energy_management_system_time_series_hour_resolution = energy_management_system_time_series_resolution_in_hours
+        self.energy_management_system_time_series_hour_resolution = \
+            energy_management_system_time_series_resolution_in_hours
         self.number_of_energy_management_system_time_intervals_per_day = \
             int(24 / self.energy_management_system_time_series_hour_resolution)
         self.number_of_time_intervals_per_day = int(24 / self.simulation_time_series_hour_resolution)
