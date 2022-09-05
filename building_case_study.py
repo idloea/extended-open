@@ -16,13 +16,13 @@ data_path = case_data["data_path"]
 
 # STEP 0: Load data
 photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file"]
-photovoltaic_generation_in_per_unit = read_open_csv_files(path=data_path,
-                                                          csv_file=photovoltaic_generation_data_file)
+photovoltaic_generation_data = read_open_csv_files(path=data_path,
+                                                   csv_file=photovoltaic_generation_data_file)
 electric_load_data_file = case_data["electric_load_data_file"]
 electric_loads = read_open_csv_files(path=data_path, csv_file=electric_load_data_file)
 
 # Photovoltaic generation
-sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_in_per_unit, 1)
+sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_data, 1)
 is_winter = case_data["is_winter"]
 max_photovoltaic_generation_in_per_unit = np.max(sum_of_photovoltaic_generation_in_per_unit)
 photovoltaic_generation_per_unit = sum_of_photovoltaic_generation_in_per_unit / max_photovoltaic_generation_in_per_unit
@@ -154,10 +154,10 @@ non_distpachable_assets.append(non_dispatchable_electric_load_at_bus_3)
 # Building asset at bus 3
 if is_winter:
     winter_ambient_degree_celsius = case_data["winter_ambient_degree_celsius"]
-    ambient_degree_celsius = winter_ambient_degree_celsius
+    ambient_temperature_in_degree_celsius = winter_ambient_degree_celsius
 else:
     summer_ambient_degree_celsius = case_data["summer_ambient_degree_celsius"]
-    ambient_degree_celsius = summer_ambient_degree_celsius
+    ambient_temperature_in_degree_celsius = summer_ambient_degree_celsius
 
 bus_id_building = bus_3
 building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
@@ -171,7 +171,7 @@ building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_cels
                                 building_thermal_resistance_in_degree_celsius_per_kilowatts,
                                 heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
                                 chiller_coefficient_of_performance=chiller_coefficient_of_performance,
-                                ambient_temperature_in_degree_celsius=ambient_degree_celsius,
+                                ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius,
                                 bus_id=bus_id_building,
                                 simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
                                 energy_management_system_time_series_resolution_in_hours=
@@ -253,5 +253,19 @@ plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_build
                                              number_of_energy_management_time_intervals_per_day=
                                              number_of_energy_management_time_intervals_per_day,
                                              building_assets=building_assets,
+                                             max_consumed_electric_heating_kilowatts=None,
                                              max_consumed_electric_cooling_kilowatts=
                                              max_consumed_electric_cooling_kilowatts)
+
+plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
+                                             simulation_time_series_resolution_in_hours=
+                                             simulation_time_series_resolution_in_hours,
+                                             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                                             energy_management_system_time_series_resolution_in_hours=
+                                             energy_management_system_time_series_resolution_in_hours,
+                                             number_of_energy_management_time_intervals_per_day=
+                                             number_of_energy_management_time_intervals_per_day,
+                                             building_assets=building_assets,
+                                             max_consumed_electric_heating_kilowatts=
+                                             max_consumed_electric_heating_kilowatts,
+                                             max_consumed_electric_cooling_kilowatts=None)

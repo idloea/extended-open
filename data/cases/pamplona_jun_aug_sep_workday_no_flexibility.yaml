@@ -68,4 +68,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Ambient temperature
 winter_ambient_degree_celsius: 10
-summer_ambient_degree_celsius : 22
+summer_ambient_degree_celsius : 30
