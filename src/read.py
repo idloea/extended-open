@@ -24,3 +24,18 @@ def read_meteo_navarra_solar_radiation_data(file_path: str) -> pd.DataFrame:
     data['Date'] = data['Timestamp'].dt.to_period('D')
     data = data.set_index('Timestamp')
     return data
+
+
+def read_meteo_navarra_ambient_temperature_csv_data(file_path: str) -> pd.DataFrame:
+    """Read 10 min data from Meteo Navarra (http://meteo.navarra.es/estaciones/estacion.cfm?IDEstacion=405)"""
+    data = pd.read_csv(file_path)
+    data = data.iloc[:, 0:2]
+    data.dropna(inplace=True)
+    data.columns = ['DateTime', 'DegreeCelsius']
+    data['Date'] = data.apply(lambda row: row['DateTime'][:10], axis=1)
+    data['Time'] = data.apply(lambda row: row['DateTime'][10:], axis=1)
+    data['DateTime'] = data['Date'] + '-' + data['Time']
+    data['DateTime'] = pd.to_datetime(data['DateTime'], format='%d/%m/%Y-%H:%M')
+    data['DegreeCelsius'] = pd.to_numeric(data['DegreeCelsius'], errors='coerce')
+    data.reset_index(inplace=True)
+    return data[['DateTime', 'DegreeCelsius']]

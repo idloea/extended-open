@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 OPEN Asset module
 
@@ -16,7 +14,6 @@ and BuildingAsset for buildings with flexible heating, ventilation and air
 conditioning (HVAC).
 """
 
-# import modules
 from typing import List
 
 import numpy as np
