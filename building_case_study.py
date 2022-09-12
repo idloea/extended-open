@@ -8,6 +8,7 @@ from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
+from src.ambient_temperature import MeteoNavarraData
 
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
@@ -158,6 +159,12 @@ if is_winter:
 else:
     summer_ambient_degree_celsius = case_data["summer_ambient_degree_celsius"]
     ambient_temperature_in_degree_celsius = summer_ambient_degree_celsius
+
+data = MeteoNavarraData()
+ambient_temperature_file_path = 'data/ambient_temperature/pamplona/20220717_ambient_temperature_upna.csv'
+ambient_temperature_in_degree_celsius = data.get_ambient_temperature_in_degree_celsius(
+    number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
+    file_path=ambient_temperature_file_path)
 
 bus_id_building = bus_3
 building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,

@@ -92,7 +92,7 @@ class BuildingAsset(Asset):
         self.min_inside_degree_celsius = min_inside_degree_celsius * np.ones(
             self.number_of_energy_management_system_time_intervals_per_day)
         self.ambient_temperature_in_degree_celsius = ambient_temperature_in_degree_celsius * np.ones(
-            self.number_of_energy_management_system_time_intervals_per_day)
+            self.number_of_energy_management_system_time_intervals_per_day)  # TODO adapt the code to be able to handle cases from UK and Pamplona
 
     def update_control(self, active_power):
         """

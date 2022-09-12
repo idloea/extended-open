@@ -5,7 +5,7 @@ import pandas as pd
 from src.read import read_open_csv_files, read_meteo_navarra_ambient_temperature_csv_data
 
 
-class Read(unittest.TestCase):
+class TestRead(unittest.TestCase):
 
     def test_read_open_csv_files(self):
         expected_result = [0.66400, 0.24700, 0.04800]

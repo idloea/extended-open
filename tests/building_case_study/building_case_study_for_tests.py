@@ -175,9 +175,9 @@ def get_building_case_original_results(is_winter: bool):
     non_distpachable_assets.append(non_dispatchable_electric_load_at_bus_3)
     # Building asset at bus 3
     if is_winter:
-        ambient_degree_celsius = 10
+        ambient_temperature_in_degree_celsius = 10
     else:
-        ambient_degree_celsius = 22
+        ambient_temperature_in_degree_celsius = 22
 
     bus_id_building = bus_3
     building = Assets.BuildingAsset(max_inside_degree_celsius=max_allowed_building_degree_celsius,
@@ -191,7 +191,7 @@ def get_building_case_original_results(is_winter: bool):
                                     building_heat_transfer_in_degree_celsius_per_kilowatts,
                                     heat_pump_coefficient_of_performance=heat_pump_coefficient_of_performance,
                                     chiller_coefficient_of_performance=chiller_coefficient_of_performance,
-                                    ambient_temperature_in_degree_celsius=ambient_degree_celsius,
+                                    ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius,
                                     bus_id=bus_id_building,
                                     simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
                                     energy_management_system_time_series_resolution_in_hours=

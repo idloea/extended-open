@@ -17,7 +17,6 @@ def read_case_data_from_yaml_file(file_path: str, file_name: str):
 
 
 def read_meteo_navarra_solar_radiation_data(file_path: str) -> pd.DataFrame:
-    # TODO: create a SolarRadiationData abstract class since there might be more places to read the data from
     """Read 10 min data from Meteo Navarra (http://meteo.navarra.es/energiasrenovables/estacionradiacion.cfm)"""
     data = pd.read_excel(file_path, engine='openpyxl')
     data['Timestamp'] = pd.to_datetime(data['Timestamp'])
@@ -28,7 +27,6 @@ def read_meteo_navarra_solar_radiation_data(file_path: str) -> pd.DataFrame:
 
 
 def read_meteo_navarra_ambient_temperature_csv_data(file_path: str) -> pd.DataFrame:
-    # TODO: create a AmbientTemperature abstract class since there might be more places to read the data from
     """Read 10 min data from Meteo Navarra (http://meteo.navarra.es/estaciones/estacion.cfm?IDEstacion=405)"""
     data = pd.read_csv(file_path)
     data = data.iloc[:, 0:2]
