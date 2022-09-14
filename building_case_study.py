@@ -8,7 +8,7 @@ from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
-from src.ambient_temperature import MeteoNavarraData
+from src.ambient_temperature import get_ambient_temperature_in_degree_celsius_by_data_strategy
 
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
@@ -152,20 +152,11 @@ non_dispatchable_electric_load_at_bus_3 = assets.NonDispatchableAsset(
     reactive_power_in_kilovolt_ampere_reactive=electric_load_reactive_power_in_kilovolt_ampere_reactive)
 non_distpachable_assets.append(non_dispatchable_electric_load_at_bus_3)
 
+ambient_temperature_in_degree_celsius = get_ambient_temperature_in_degree_celsius_by_data_strategy(
+            case_data=case_data,
+            number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day)
+
 # Building asset at bus 3
-if is_winter:
-    winter_ambient_degree_celsius = case_data["winter_ambient_degree_celsius"]
-    ambient_temperature_in_degree_celsius = winter_ambient_degree_celsius
-else:
-    summer_ambient_degree_celsius = case_data["summer_ambient_degree_celsius"]
-    ambient_temperature_in_degree_celsius = summer_ambient_degree_celsius
-
-data = MeteoNavarraData()
-ambient_temperature_file_path = 'data/ambient_temperature/pamplona/20220717_ambient_temperature_upna.csv'
-ambient_temperature_in_degree_celsius = data.get_ambient_temperature_in_degree_celsius(
-    number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-    file_path=ambient_temperature_file_path)
-
 bus_id_building = bus_3
 building = assets.BuildingAsset(max_inside_degree_celsius=max_inside_degree_celsius,
                                 min_inside_degree_celsius=min_inside_degree_celsius,

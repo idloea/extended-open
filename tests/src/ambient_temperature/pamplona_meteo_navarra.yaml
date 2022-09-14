@@ -50,8 +50,8 @@ import_periods: [{'P1': [0, 0.1395]},
                  {'P6': [8 , 0.0871]}]
 demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand (power term). This probably per day
 # TODO: get the demand_charge_in_euros_per_kilowatt for Spain in the BOE (it is annual there)
-max_import_kilowatts: 500
-max_export_kilowatts: -500
+max_import_kilowatts: 1000
+max_export_kilowatts: -1000
 
 # Flexibility
 offered_kilowatts_in_frequency_response: 0
@@ -68,4 +68,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20220717_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'tests/src/ambient_temperature/20220717_ambient_temperature_upna.csv'

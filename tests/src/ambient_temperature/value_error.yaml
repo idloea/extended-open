@@ -60,4 +60,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 ambient_temperature_in_degree_celsius: 22
 
 # Data Strategy
-data_strategy: UK
+data_strategy: MyStrategy
