@@ -37,7 +37,7 @@ building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
 building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 
 # Cost parameters
-export_prices_in_euros_per_kilowatt_hour: 0.051  # https://www.iberdrola.es/smart-solar/plan-solar
+export_prices_in_euros_per_kilowatt_hour: 0.189  # Average between 2022/01/01-2022/09/14 (https://www.esios.ree.es/es/analisis/1739?vis=1&start_date=01-01-2022T00%3A00&end_date=14-09-2022T23%3A55&compare_start_date=31-12-2021T00%3A00&groupby=day&compare_indicators=1013,1014,1015)
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
 # Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
