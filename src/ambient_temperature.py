@@ -34,7 +34,7 @@ class MeteoNavarraData(DataStrategy):
 
 
 def get_ambient_temperature_in_degree_celsius_by_data_strategy(
-        case_data: dict, number_of_energy_management_time_intervals_per_day: int) -> float:
+        case_data: dict, number_of_energy_management_time_intervals_per_day: int) -> np.ndarray:
     data_strategy = case_data["data_strategy"]
     if data_strategy == 'UK':
         data = UKData()

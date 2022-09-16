@@ -29,8 +29,8 @@ electric_vehicle_departure_time_end: 8
 max_inside_degree_celsius: 25  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
 min_inside_degree_celsius: 21  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
 initial_inside_degree_celsius: 21
-max_consumed_electric_heating_kilowatts: 90
-max_consumed_electric_cooling_kilowatts: 200
+max_consumed_electric_heating_kilowatts: 500
+max_consumed_electric_cooling_kilowatts: 500
 heat_pump_coefficient_of_performance: 3
 chiller_coefficient_of_performance: 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
@@ -64,6 +64,6 @@ grid_3_voltage_level_in_kilo_volts: 0.4
 transformer_apparent_power_in_mega_volt_ampere: 0.4
 length_from_bus_2_to_bus_3_in_km: 0.1
 
-# Ambient temperature
-winter_ambient_degree_celsius: 10
-summer_ambient_degree_celsius : 22
+# Data Strategy
+data_strategy: MeteoNavarra
+ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20220515_ambient_temperature_upna.csv'

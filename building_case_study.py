@@ -3,7 +3,7 @@ import numpy as np
 from src import assets, markets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
 from src.plot.plots import plot_demand_base_and_total_imported_power, plot_building_internal_temperature, \
-    plot_hvac_consumed_active_power_in_kilowatts
+    plot_hvac_consumed_active_power_in_kilowatts, plot_ambient_temperature
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
@@ -153,8 +153,8 @@ non_dispatchable_electric_load_at_bus_3 = assets.NonDispatchableAsset(
 non_distpachable_assets.append(non_dispatchable_electric_load_at_bus_3)
 
 ambient_temperature_in_degree_celsius = get_ambient_temperature_in_degree_celsius_by_data_strategy(
-            case_data=case_data,
-            number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day)
+    case_data=case_data,
+    number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day)
 
 # Building asset at bus 3
 bus_id_building = bus_3
@@ -233,6 +233,11 @@ plot_demand_base_and_total_imported_power(
     number_of_time_intervals_per_day=number_of_time_intervals_per_day,
     active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
     market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=yaml_file)
+
+plot_ambient_temperature(
+    energy_management_system_time_series_resolution_in_hours=energy_management_system_time_series_resolution_in_hours,
+    number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
+    ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=yaml_file)
 
 number_of_buildings = len(building_assets)
 plot_building_internal_temperature(number_of_buildings=number_of_buildings,

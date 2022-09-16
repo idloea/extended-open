@@ -27,6 +27,27 @@ def plot_demand_base_and_total_imported_power(simulation_time_series_resolution_
     plt.show()
 
 
+def plot_ambient_temperature(energy_management_system_time_series_resolution_in_hours: float,
+                             number_of_energy_management_time_intervals_per_day: int,
+                             ambient_temperature_in_degree_celsius: np.ndarray,
+                             case: str) -> None:
+    plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
+    hours = energy_management_system_time_series_resolution_in_hours * \
+            np.arange(number_of_energy_management_time_intervals_per_day)
+    max_time = max(hours)
+    plt.plot(hours, ambient_temperature_in_degree_celsius)
+    plt.suptitle('Ambient Temperature')
+    subtitle = 'Case: ' + str(case)
+    plt.title(subtitle)
+    plt.ylabel('Temperature [ºC]')
+    plt.xlabel('Time [h]')
+    plt.xlim(0, max_time)
+    plt.xticks(np.arange(0, max_time, step=1))
+    plt.grid(True, alpha=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_building_internal_temperature(number_of_buildings: int,
                                        energy_management_system_time_series_resolution_in_hours: float,
                                        number_of_energy_management_time_intervals_per_day: int,
