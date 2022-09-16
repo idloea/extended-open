@@ -1,4 +1,4 @@
-from src.read import read_meteo_navarra_ambient_temperature_csv_data
+from src.read import read_preprocessing_meteo_navarra_ambient_temperature_csv_data
 import datetime
 
 
@@ -7,7 +7,7 @@ def adapt_ambient_temperature_data_from_solar_time_to_regular_time(read_path: st
                                                                    write_path: str) -> None:
 
     file_path = read_path + '/' + read_file
-    data = read_meteo_navarra_ambient_temperature_csv_data(file_path=file_path)
+    data = read_preprocessing_meteo_navarra_ambient_temperature_csv_data(file_path=file_path)
     if time_schedule == 'winter':
         hours = 1
     elif time_schedule == 'summer':
@@ -28,9 +28,9 @@ def adapt_ambient_temperature_data_from_solar_time_to_regular_time(read_path: st
 
 if __name__ == '__main__':
     read_path = 'data/ambient_temperature/pamplona'
-    read_file = '202110_ambient_temperature.csv'
-    start_date = '2022-10-15'
-    end_date = '2022-10-16'
+    read_file = '202209_ambient_temperature.csv'
+    start_date = '2022-09-15'
+    end_date = '2022-09-16'
     time_schedule = 'summer'
     write_path = read_path
     adapt_ambient_temperature_data_from_solar_time_to_regular_time(read_path=read_path, read_file=read_file,

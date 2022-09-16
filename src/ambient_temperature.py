@@ -2,7 +2,8 @@ from abc import abstractmethod, ABC
 from typing import Optional
 import numpy as np
 from scipy import signal
-from src.read import read_meteo_navarra_ambient_temperature_csv_data
+from src.read import read_preprocessing_meteo_navarra_ambient_temperature_csv_data, \
+    read_meteo_navarra_ambient_temperature_csv_data
 
 
 class DataStrategy(ABC):

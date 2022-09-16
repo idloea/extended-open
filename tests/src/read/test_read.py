@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from datetime import datetime
 import pandas as pd
-from src.read import read_open_csv_files, read_meteo_navarra_ambient_temperature_csv_data
+from src.read import read_open_csv_files, read_preprocessing_meteo_navarra_ambient_temperature_csv_data
 
 
 class TestRead(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestRead(unittest.TestCase):
 
     def test_read_meteo_navarra_ambient_temperature_csv_data(self):
         file_path = 'tests/src/read/20220717_ambient_temperature_upna.csv'
-        result = read_meteo_navarra_ambient_temperature_csv_data(file_path).head()
+        result = read_preprocessing_meteo_navarra_ambient_temperature_csv_data(file_path).head()
         first_time_stamp = datetime(2022, 7, 17, 0, 0)
         second_time_stamp = datetime(2022, 7, 17, 0, 10)
         third_time_stamp = datetime(2022, 7, 17, 0, 20)

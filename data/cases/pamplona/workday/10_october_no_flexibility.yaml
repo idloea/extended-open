@@ -1,11 +1,7 @@
-# CASE:
-# Spanish case without flexibility for June, August, and September workdays
-
-# data
+# Data
 data_path: "data/"
-photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-08_pamplona.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file: "Building/Loads_1min_2013JUN.csv"  # TODO: change to more realistic case (Check OPENStudio). Take the US
-                                                   # default buildings from their energy department
+photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-10_pamplona.csv"
+electric_load_data_file: "Building/Loads_1min_2014JAN.csv"  # TODO: change to more realistic case
 
 # Winter/summer
 is_winter: False
@@ -30,8 +26,8 @@ electric_vehicle_departure_time_end: 8
 max_inside_degree_celsius: 25  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
 min_inside_degree_celsius: 21  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
 initial_inside_degree_celsius: 21
-max_consumed_electric_heating_kilowatts: 90
-max_consumed_electric_cooling_kilowatts: 200
+max_consumed_electric_heating_kilowatts: 500
+max_consumed_electric_cooling_kilowatts: 500
 heat_pump_coefficient_of_performance: 3
 chiller_coefficient_of_performance: 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
@@ -41,17 +37,16 @@ building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
 export_prices_in_euros_per_kilowatt_hour: 0.189  # Average between 2022/01/01-2022/09/14 (https://www.esios.ree.es/es/analisis/1739?vis=1&start_date=01-01-2022T00%3A00&end_date=14-09-2022T23%3A55&compare_start_date=31-12-2021T00%3A00&groupby=day&compare_indicators=1013,1014,1015)
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
-# Periods from here: https://www.electricadealginet.com/wp-content/uploads/7-Industrias-tarifas-6.1-a-6.4.pdf
+# Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
 import_periods: [{'P1': [0, 0.1395]},
                  {'P2': [0, 0.1278]},
-                 {'P3': [9, 0.1110]},
-                 {'P4': [7, 0.1014]},
-                 {'P5': [0, 0.0927]},
+                 {'P3': [0, 0.1110]},
+                 {'P4': [9, 0.1014]},
+                 {'P5': [7, 0.0927]},
                  {'P6': [8 , 0.0871]}]
-demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand (power term). This probably per day
-# TODO: get the demand_charge_in_euros_per_kilowatt for Spain in the BOE (it is annual there)
-max_import_kilowatts: 1000
-max_export_kilowatts: -1000
+demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
+max_import_kilowatts: 500
+max_export_kilowatts: -500
 
 # Flexibility
 offered_kilowatts_in_frequency_response: 0
@@ -68,4 +63,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20220717_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20211015_ambient_temperature_upna.csv'
