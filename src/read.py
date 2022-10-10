@@ -47,6 +47,9 @@ def read_meteo_navarra_ambient_temperature_csv_data(file_path: str) -> pd.DataFr
     data = data.iloc[:, 0:2]
     data.dropna(inplace=True)
     data.columns = ['DateTime', 'DegreeCelsius']
+    data['Date'] = [row['DateTime'][:10] for row_index, row in data.iterrows()]
+    data['Time'] = [row['DateTime'][10:] for row_index, row in data.iterrows()]
+    data['DateTime'] = data['Date'] + '-' + data['Time']
     data['DateTime'] = pd.to_datetime(data['DateTime'])
     data['DegreeCelsius'] = pd.to_numeric(data['DegreeCelsius'], errors='coerce')
     data.reset_index(inplace=True)
