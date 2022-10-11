@@ -1,4 +1,5 @@
 from typing import List
+
 import pandas as pd
 import os
 import yaml
@@ -54,3 +55,12 @@ def read_meteo_navarra_ambient_temperature_csv_data(file_path: str) -> pd.DataFr
     data['DegreeCelsius'] = pd.to_numeric(data['DegreeCelsius'], errors='coerce')
     data.reset_index(inplace=True)
     return data[['DateTime', 'DegreeCelsius']]
+
+
+def get_import_period_prices_from_yaml(case_data: dict) -> List[dict]:
+    return case_data['import_period_prices']
+
+
+def get_specific_import_price(case_data: dict, period: str) -> float:
+    import_period_prices = get_import_period_prices_from_yaml(case_data=case_data)
+    return import_period_prices[period]

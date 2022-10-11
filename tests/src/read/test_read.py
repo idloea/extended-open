@@ -2,12 +2,13 @@ import unittest
 import numpy as np
 from datetime import datetime
 import pandas as pd
-from src.read import read_open_csv_files, read_preprocessing_meteo_navarra_ambient_temperature_csv_data
+from src.read import read_open_csv_files, read_preprocessing_meteo_navarra_ambient_temperature_csv_data, \
+    get_import_period_prices_from_yaml, read_case_data_from_yaml_file, get_specific_import_price
 
 
 class TestRead(unittest.TestCase):
 
-    def test_read_open_csv_files(self):
+    def test_read_open_csv_files(self) -> None:
         expected_result = [0.66400, 0.24700, 0.04800]
 
         path = 'tests/src/read'
@@ -15,7 +16,7 @@ class TestRead(unittest.TestCase):
         result = data[0][0:3]  # Get a sample
         np.testing.assert_almost_equal(expected_result, result)
 
-    def test_read_meteo_navarra_ambient_temperature_csv_data(self):
+    def test_read_meteo_navarra_ambient_temperature_csv_data(self) -> None:
         file_path = 'tests/src/read/20220717_ambient_temperature_upna.csv'
         result = read_preprocessing_meteo_navarra_ambient_temperature_csv_data(file_path).head()
         first_time_stamp = datetime(2022, 7, 17, 0, 0)
@@ -29,7 +30,24 @@ class TestRead(unittest.TestCase):
         expected_result = pd.DataFrame.from_dict(expected_dictionary)
         pd.testing.assert_frame_equal(expected_result, result)
 
+    def test_get_import_period_prices_from_yaml(self) -> None:
+        yaml_file = '01_january_no_flexibility.yaml'
+        file_path = 'tests/src/read'
+        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        result = get_import_period_prices_from_yaml(case_data)
+        expected_result = {'P1': 0.1395,
+                           'P2': 0.1278,
+                           'P3': 0.1110,
+                           'P4': 0.1014,
+                           'P5': 0.0927,
+                           'P6': 0.0871}
+        self.assertEqual(expected_result, result)
 
-
-
-
+    def test_get_import_price_for_specific_period(self) -> None:
+        yaml_file = '01_january_no_flexibility.yaml'
+        file_path = 'tests/src/read'
+        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        period = 'P3'
+        result = get_specific_import_price(case_data=case_data, period=period)
+        expected_result = 0.1110
+        self.assertEqual(expected_result, result)

@@ -203,18 +203,16 @@ def get_building_case_original_results(is_winter: bool):
     ### STEP 4: setup the market
     #######################################
     bus_id_market = bus_1
-    market = Markets.Market(network_bus_id=bus_id_market,
-                            market_time_series_resolution_in_minutes=market_time_interval_in_hours,
-                            export_prices_in_euros_per_kilowatt_hour=prices_export_in_euros_per_kilowatt_hour,
-                            import_periods=import_periods,
-                            max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
-                            max_import_kilowatts=max_import_kilowatts,
-                            max_export_kilowatts=max_export_kilowatts,
-                            offered_kW_in_frequency_response=offered_kilowatts_in_frequency_response,
-                            max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
-                            min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                            frequency_response_price_in_euros_per_kilowatt_hour=
-                            frequency_response_price_in_euros_per_kilowatt_hour)
+    market = Markets.OPENMarket(network_bus_id=bus_id_market,
+                                market_time_series_resolution_in_hours=market_time_interval_in_hours,
+                                export_prices_in_euros_per_kilowatt_hour=prices_export_in_euros_per_kilowatt_hour,
+                                import_periods=import_periods,
+                                max_demand_charge_in_euros_per_kilowatt_hour=demand_charge_in_euros_per_kilowatt,
+                                max_import_kilowatts=max_import_kilowatts, max_export_kilowatts=max_export_kilowatts,
+                                offered_kilowatt_in_frequency_response=offered_kilowatts_in_frequency_response,
+                                max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
+                                min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
+                                frequency_response_price_in_euros_per_kilowatt_hour=frequency_response_price_in_euros_per_kilowatt_hour)
 
     #######################################
     # STEP 5: setup the energy system

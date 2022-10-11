@@ -61,3 +61,4 @@ ambient_temperature_in_degree_celsius: 10
 
 # Data Strategy
 data_strategy: UK
+market: OPEN

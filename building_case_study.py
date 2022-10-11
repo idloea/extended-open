@@ -2,24 +2,28 @@ import sys
 import numpy as np
 from src import assets, markets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
+from src.markets import get_market
 from src.plot.plots import plot_demand_base_and_total_imported_power, plot_building_internal_temperature, \
     plot_hvac_consumed_active_power_in_kilowatts, plot_ambient_temperature
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
-from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four
+from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four, \
+    check_unique_hours_of_daily_periods, check_all_hours_of_daily_periods
 from src.ambient_temperature import get_ambient_temperature_in_degree_celsius_by_data_strategy
 
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
 case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
 data_path = case_data["data_path"]
+market_scenario = case_data['market']
 
 # STEP 0: Load data
 photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file"]
 photovoltaic_generation_data = read_open_csv_files(path=data_path,
                                                    csv_file=photovoltaic_generation_data_file)
-electric_load_data_file = case_data["electric_load_data_file"]
+electric_load_data_file = case_data[
+    "electric_load_data_file"]  # TODO: why is the demand and the imports different in the final plot?
 electric_loads = read_open_csv_files(path=data_path, csv_file=electric_load_data_file)
 
 # Photovoltaic generation
@@ -93,7 +97,12 @@ market_time_interval_in_hours = energy_management_system_time_series_resolution_
 
 export_prices_in_euros_per_kilowatt_hour = case_data["export_prices_in_euros_per_kilowatt_hour"]
 import_periods = case_data["import_periods"]
-check_sum_of_daily_periods_in_hours_equals_twenty_four(periods=import_periods)
+import_period_prices = None
+if market_scenario == 'Spanish':
+    check_sum_of_daily_periods_in_hours_equals_twenty_four(periods=import_periods)
+    check_unique_hours_of_daily_periods(periods=import_periods)
+    check_all_hours_of_daily_periods(periods=import_periods)
+    import_period_prices = case_data["import_period_prices"]
 demand_charge_in_euros_per_kilowatt = case_data["demand_charge_in_euros_per_kilowatt"]
 max_import_kilowatts = case_data["max_import_kilowatts"]
 max_export_kilowatts = case_data["max_export_kilowatts"]
@@ -179,18 +188,20 @@ building_assets.append(building)
 
 # STEP 4: setup the market
 bus_id_market = bus_1
-market = markets.Market(network_bus_id=bus_id_market,
-                        market_time_series_resolution_in_minutes=market_time_interval_in_hours,
-                        export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
-                        import_periods=import_periods,
-                        max_demand_charge_in_euros_per_kWh=demand_charge_in_euros_per_kilowatt,
-                        max_import_kilowatts=max_import_kilowatts,
-                        max_export_kilowatts=max_export_kilowatts,
-                        offered_kW_in_frequency_response=offered_kilowatts_in_frequency_response,
-                        max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
-                        min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
-                        frequency_response_price_in_euros_per_kilowatt_hour=
-                        frequency_response_price_in_euros_per_kilowatt_hour)
+market = get_market(case_data=case_data,
+                    import_period_prices=import_period_prices,
+                    network_bus_id=bus_id_market,
+                    market_time_series_resolution_in_hours=market_time_interval_in_hours,
+                    export_prices_in_euros_per_kilowatt_hour=export_prices_in_euros_per_kilowatt_hour,
+                    import_periods=import_periods,
+                    max_demand_charge_in_euros_per_kilowatt_hour=demand_charge_in_euros_per_kilowatt,
+                    max_import_kilowatts=max_import_kilowatts,
+                    max_export_kilowatts=max_export_kilowatts,
+                    offered_kilowatt_in_frequency_response=offered_kilowatts_in_frequency_response,
+                    max_frequency_response_state_of_charge=max_frequency_response_state_of_charge,
+                    min_frequency_response_state_of_charge=min_frequency_response_state_of_charge,
+                    frequency_response_price_in_euros_per_kilowatt_hour=
+                    frequency_response_price_in_euros_per_kilowatt_hour)
 
 # STEP 5: setup the energy system
 energy_system = energy_system.EnergySystem(storage_assets=storage_assets,
