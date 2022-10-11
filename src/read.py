@@ -61,6 +61,5 @@ def get_import_period_prices_from_yaml(case_data: dict) -> List[dict]:
     return case_data['import_period_prices']
 
 
-def get_specific_import_price(case_data: dict, period: str) -> float:
-    import_period_prices = get_import_period_prices_from_yaml(case_data=case_data)
-    return import_period_prices[period]
+def get_specific_import_price(import_period_prices: dict, import_period: str) -> float:
+    return import_period_prices[import_period]

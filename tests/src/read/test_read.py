@@ -44,10 +44,13 @@ class TestRead(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_get_import_price_for_specific_period(self) -> None:
-        yaml_file = '01_january_no_flexibility.yaml'
-        file_path = 'tests/src/read'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        import_period_prices = {'P1': 0.1395,
+                                'P2': 0.1278,
+                                'P3': 0.1110,
+                                'P4': 0.1014,
+                                'P5': 0.0927,
+                                'P6': 0.0871}
         period = 'P3'
-        result = get_specific_import_price(case_data=case_data, period=period)
+        result = get_specific_import_price(import_period_prices=import_period_prices, import_period=period)
         expected_result = 0.1110
         self.assertEqual(expected_result, result)
