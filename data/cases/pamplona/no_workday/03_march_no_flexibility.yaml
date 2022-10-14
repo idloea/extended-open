@@ -1,13 +1,13 @@
 # Data
 data_path: "data/"
-photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-12_pamplona.csv"
+photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2022-01-03_pamplona.csv"
 electric_load_data_file: "Building/Loads_1min_2014JAN.csv"  # TODO: change to more realistic case
 
 # Winter/summer
 is_winter: False
 
 # Photovoltaic generation
-rated_photovoltaic_kilowatts: 400
+rated_photovoltaic_kilowatts: 0
 
 # Time series resolutions
 simulation_time_series_resolution_in_minutes: 1
@@ -44,9 +44,8 @@ import_period_prices: {'P1': 0.1395,
                        'P4': 0.1014,
                        'P5': 0.0927,
                        'P6': 0.0871}
-import_periods: {'P1': [9, 10, 11, 12 ,13, 18, 19, 20, 21],
-                 'P2': [8, 14, 15, 16, 17, 22, 23],
-                 'P6': [0, 1, 2, 3, 4, 5, 6, 7]}
+import_periods: {'P6': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]}
 demand_charge_in_euros_per_kilowatt: 0  # Already considered in the import_period_prices
 max_import_kilowatts: 500
 max_export_kilowatts: -500
@@ -66,5 +65,5 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20211215_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20220315_ambient_temperature_upna.csv'
 market: Spanish
