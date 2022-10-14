@@ -38,13 +38,16 @@ export_prices_in_euros_per_kilowatt_hour: 0.189  # Average between 2022/01/01-20
 # Spanish Electric Tariff: 6.1TD (https://tarifasgasluz.com/pymes/tarifas-luz/seis-periodos)
 # Iberdrola prices from here: https://tarifasgasluz.com/pymes/tarifas-luz#nueva-tarifa-pyme
 # Periods from here: La nueva factura de la luz 7. INDUSTRIAS (tarifas 6.1 a 6.4).pdf
-import_periods: [{'P1': [0, 0.1395]},
-                 {'P2': [0, 0.1278]},
-                 {'P3': [0, 0.1110]},
-                 {'P4': [9, 0.1014]},
-                 {'P5': [7, 0.0927]},
-                 {'P6': [8 , 0.0871]}]
-demand_charge_in_euros_per_kilowatt: 0.12  # price per kW for the maximum demand
+import_period_prices: {'P1': 0.1395,
+                       'P2': 0.1278,
+                       'P3': 0.1110,
+                       'P4': 0.1014,
+                       'P5': 0.0927,
+                       'P6': 0.0871}
+import_periods: {'P4': [9, 10, 11, 12 ,13, 18, 19, 20, 21],
+                 'P5': [8, 14, 15, 16, 17, 22, 23],
+                 'P6': [0, 1, 2, 3, 4, 5, 6, 7]}
+demand_charge_in_euros_per_kilowatt: 0  # Already considered in the import_period_prices
 max_import_kilowatts: 500
 max_export_kilowatts: -500
 
@@ -64,3 +67,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 # Data Strategy
 data_strategy: MeteoNavarra
 ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20211015_ambient_temperature_upna.csv'
+market: Spanish
