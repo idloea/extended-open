@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from src import assets, markets, energy_system
+from src import assets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
 from src.plot.plots import plot_demand_base_and_total_imported_power, plot_building_internal_temperature, \
@@ -14,6 +14,7 @@ from src.ambient_temperature import get_ambient_temperature_in_degree_celsius_by
 
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
+case_name = yaml_file.split('\\')[-1].split('.')[0]
 case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
 data_path = case_data["data_path"]
 market_scenario = case_data['market']
@@ -236,19 +237,20 @@ for non_dispatchable_asset in range(len(non_distpachable_assets)):
     bus_id = non_distpachable_assets[non_dispatchable_asset].bus_id
     active_power_demand_base_in_kilowatts += non_distpachable_assets[non_dispatchable_asset].active_power_in_kilowatts
 
-revenue = market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours)
+revenue = \
+    round(market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours), 2)
 print('Revenue in euros:', revenue)
 
 plot_demand_base_and_total_imported_power(
     simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
     number_of_time_intervals_per_day=number_of_time_intervals_per_day,
     active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
-    market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=yaml_file)
+    market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=case_name, revenue=revenue)
 
 plot_ambient_temperature(
     energy_management_system_time_series_resolution_in_hours=energy_management_system_time_series_resolution_in_hours,
     number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-    ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=yaml_file)
+    ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=case_name)
 
 number_of_buildings = len(building_assets)
 plot_building_internal_temperature(number_of_buildings=number_of_buildings,
@@ -256,7 +258,7 @@ plot_building_internal_temperature(number_of_buildings=number_of_buildings,
                                    energy_management_system_time_series_resolution_in_hours,
                                    number_of_energy_management_time_intervals_per_day=
                                    number_of_energy_management_time_intervals_per_day,
-                                   building_assets=building_assets)
+                                   building_assets=building_assets, case=case_name)
 
 plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
                                              simulation_time_series_resolution_in_hours=
@@ -269,7 +271,7 @@ plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_build
                                              building_assets=building_assets,
                                              max_consumed_electric_heating_kilowatts=None,
                                              max_consumed_electric_cooling_kilowatts=
-                                             max_consumed_electric_cooling_kilowatts)
+                                             max_consumed_electric_cooling_kilowatts, case=case_name)
 
 plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
                                              simulation_time_series_resolution_in_hours=
@@ -282,4 +284,4 @@ plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_build
                                              building_assets=building_assets,
                                              max_consumed_electric_heating_kilowatts=
                                              max_consumed_electric_heating_kilowatts,
-                                             max_consumed_electric_cooling_kilowatts=None)
+                                             max_consumed_electric_cooling_kilowatts=None, case=case_name)
