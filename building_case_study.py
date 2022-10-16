@@ -255,40 +255,39 @@ save_plot_ambient_temperature(
 number_of_buildings = len(building_assets)
 save_plot_building_internal_temperature(number_of_buildings=number_of_buildings,
                                         energy_management_system_time_series_resolution_in_hours=
-                                   energy_management_system_time_series_resolution_in_hours,
+                                        energy_management_system_time_series_resolution_in_hours,
                                         number_of_energy_management_time_intervals_per_day=
-                                   number_of_energy_management_time_intervals_per_day,
+                                        number_of_energy_management_time_intervals_per_day,
                                         building_assets=building_assets, case=case_name)
 
 save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
                                                   simulation_time_series_resolution_in_hours=
-                                             simulation_time_series_resolution_in_hours,
+                                                  simulation_time_series_resolution_in_hours,
                                                   number_of_time_intervals_per_day=number_of_time_intervals_per_day,
                                                   energy_management_system_time_series_resolution_in_hours=
-                                             energy_management_system_time_series_resolution_in_hours,
+                                                  energy_management_system_time_series_resolution_in_hours,
                                                   number_of_energy_management_time_intervals_per_day=
-                                             number_of_energy_management_time_intervals_per_day,
+                                                  number_of_energy_management_time_intervals_per_day,
                                                   building_assets=building_assets,
                                                   max_consumed_electric_heating_kilowatts=None,
                                                   max_consumed_electric_cooling_kilowatts=
-                                             max_consumed_electric_cooling_kilowatts, case=case_name)
+                                                  max_consumed_electric_cooling_kilowatts, case=case_name)
 
 save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
                                                   simulation_time_series_resolution_in_hours=
-                                             simulation_time_series_resolution_in_hours,
+                                                  simulation_time_series_resolution_in_hours,
                                                   number_of_time_intervals_per_day=number_of_time_intervals_per_day,
                                                   energy_management_system_time_series_resolution_in_hours=
-                                             energy_management_system_time_series_resolution_in_hours,
+                                                  energy_management_system_time_series_resolution_in_hours,
                                                   number_of_energy_management_time_intervals_per_day=
-                                             number_of_energy_management_time_intervals_per_day,
+                                                  number_of_energy_management_time_intervals_per_day,
                                                   building_assets=building_assets,
                                                   max_consumed_electric_heating_kilowatts=
-                                             max_consumed_electric_heating_kilowatts,
+                                                  max_consumed_electric_heating_kilowatts,
                                                   max_consumed_electric_cooling_kilowatts=None, case=case_name)
 
 save_plot_import_periods(energy_management_system_time_series_resolution_in_hours=
-                    energy_management_system_time_series_resolution_in_hours,
+                         energy_management_system_time_series_resolution_in_hours,
                          number_of_energy_management_time_intervals_per_day=
-                    number_of_energy_management_time_intervals_per_day,
+                         number_of_energy_management_time_intervals_per_day,
                          import_periods=import_periods, case=case_name)
-
