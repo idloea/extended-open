@@ -3,8 +3,8 @@ import numpy as np
 from src import assets, energy_system
 from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
-from src.plot.plots import plot_demand_base_and_total_imported_power, plot_building_internal_temperature, \
-    plot_hvac_consumed_active_power_in_kilowatts, plot_ambient_temperature
+from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
+    save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
@@ -241,47 +241,54 @@ revenue = \
     round(market.calculate_revenue(-market_active_power_in_kilowatts, simulation_time_series_resolution_in_hours), 2)
 print('Revenue in euros:', revenue)
 
-plot_demand_base_and_total_imported_power(
+save_plot_demand_base_and_total_imported_power(
     simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
     number_of_time_intervals_per_day=number_of_time_intervals_per_day,
     active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
     market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=case_name, revenue=revenue)
 
-plot_ambient_temperature(
+save_plot_ambient_temperature(
     energy_management_system_time_series_resolution_in_hours=energy_management_system_time_series_resolution_in_hours,
     number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
     ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=case_name)
 
 number_of_buildings = len(building_assets)
-plot_building_internal_temperature(number_of_buildings=number_of_buildings,
-                                   energy_management_system_time_series_resolution_in_hours=
+save_plot_building_internal_temperature(number_of_buildings=number_of_buildings,
+                                        energy_management_system_time_series_resolution_in_hours=
                                    energy_management_system_time_series_resolution_in_hours,
-                                   number_of_energy_management_time_intervals_per_day=
+                                        number_of_energy_management_time_intervals_per_day=
                                    number_of_energy_management_time_intervals_per_day,
-                                   building_assets=building_assets, case=case_name)
+                                        building_assets=building_assets, case=case_name)
 
-plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
-                                             simulation_time_series_resolution_in_hours=
+save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
+                                                  simulation_time_series_resolution_in_hours=
                                              simulation_time_series_resolution_in_hours,
-                                             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                             energy_management_system_time_series_resolution_in_hours=
+                                                  number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                                                  energy_management_system_time_series_resolution_in_hours=
                                              energy_management_system_time_series_resolution_in_hours,
-                                             number_of_energy_management_time_intervals_per_day=
+                                                  number_of_energy_management_time_intervals_per_day=
                                              number_of_energy_management_time_intervals_per_day,
-                                             building_assets=building_assets,
-                                             max_consumed_electric_heating_kilowatts=None,
-                                             max_consumed_electric_cooling_kilowatts=
+                                                  building_assets=building_assets,
+                                                  max_consumed_electric_heating_kilowatts=None,
+                                                  max_consumed_electric_cooling_kilowatts=
                                              max_consumed_electric_cooling_kilowatts, case=case_name)
 
-plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
-                                             simulation_time_series_resolution_in_hours=
+save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
+                                                  simulation_time_series_resolution_in_hours=
                                              simulation_time_series_resolution_in_hours,
-                                             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-                                             energy_management_system_time_series_resolution_in_hours=
+                                                  number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                                                  energy_management_system_time_series_resolution_in_hours=
                                              energy_management_system_time_series_resolution_in_hours,
-                                             number_of_energy_management_time_intervals_per_day=
+                                                  number_of_energy_management_time_intervals_per_day=
                                              number_of_energy_management_time_intervals_per_day,
-                                             building_assets=building_assets,
-                                             max_consumed_electric_heating_kilowatts=
+                                                  building_assets=building_assets,
+                                                  max_consumed_electric_heating_kilowatts=
                                              max_consumed_electric_heating_kilowatts,
-                                             max_consumed_electric_cooling_kilowatts=None, case=case_name)
+                                                  max_consumed_electric_cooling_kilowatts=None, case=case_name)
+
+save_plot_import_periods(energy_management_system_time_series_resolution_in_hours=
+                    energy_management_system_time_series_resolution_in_hours,
+                         number_of_energy_management_time_intervals_per_day=
+                    number_of_energy_management_time_intervals_per_day,
+                         import_periods=import_periods, case=case_name)
+
