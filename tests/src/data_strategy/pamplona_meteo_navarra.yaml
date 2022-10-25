@@ -4,8 +4,7 @@
 # data
 data_path: "data/"
 photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-08_pamplona.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file: "Building/Loads_1min_2013JUN.csv"  # TODO: change to more realistic case (Check OPENStudio). Take the US
-                                                   # default buildings from their energy department
+electric_load_data_file: 'data/electric_load/Commercial-Office.csv'
 
 # Winter/summer
 is_winter: False
@@ -68,4 +67,4 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'tests/src/ambient_temperature/20220717_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'tests/src/data_strategy/20220717_ambient_temperature_upna.csv'

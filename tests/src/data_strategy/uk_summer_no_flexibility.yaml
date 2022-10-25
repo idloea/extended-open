@@ -4,7 +4,7 @@
 # data
 data_path: "data/Building/"
 photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"
-electric_load_data_file: "Loads_1min_2013JUN.csv"
+electric_load_data_file: "tests/src/data_strategy/Loads_1min_2013JUN.csv"
 
 # Winter/summer
 is_winter: False

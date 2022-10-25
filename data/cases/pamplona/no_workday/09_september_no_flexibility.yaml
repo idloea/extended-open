@@ -65,5 +65,5 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20210915_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'data/data_strategy/pamplona/20210915_ambient_temperature_upna.csv'
 market: Spanish

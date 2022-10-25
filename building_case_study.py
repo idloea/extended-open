@@ -10,7 +10,8 @@ import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four, \
     check_unique_hours_of_daily_periods, check_all_hours_of_daily_periods
-from src.ambient_temperature import get_ambient_temperature_in_degree_celsius_by_data_strategy
+from src.data_strategy import get_ambient_temperature_in_degree_celsius_by_data_strategy, \
+    get_building_electric_loads_by_data_strategy
 
 yaml_file = sys.argv[1]
 file_path = 'data/cases'
@@ -23,9 +24,7 @@ market_scenario = case_data['market']
 photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file"]
 photovoltaic_generation_data = read_open_csv_files(path=data_path,
                                                    csv_file=photovoltaic_generation_data_file)
-electric_load_data_file = case_data[
-    "electric_load_data_file"]  # TODO: why is the demand and the imports different in the final plot?
-electric_loads = read_open_csv_files(path=data_path, csv_file=electric_load_data_file)
+electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data)
 
 # Photovoltaic generation
 sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_data, 1)
@@ -154,7 +153,7 @@ non_dispatchable_photovoltaic_asset = assets.NonDispatchableAsset(
     reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere)
 non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
 
-electric_load_active_power_in_kilowatts = np.sum(electric_loads, 1)
+electric_load_active_power_in_kilowatts = np.array(electric_loads)
 electric_load_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
 non_dispatchable_electric_load_at_bus_3 = assets.NonDispatchableAsset(
     simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,

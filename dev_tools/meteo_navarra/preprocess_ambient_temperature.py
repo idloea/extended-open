@@ -27,7 +27,7 @@ def adapt_ambient_temperature_data_from_solar_time_to_regular_time(read_path: st
 
 
 if __name__ == '__main__':
-    read_path = 'data/ambient_temperature/pamplona'
+    read_path = 'data/data_strategy/pamplona'
     read_file = '202209_ambient_temperature.csv'
     start_date = '2022-09-15'
     end_date = '2022-09-16'
