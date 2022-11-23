@@ -7,6 +7,7 @@ import pandas as pd
 from scipy import signal
 from scipy.interpolate import interpolate
 
+from src.interpolation import get_extrapolated_array_from_hour_to_minutes
 from src.read import read_preprocessing_meteo_navarra_ambient_temperature_csv_data, \
     read_meteo_navarra_ambient_temperature_csv_data
 
@@ -59,13 +60,7 @@ class MeteoNavarraData(DataStrategy):
         specific_day = datetime.date(year, month, day)
         specific_day_df = df[df['Date'] == specific_day]
         active_power_in_kilowatts_per_hour = np.array(specific_day_df['ActivePower_kW'])
-        hours_per_day = 24
-        hours_per_day_array = np.arange(0, hours_per_day)
-        extrapolation_function = interpolate.interp1d(x=hours_per_day_array, y=active_power_in_kilowatts_per_hour,
-                                                      fill_value='extrapolate')
-        minutes_per_day = 24 * 60
-        minutes_per_day_array = np.arange(0, minutes_per_day)
-        return extrapolation_function(minutes_per_day_array)
+        return get_extrapolated_array_from_hour_to_minutes(array_in_hours=active_power_in_kilowatts_per_hour)
 
 
 def get_ambient_temperature_in_degree_celsius_by_data_strategy(

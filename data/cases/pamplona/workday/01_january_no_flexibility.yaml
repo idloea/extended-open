@@ -29,7 +29,7 @@ min_inside_degree_celsius: 21  # RITE Tabla 1.4.1.1 Condiciones interiores de di
 initial_inside_degree_celsius: 21
 max_consumed_electric_heating_kilowatts: 400
 max_consumed_electric_cooling_kilowatts: 400
-heat_pump_coefficient_of_performance: 3
+heat_pump_coefficient_of_performance: 3  # 1 electric kWh = 3 thermal kWh
 chiller_coefficient_of_performance: 1
 building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius: 500
 building_thermal_resistance_in_degree_celsius_per_kilowatts: 0.0337
@@ -49,8 +49,8 @@ import_periods: {'P1': [9, 10, 11, 12 ,13, 18, 19, 20, 21],
                  'P2': [8, 14, 15, 16, 17, 22, 23],
                  'P6': [0, 1, 2, 3, 4, 5, 6, 7]}
 demand_charge_in_euros_per_kilowatt: 0  # Already considered in the import_period_prices
-max_import_kilowatts: 1000
-max_export_kilowatts: -1000
+max_import_kilowatts: 500
+max_export_kilowatts: -500
 
 # Flexibility
 offered_kilowatts_in_frequency_response: 0

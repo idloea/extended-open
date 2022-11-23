@@ -83,7 +83,7 @@ class TestBuildingElectricLoads(unittest.TestCase):  # TODO: would it make sense
                                                                                             month=month)
         building_electric_loads_random_slice = building_electric_loads[800:810]
         result = np.round(building_electric_loads_random_slice[:8], 1)
-        expected_result = np.array([2086.9, 2089.3, 2091.7, 2094.1, 2096.5, 2098.9, 2101.3, 2103.7])
+        expected_result = np.array([3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6, 3.6])
         np.testing.assert_equal(expected_result, result)
 
     def test_get_building_electric_loads_by_data_strategy_UK(self):

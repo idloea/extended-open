@@ -1,7 +1,8 @@
 # Data
 data_path: "data/"
 photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-07_pamplona.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file: "Building/Loads_1min_2013JUN.csv"  # TODO: change to more realistic case
+electric_load_data_file: 'data/electric_load/Commercial-Office.csv'
+month: 7
 
 # Winter/summer
 is_winter: False

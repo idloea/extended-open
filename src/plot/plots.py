@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,7 +10,7 @@ def save_plot_demand_base_and_total_imported_power(simulation_time_series_resolu
                                                    number_of_time_intervals_per_day: int,
                                                    active_power_demand_base_in_kilowatts: np.ndarray,
                                                    market_active_power_in_kilowatts: np.ndarray, case: str,
-                                                   revenue: float) -> None:
+                                                   revenue: float, current_time: str, plots_path: str) -> None:
     hours = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day)
     max_time = max(hours)
     figure = plt.figure(num=None, figsize=(6, 3), dpi=80, facecolor='w', edgecolor='k')
@@ -25,13 +26,13 @@ def save_plot_demand_base_and_total_imported_power(simulation_time_series_resolu
     plt.legend()
     plt.grid(True, alpha=0.5)
     plt.tight_layout()
-    figure.savefig(f'results/plots/{case}_demand_base_and_total_imported_power.png')
+    figure.savefig(f'{plots_path}/{current_time}_{case}_demand_base_and_total_imported_power.png')
 
 
 def save_plot_ambient_temperature(energy_management_system_time_series_resolution_in_hours: float,
                                   number_of_energy_management_time_intervals_per_day: int,
                                   ambient_temperature_in_degree_celsius: np.ndarray,
-                                  case: str) -> None:
+                                  case: str, current_time: str, plots_path: str) -> None:
     figure = plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
     hours = energy_management_system_time_series_resolution_in_hours * \
             np.arange(number_of_energy_management_time_intervals_per_day)
@@ -46,13 +47,14 @@ def save_plot_ambient_temperature(energy_management_system_time_series_resolutio
     plt.xticks(np.arange(0, max_time, step=1))
     plt.grid(True, alpha=0.5)
     plt.tight_layout()
-    figure.savefig(f'results/plots/{case}_ambient_temperature.png')
+    figure.savefig(f'{plots_path}/{current_time}_{case}_ambient_temperature.png')
 
 
 def save_plot_building_internal_temperature(number_of_buildings: int,
                                             energy_management_system_time_series_resolution_in_hours: float,
                                             number_of_energy_management_time_intervals_per_day: int,
-                                            building_assets: List[BuildingAsset], case: str) -> None:
+                                            building_assets: List[BuildingAsset], case: str, current_time: str,
+                                            plots_path: str) -> None:
     figure = plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
     energy_management_system_hours = energy_management_system_time_series_resolution_in_hours * np.arange(
         number_of_energy_management_time_intervals_per_day)
@@ -79,7 +81,7 @@ def save_plot_building_internal_temperature(number_of_buildings: int,
     plt.legend(loc='center right')
     plt.grid(alpha=0.5)
     plt.tight_layout()
-    figure.savefig(f'results/plots/{case}_building_internal_temperature.png')
+    figure.savefig(f'{plots_path}/{current_time}_{case}_building_internal_temperature.png')
 
 
 def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
@@ -90,7 +92,7 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
                                                       building_assets: List[BuildingAsset],
                                                       max_consumed_electric_heating_kilowatts: int or None,
                                                       max_consumed_electric_cooling_kilowatts: int or None,
-                                                      case: str) -> None:
+                                                      case: str, current_time: str, plots_path: str) -> None:
     figure = plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
     hours = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day)
 
@@ -121,12 +123,12 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
     plt.grid(True, alpha=0.5)
     plt.legend(loc='upper right')
     plt.grid(alpha=0.5)
-    figure.savefig(f'results\\plots\\{case}_hvac_consumed_active_power_in_kilowatts.png')
+    figure.savefig(f'{plots_path}\\{current_time}_{case}_hvac_consumed_active_power_in_kilowatts.png')
 
 
 def save_plot_import_periods(energy_management_system_time_series_resolution_in_hours: float,
                              number_of_energy_management_time_intervals_per_day: int,
-                             import_periods: dict, case: str) -> None:
+                             import_periods: dict, case: str, current_time: str, plots_path: str) -> None:
     figure = plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
     for import_period_name, import_period_hours in import_periods.items():
         random_height = 100
@@ -143,4 +145,4 @@ def save_plot_import_periods(energy_management_system_time_series_resolution_in_
     plt.grid(True, alpha=0.5)
     plt.legend(loc='upper right')
     plt.tight_layout()
-    figure.savefig(f'results\\plots\\{case}_import_periods.png')
+    figure.savefig(f'{plots_path}\\{current_time}_{case}_import_periods.png')
