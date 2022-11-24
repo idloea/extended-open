@@ -4,9 +4,6 @@ photovoltaic_generation_data_file: "solar_radiation/pamplona/1_min/2021-01-10_pa
 electric_load_data_file: 'data/electric_load/Commercial-Office.csv'
 month: 10
 
-# Winter/summer
-is_winter: False
-
 # Photovoltaic generation
 rated_photovoltaic_kilowatts: 400
 
@@ -67,5 +64,5 @@ length_from_bus_2_to_bus_3_in_km: 0.1
 
 # Data Strategy
 data_strategy: MeteoNavarra
-ambient_temperature_file_path: 'data/data_strategy/pamplona/20211015_ambient_temperature_upna.csv'
+ambient_temperature_file_path: 'data/ambient_temperature/pamplona/20211015_ambient_temperature_upna.csv'
 market: Spanish
