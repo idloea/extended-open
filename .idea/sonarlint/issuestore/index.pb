@@ -29,10 +29,6 @@ m
 =data/cases/pamplona/no_workday/01_january_no_flexibility.yaml,e\1\e10d2543ccc4598e6d02ee0f15a44d9522abab77
 b
 2data/electric_load/Commercial-450-bed Hospital.csv,5\c\5cd04160356cf6083e2c1e0bc97ae5b57c006977
-`
-0data/electric_load/Industrial-Pharmaceutical.csv,b\4\b46d935250d214bf88c5f0d19789c408d77375bc
-f
-6data/electric_load/Industrial-Plastic Manufacturer.csv,1\5\15bce6947d3b44c30c7343a565a63ddb9cb71efc
 k
 ;data/electric_load/Industrial-2-shift Fabricated Metals.csv,6\6\66cacc9b9350a0a156a64cfbfab13d6928bd9fe5
 ]
@@ -69,14 +65,10 @@ i
 9dev_tools/meteo_navarra/preprocess_ambient_temperature.py,9\8\9895290d1b1200188b4e748f44dbd67c5ccba3ad
 [
 +data/electric_load/Reference-Residental.csv,3\3\339d18006b7c72680918e458f585f122280f9131
-f
-6data/electric_load/Industrial-General Manufacturer.csv,b\2\b29276a071a2c8285d864872e0fb227a976d494d
 _
 /data/electric_load/Commercial-Middle School.csv,6\7\6745668b6593d2cfe973ab4e3ea850288801db55
 k
 ;data/cases/pamplona_apr_may_oct_workday_no_flexibility.yaml,e\c\ec283a6fb93a14806b1605498031c8fe9bd9e458
-;
-src/read.py,e\c\ec9e6150721976cacf3a708d5d63863dc899dec3
 ^
 .tests/src/data_strategy/Loads_1min_2013JUN.csv,6\4\643e5e622192b2949fba7473073d713888c259d3
 ]
@@ -89,11 +81,31 @@ R
 -data/electric_load/Commercial-Supermarket.csv,d\0\d04512b295d90618367eba6b9c8d4218386c8078
 V
 &data/electric_load/Reference-Hotel.csv,f\c\fc5030f8d2e01e0ba1d747d911e3427966705ed5
-D
-src/energy_system.py,0\0\0072a54b573d0b657c401bf901693a6f26589ab9
 X
 (data/electric_load/Commercial-Office.csv,e\8\e8904528fd111e76314ab2a2ebd34c6184a6e30b
 W
 'data/electric_load/Reference-Office.csv,2\7\27ac68c981b317ea69bb4094be21d9aabdf815a6
 N
 tests/src/test_temperatures.py,e\e\ee614c5008d1237c178ee9a4ef546e4137b9e508
+D
+src/data_strategy.py,3\9\39992790cc0586d53fe6e1bba2a070a3a3c08cb1
+O
+tests/src/test_interpolation.py,1\a\1aacb04f94360345e5fb22c757448f2e18c0f5a0
+D
+src/interpolation.py,0\6\061a62a047a83fa2391e306795696294b90c092d
+E
+src/time_intervals.py,7\4\74690db82914a9bfbe743dd21463f27665db38ad
+]
+-tests/src/data_strategy/test_data_strategy.py,7\2\727a5b012f65c4ea4b7f16d87714014c02924db5
+;
+src/read.py,e\c\ec9e6150721976cacf3a708d5d63863dc899dec3
+D
+src/energy_system.py,0\0\0072a54b573d0b657c401bf901693a6f26589ab9
+B
+data/PVpu_1min.csv,1\c\1ce4f88a3d4ba072bfd1eb38f730f9d4678bf72e
+f
+6data/electric_load/Industrial-General Manufacturer.csv,b\2\b29276a071a2c8285d864872e0fb227a976d494d
+f
+6data/electric_load/Industrial-Plastic Manufacturer.csv,1\5\15bce6947d3b44c30c7343a565a63ddb9cb71efc
+`
+0data/electric_load/Industrial-Pharmaceutical.csv,b\4\b46d935250d214bf88c5f0d19789c408d77375bc

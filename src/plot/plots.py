@@ -29,6 +29,29 @@ def save_plot_demand_base_and_total_imported_power(simulation_time_series_resolu
     figure.savefig(f'{plots_path}/{current_time}_{case}_demand_base_and_total_imported_power.png')
 
 
+def save_plot_demand_base_and_total_imported_power(simulation_time_series_resolution_in_hours: float,
+                                                   number_of_time_intervals_per_day: int,
+                                                   active_power_demand_base_in_kilowatts: np.ndarray,
+                                                   market_active_power_in_kilowatts: np.ndarray, case: str,
+                                                   revenue: float, current_time: str, plots_path: str) -> None:
+    hours = simulation_time_series_resolution_in_hours * np.arange(number_of_time_intervals_per_day)
+    max_time = max(hours)
+    figure = plt.figure(num=None, figsize=(6, 3), dpi=80, facecolor='w', edgecolor='k')
+    plt.plot(hours, active_power_demand_base_in_kilowatts, '--', label='Demand')
+    plt.plot(hours, market_active_power_in_kilowatts, label='Imports')
+    plt.suptitle('Base Demand vs Imports from the Network')
+    subtitle = 'Case: ' + str(case) + ' - ' + 'Revenue[€]: ' + str(revenue)
+    plt.title(subtitle)
+    plt.ylabel('Power [kW]')
+    plt.xlabel('Time [h]')
+    plt.xlim(0, max_time)
+    plt.xticks(np.arange(0, max_time, step=1))
+    plt.legend()
+    plt.grid(True, alpha=0.5)
+    plt.tight_layout()
+    figure.savefig(f'{plots_path}/{current_time}_{case}_demand_base_and_total_imported_power.png')
+
+
 def save_plot_ambient_temperature(energy_management_system_time_series_resolution_in_hours: float,
                                   number_of_energy_management_time_intervals_per_day: int,
                                   ambient_temperature_in_degree_celsius: np.ndarray,

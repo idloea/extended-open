@@ -51,7 +51,7 @@ class BuildingAsset(Asset):
                  building_thermal_resistance_in_degree_celsius_per_kilowatts: float,
                  heat_pump_coefficient_of_performance: float,
                  chiller_coefficient_of_performance: float,
-                 ambient_temperature_in_degree_celsius: float,
+                 ambient_temperature_in_degree_celsius: np.ndarray,
                  bus_id: int,
                  simulation_time_series_hour_resolution: float,
                  energy_management_system_time_series_resolution_in_hours: float):
