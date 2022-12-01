@@ -60,17 +60,3 @@ def get_import_period_prices_from_yaml(case_data: dict) -> List[dict]:
 
 def get_specific_import_price(import_period_prices: dict, import_period: str) -> float:
     return import_period_prices[import_period]
-
-
-def get_csv_file_name_from_path(csv_file_path: str) -> str:
-    return csv_file_path.split('/')[-1].split('.')[0]
-
-
-def get_case_name(case_data: dict) -> str:
-    photovoltaic_generation_data_file_path = case_data['photovoltaic_generation_data_file_path']
-    electric_load_data_file_path = case_data['electric_load_data_file_path']
-    photovoltaic_generation_data_file = \
-        get_csv_file_name_from_path(csv_file_path=photovoltaic_generation_data_file_path)
-    electric_load_data_file = get_csv_file_name_from_path(csv_file_path=electric_load_data_file_path)
-    return photovoltaic_generation_data_file + '_' + electric_load_data_file
-

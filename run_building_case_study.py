@@ -1,3 +1,5 @@
+from datetime import datetime
+from pathlib import Path
 from src.building_case_study import run
 
 if __name__ == "__main__":
@@ -96,20 +98,30 @@ if __name__ == "__main__":
         'length_from_bus_2_to_bus_3_in_km': length_from_bus_2_to_bus_3_in_km
 
     }
-    cases_file_path = 'data/cases/pamplona/workday'
-    yaml_files = ['01_january_no_flexibility.yaml',
-                  '02_february_no_flexibility.yaml',
-                  '03_march_no_flexibility.yaml',
-                  '04_april_no_flexibility.yaml',
-                  '05_may_no_flexibility.yaml',
-                  '06_june_no_flexibility.yaml',
-                  '07_july_no_flexibility.yaml',
-                  '08_august_no_flexibility.yaml',
-                  '09_september_no_flexibility.yaml',
-                  '10_october_no_flexibility.yaml',
-                  '11_november_no_flexibility.yaml',
-                  '12_december_no_flexibility.yaml'
+    cases_file_path = 'data/cases'
+    yaml_files = ['01.yaml',
+                  '02.yaml',
+                  '03.yaml',
+                  '04.yaml',
+                  '05.yaml',
+                  '06.yaml',
+                  '07.yaml',
+                  '08.yaml',
+                  '09.yaml',
+                  '10.yaml',
+                  '11.yaml',
+                  '12.yaml'
                   ]
-    results_path = 'results'
-    run(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
-        results_path=results_path)
+    current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+    results_path = Path(f'results/{current_time}')
+    results_path.mkdir(parents=True, exist_ok=True)
+
+    path = Path('data/electric_load')
+    electric_load_file_list = []
+    for entry in path.iterdir():
+        electric_load_file_list.append(entry.name)
+
+    for electric_load_file in electric_load_file_list:
+        print(f'RUNNING {electric_load_file} ELECTRIC LOAD')
+        run(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
+            results_path=results_path, electric_load_file=electric_load_file)

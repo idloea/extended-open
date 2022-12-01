@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import List
 import numpy as np
 from src import assets, energy_system
@@ -8,7 +9,7 @@ from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
 from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
     save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods
-from src.read import read_open_csv_files, read_case_data_from_yaml_file, get_case_name
+from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four, \
@@ -17,7 +18,8 @@ from src.data_strategy import get_ambient_temperature_in_degree_celsius_by_data_
     get_building_electric_loads_by_data_strategy
 
 
-def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: str) -> None:
+def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: Path,
+        electric_load_file: str) -> None:
     for yaml_file in yaml_files:
         print('YAML FILE:', yaml_file)
         case_data = read_case_data_from_yaml_file(cases_file_path=cases_file_path, file_name=yaml_file)
@@ -26,7 +28,8 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
         # STEP 0: Load data
         photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file_path"]
         photovoltaic_generation_data = read_open_csv_files(csv_file_path=photovoltaic_generation_data_file)
-        electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data)
+        electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data,
+                                                                      electric_load_file=electric_load_file)
 
         # Photovoltaic generation
         sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_data, 1)
@@ -249,21 +252,20 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
         print('Revenue in euros:', revenue)
 
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-        case_name = get_case_name(case_data=case_data)
-        plots_path = f'{results_path}/{current_time}_{case_name}'
+        plots_path = f'{results_path}/{current_time}_{electric_load_file}'
         os.mkdir(path=plots_path)
         save_plot_demand_base_and_total_imported_power(
             simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
             active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
-            market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=case_name, revenue=revenue,
+            market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=electric_load_file, revenue=revenue,
             current_time=current_time, plots_path=plots_path)
 
         save_plot_ambient_temperature(
             energy_management_system_time_series_resolution_in_hours=
             energy_management_system_time_series_resolution_in_hours,
             number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-            ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=case_name,
+            ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=electric_load_file,
             current_time=current_time, plots_path=plots_path)
 
         number_of_buildings = len(building_assets)
@@ -272,7 +274,7 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
                                                 energy_management_system_time_series_resolution_in_hours,
                                                 number_of_energy_management_time_intervals_per_day=
                                                 number_of_energy_management_time_intervals_per_day,
-                                                building_assets=building_assets, case=case_name,
+                                                building_assets=building_assets, case=electric_load_file,
                                                 current_time=current_time,
                                                 plots_path=plots_path)
 
@@ -287,14 +289,15 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
                                                           building_assets=building_assets,
                                                           max_consumed_electric_heating_kilowatts=None,
                                                           max_consumed_electric_cooling_kilowatts=
-                                                          max_consumed_electric_cooling_kilowatts, case=case_name,
+                                                          max_consumed_electric_cooling_kilowatts,
+                                                          case=electric_load_file,
                                                           current_time=current_time, plots_path=plots_path)
 
         save_plot_import_periods(energy_management_system_time_series_resolution_in_hours=
                                  energy_management_system_time_series_resolution_in_hours,
                                  number_of_energy_management_time_intervals_per_day=
                                  number_of_energy_management_time_intervals_per_day,
-                                 import_periods=import_periods, case=case_name, current_time=current_time,
+                                 import_periods=import_periods, case=electric_load_file, current_time=current_time,
                                  plots_path=plots_path)
 
         general_case_data['photovoltaic_generation_data_file_path'] = case_data['photovoltaic_generation_data_file_path']

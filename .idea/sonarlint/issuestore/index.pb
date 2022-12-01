@@ -1,6 +1,4 @@
 
-X
-(data/cases/uk_summer_no_flexibility.yaml,9\6\969685f9abf2324cbaa8cb2025ed32e9dfc86294
 m
 =tests/src/data_strategy/20220717_ambient_temperature_upna.csv,7\e\7e46c0c723f74cfbea9bf0367f4eb38214ddf96d
 S
@@ -25,10 +23,6 @@ j
 :data/cases/pamplona/no_workday/06_june_no_flexibility.yaml,8\b\8bccdf4c921511d41b1f5c70dd724f2e28e4dcf9
 n
 >data/cases/pamplona/no_workday/02_february_no_flexibility.yaml,8\4\847a3b3a4405e0a715404b7b309dc833ef96ba7b
-m
-=data/cases/pamplona/no_workday/01_january_no_flexibility.yaml,e\1\e10d2543ccc4598e6d02ee0f15a44d9522abab77
-b
-2data/electric_load/Commercial-450-bed Hospital.csv,5\c\5cd04160356cf6083e2c1e0bc97ae5b57c006977
 k
 ;data/electric_load/Industrial-2-shift Fabricated Metals.csv,6\6\66cacc9b9350a0a156a64cfbfab13d6928bd9fe5
 ]
@@ -61,8 +55,6 @@ i
 +data/electric_load/Reference-Residental.csv,3\3\339d18006b7c72680918e458f585f122280f9131
 _
 /data/electric_load/Commercial-Middle School.csv,6\7\6745668b6593d2cfe973ab4e3ea850288801db55
-k
-;data/cases/pamplona_apr_may_oct_workday_no_flexibility.yaml,e\c\ec283a6fb93a14806b1605498031c8fe9bd9e458
 ^
 .tests/src/data_strategy/Loads_1min_2013JUN.csv,6\4\643e5e622192b2949fba7473073d713888c259d3
 ]
@@ -71,8 +63,6 @@ k
 ;data/electric_load/Industrial-1-shift Fabricated Metals.csv,2\1\213ace574aa076984486068e10a8b5926051448d
 R
 "data/electric_load/Residential.csv,a\9\a994fd58cc5ec2f759c811ced1741904cfd730e2
-]
--data/electric_load/Commercial-Supermarket.csv,d\0\d04512b295d90618367eba6b9c8d4218386c8078
 V
 &data/electric_load/Reference-Hotel.csv,f\c\fc5030f8d2e01e0ba1d747d911e3427966705ed5
 X
@@ -97,3 +87,43 @@ f
 0data/electric_load/Industrial-Pharmaceutical.csv,b\4\b46d935250d214bf88c5f0d19789c408d77375bc
 =
 src/assets.py,2\d\2d3030b58ab0ef2a9ead8a4b9d70009945ebdda1
+D
+src/energy_system.py,0\0\0072a54b573d0b657c401bf901693a6f26589ab9
+g
+7tests/building_case_study/test_building_case_studies.py,9\4\94d5d38995e01ca19f960fbe7b7e7393ffebde33
+X
+(tests/src/data_strategy/value_error.yaml,7\8\786061edb2d07321e382b66877e1e7d7cf609f69
+h
+8data/cases/pamplona/workday/03_march_no_flexibility.yaml,6\6\66fb7db4c4a3b1bd6a3ceb42f315c0da1d0afd10
+h
+8data/cases/pamplona/workday/04_april_no_flexibility.yaml,d\6\d65bb010d16e2c45ba16cabb0dfb3a4d9ceca144
+g
+7data/cases/pamplona/workday/06_june_no_flexibility.yaml,5\8\580384c77652cca1344b63b7bab1b8c71db23d77
+c
+3tests/src/data_strategy/pamplona_meteo_navarra.yaml,1\e\1e104b987ee039e862828832360aaa81505e2d16
+e
+5tests/src/data_strategy/uk_summer_no_flexibility.yaml,0\a\0a0587f80e9ea346773c8e256db16ed1babc364f
+j
+:data/cases/pamplona/workday/01_january_no_flexibility.yaml,f\8\f83bfb3a7f524c6272b2d546e36a3dcdfc2c72c8
+k
+;data/cases/pamplona/workday/02_february_no_flexibility.yaml,8\0\80a65b2bf2dcf6b66be7089a306cf03d6876b342
+Q
+!tests/src/markets/test_markets.py,c\6\c6ec5ad55db39b3caae3e393211c9a02be6ffc5f
+A
+src/plot/plots.py,0\4\04779ef80bf2a21e0b0c100f6428b3b7d50bacdc
+j
+:tests/building_case_study/building_case_study_for_tests.py,6\5\65483beb8856a6e0f73a2792e6600377ce330eea
+l
+<data/cases/pamplona/workday/09_september_no_flexibility.yaml,0\5\05e7000032d8a8a6de0ee16d481ec6955265892f
+k
+;data/cases/pamplona/workday/11_november_no_flexibility.yaml,5\6\563c1edca11fc5765caf54a4492ac6df8025b72f
+g
+7data/cases/pamplona/workday/07_july_no_flexibility.yaml,4\d\4df09f8c5f52096649ad3f5749fc2f3dff6ce7be
+i
+9data/cases/pamplona/workday/08_august_no_flexibility.yaml,f\9\f968e6495403479eb4b961ece0735303ce4cf877
+f
+6data/cases/pamplona/workday/05_may_no_flexibility.yaml,a\2\a2c1af90fa9e6e003606d8e93919946b28915f1a
+k
+;data/cases/pamplona/workday/12_december_no_flexibility.yaml,3\a\3ab7bb42f0b7ea6aa7c389ee5ba00a5f1396e4db
+j
+:data/cases/pamplona/workday/10_october_no_flexibility.yaml,c\0\c0a29be72ab031e3abc6ee9dec3fcc33d90fc1bc
