@@ -4,14 +4,12 @@ import os
 import yaml
 
 
-def read_open_csv_files(path: str, csv_file: str):
-    """Read CSV files for the OPEN original case"""
-    csv_file_path = os.path.join(path, csv_file)
+def read_open_csv_files(csv_file_path: str) -> pd.DataFrame:
     return pd.read_csv(csv_file_path, index_col=0, parse_dates=True).values
 
 
-def read_case_data_from_yaml_file(file_path: str, file_name: str):
-    with open(os.path.join(file_path, file_name)) as file:
+def read_case_data_from_yaml_file(cases_file_path: str, file_name: str) -> dict:
+    with open(os.path.join(cases_file_path, file_name)) as file:
         case = yaml.safe_load(file)
     return case
 
@@ -62,3 +60,17 @@ def get_import_period_prices_from_yaml(case_data: dict) -> List[dict]:
 
 def get_specific_import_price(import_period_prices: dict, import_period: str) -> float:
     return import_period_prices[import_period]
+
+
+def get_csv_file_name_from_path(csv_file_path: str) -> str:
+    return csv_file_path.split('/')[-1].split('.')[0]
+
+
+def get_case_name(case_data: dict) -> str:
+    photovoltaic_generation_data_file_path = case_data['photovoltaic_generation_data_file_path']
+    electric_load_data_file_path = case_data['electric_load_data_file_path']
+    photovoltaic_generation_data_file = \
+        get_csv_file_name_from_path(csv_file_path=photovoltaic_generation_data_file_path)
+    electric_load_data_file = get_csv_file_name_from_path(csv_file_path=electric_load_data_file_path)
+    return photovoltaic_generation_data_file + '_' + electric_load_data_file
+

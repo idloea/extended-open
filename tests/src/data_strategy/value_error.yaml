@@ -1,10 +1,8 @@
 # CASE:
 # United Kingdom summer case without flexibility
 
-# data
-data_path: "data/Building/"
-photovoltaic_generation_data_file: "PVpu_1min_2013JUN.csv"
-electric_load_data_file: "Loads_1min_2013JUN.csv"
+photovoltaic_generation_data_file_path: "data/Building/PVpu_1min_2013JUN.csv"
+electric_load_data_file_path: "Loads_1min_2013JUN.csv"
 
 # Winter/summer
 is_winter: False

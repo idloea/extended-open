@@ -49,7 +49,7 @@ def create_spanish_market(yaml_file: str, file_path: str) -> Market:
     max_frequency_response_state_of_charge = 0
     min_frequency_response_state_of_charge = 0
     frequency_response_price_in_euros_per_kilowatt_hour = 1
-    case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+    case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
     market = get_market(case_data=case_data,
                         import_period_prices=import_period_prices,
                         network_bus_id=network_bus_id,
@@ -94,7 +94,7 @@ class TestMarkets(unittest.TestCase):
         max_frequency_response_state_of_charge = 0
         min_frequency_response_state_of_charge = 0
         frequency_response_price_in_euros_per_kilowatt_hour = 1
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         market = get_market(case_data=case_data,
                             import_period_prices=import_period_prices,
                             network_bus_id=network_bus_id,
@@ -153,7 +153,7 @@ class TestMarkets(unittest.TestCase):
         max_frequency_response_state_of_charge = 0
         min_frequency_response_state_of_charge = 0
         frequency_response_price_in_euros_per_kilowatt_hour = 1
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         with self.assertRaises(ValueError):
             get_market(case_data=case_data,
                        import_period_prices=import_period_prices,

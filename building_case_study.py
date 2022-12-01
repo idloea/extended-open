@@ -8,7 +8,7 @@ from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
 from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
     save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods
-from src.read import read_open_csv_files, read_case_data_from_yaml_file
+from src.read import read_open_csv_files, read_case_data_from_yaml_file, get_case_name
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
 from src.time_intervals import check_sum_of_daily_periods_in_hours_equals_twenty_four, \
@@ -17,25 +17,22 @@ from src.data_strategy import get_ambient_temperature_in_degree_celsius_by_data_
     get_building_electric_loads_by_data_strategy
 
 
-def run(yaml_files: List[str], general_case_data: dict):
+def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: str) -> None:
     for yaml_file in yaml_files:
         print('YAML FILE:', yaml_file)
-        file_path = 'data/cases/pamplona/workday'
-        case_name = yaml_file.split('.')[0]
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
-        data_path = case_data["data_path"]
+        case_data = read_case_data_from_yaml_file(cases_file_path=cases_file_path, file_name=yaml_file)
         market_scenario = case_data['market']
 
         # STEP 0: Load data
-        photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file"]
-        photovoltaic_generation_data = read_open_csv_files(path=data_path,
-                                                           csv_file=photovoltaic_generation_data_file)
+        photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file_path"]
+        photovoltaic_generation_data = read_open_csv_files(csv_file_path=photovoltaic_generation_data_file)
         electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data)
 
         # Photovoltaic generation
         sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_data, 1)
         max_photovoltaic_generation_in_per_unit = np.max(sum_of_photovoltaic_generation_in_per_unit)
-        photovoltaic_generation_per_unit = sum_of_photovoltaic_generation_in_per_unit / max_photovoltaic_generation_in_per_unit
+        photovoltaic_generation_per_unit = sum_of_photovoltaic_generation_in_per_unit / \
+                                           max_photovoltaic_generation_in_per_unit
 
         rated_photovoltaic_kilowatts = general_case_data["rated_photovoltaic_kilowatts"]
 
@@ -252,7 +249,8 @@ def run(yaml_files: List[str], general_case_data: dict):
         print('Revenue in euros:', revenue)
 
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-        plots_path = f'results/plots/{current_time}_{case_name}'
+        case_name = get_case_name(case_data=case_data)
+        plots_path = f'{results_path}/{current_time}_{case_name}'
         os.mkdir(path=plots_path)
         save_plot_demand_base_and_total_imported_power(
             simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
@@ -298,6 +296,12 @@ def run(yaml_files: List[str], general_case_data: dict):
                                  number_of_energy_management_time_intervals_per_day,
                                  import_periods=import_periods, case=case_name, current_time=current_time,
                                  plots_path=plots_path)
+
+        general_case_data['photovoltaic_generation_data_file_path'] = case_data['photovoltaic_generation_data_file_path']
+        general_case_data['electric_load_data_file_path'] = case_data['electric_load_data_file_path']
+        general_case_data['data_strategy'] = case_data['data_strategy']
+        general_case_data['ambient_temperature_file_path'] = case_data['ambient_temperature_file_path']
+        general_case_data['market'] = case_data['market']
 
         with open(f"{plots_path}/general_case_data.json", "w") as outfile:
             json.dump(general_case_data, outfile, indent=4)

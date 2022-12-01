@@ -135,7 +135,9 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
         number_of_energy_management_time_intervals_per_day)
     plt.hlines(hvac_consumed_electric_active_power_in_kilowatts_value, 0, max(energy_management_system_hours),
                linestyle=':', label='Maximum', color='red', zorder=11, )
-    plt.suptitle(f'HVAC consumption - Case: {case}')
+    plt.suptitle('HVAC consumption')
+    subtitle = 'Case: ' + str(case)
+    plt.title(subtitle)
     plt.ylabel('Power (kW)')
     plt.grid(True, alpha=0.5)
     max_time = max(hours)
@@ -146,6 +148,7 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
     plt.grid(True, alpha=0.5)
     plt.legend(loc='upper right')
     plt.grid(alpha=0.5)
+    plt.tight_layout()
     figure.savefig(f'{plots_path}\\{current_time}_{case}_hvac_consumed_active_power_in_kilowatts.png')
 
 

@@ -25,20 +25,17 @@ def get_building_case_original_results(is_winter: bool):
     results_path = 'Results/Building_Case_Study/'
     create_results_folder(results_path=results_path)
     ### STEP 0: Load data
+    winter_photovoltaic_data_file = "data/Building/PVpu_1min_2014JAN.csv"
+    winter_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(
+        csv_file_path=winter_photovoltaic_data_file)
+    winter_electric_load_data_file = "data/Building/Loads_1min_2014JAN.csv"
+    winter_electric_load_data = read_open_csv_files(csv_file_path=winter_electric_load_data_file)
 
-    building_data_path = "data/Building/"
-
-    winter_photovoltaic_data_file = "PVpu_1min_2014JAN.csv"
-    winter_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(path=building_data_path,
-                                                                                 csv_file=winter_photovoltaic_data_file)
-    winter_electric_load_data_file = "Loads_1min_2014JAN.csv"
-    winter_electric_load_data = read_open_csv_files(path=building_data_path, csv_file=winter_electric_load_data_file)
-
-    summer_photovoltaic_data_file = "PVpu_1min_2013JUN.csv"
-    summer_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(path=building_data_path,
-                                                                                 csv_file=summer_photovoltaic_data_file)
-    summer_electric_load_data_file = "Loads_1min_2013JUN.csv"
-    summer_electric_load_data = read_open_csv_files(path=building_data_path, csv_file=summer_electric_load_data_file)
+    summer_photovoltaic_data_file = "data/Building/PVpu_1min_2013JUN.csv"
+    summer_photovoltaic_electricity_generation_in_per_unit = read_open_csv_files(
+        csv_file_path=summer_photovoltaic_data_file)
+    summer_electric_load_data_file = "data/Building/Loads_1min_2013JUN.csv"
+    summer_electric_load_data = read_open_csv_files(csv_file_path=summer_electric_load_data_file)
 
     sum_of_summer_photovoltaic_electricity_generation_in_per_unit = np.sum(
         summer_photovoltaic_electricity_generation_in_per_unit, 1)

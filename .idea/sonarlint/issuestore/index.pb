@@ -39,12 +39,8 @@ a
 .data/electric_load/Commercial-Fire Station.csv,4\4\44f0658c9974d5cec1ef35b5e481f6e69285f456
 [
 +data/electric_load/Industrial-Warehouse.csv,f\a\fa0ef6bc375dd0125d0b9c6558758b56e6658e6b
-X
-(tests/src/data_strategy/value_error.yaml,7\8\786061edb2d07321e382b66877e1e7d7cf609f69
 Y
 )data/electric_load/Commercial-College.csv,9\8\98cf6141e06365f6264c2d010875f176989f24c1
-e
-5tests/src/data_strategy/uk_summer_no_flexibility.yaml,0\a\0a0587f80e9ea346773c8e256db16ed1babc364f
 b
 2data/electric_load/Commercial-275-bed Hospital.csv,f\2\f232c6bdbb3a1bf4c5ab37bc93bb1c63027ffa05
 ^
@@ -57,8 +53,6 @@ a
 ,data/electric_load/Reference-Supermarket.csv,0\1\012929eb517de417f7cd687a1ffbe5182c2eb8d7
 l
 <data/electric_load/Commercial-Wastewater Treatment Plant.csv,3\b\3b9cb34f1a7360a0b1c48672500634d35fb0d419
-c
-3tests/src/data_strategy/pamplona_meteo_navarra.yaml,1\e\1e104b987ee039e862828832360aaa81505e2d16
 Z
 *data/electric_load/Industrial-Services.csv,2\d\2dc5307d735675272bb31857c248b5609db110d0
 i
@@ -87,20 +81,12 @@ W
 'data/electric_load/Reference-Office.csv,2\7\27ac68c981b317ea69bb4094be21d9aabdf815a6
 N
 tests/src/test_temperatures.py,e\e\ee614c5008d1237c178ee9a4ef546e4137b9e508
-D
-src/data_strategy.py,3\9\39992790cc0586d53fe6e1bba2a070a3a3c08cb1
 O
 tests/src/test_interpolation.py,1\a\1aacb04f94360345e5fb22c757448f2e18c0f5a0
 D
 src/interpolation.py,0\6\061a62a047a83fa2391e306795696294b90c092d
 E
 src/time_intervals.py,7\4\74690db82914a9bfbe743dd21463f27665db38ad
-]
--tests/src/data_strategy/test_data_strategy.py,7\2\727a5b012f65c4ea4b7f16d87714014c02924db5
-;
-src/read.py,e\c\ec9e6150721976cacf3a708d5d63863dc899dec3
-D
-src/energy_system.py,0\0\0072a54b573d0b657c401bf901693a6f26589ab9
 B
 data/PVpu_1min.csv,1\c\1ce4f88a3d4ba072bfd1eb38f730f9d4678bf72e
 f
@@ -109,3 +95,5 @@ f
 6data/electric_load/Industrial-Plastic Manufacturer.csv,1\5\15bce6947d3b44c30c7343a565a63ddb9cb71efc
 `
 0data/electric_load/Industrial-Pharmaceutical.csv,b\4\b46d935250d214bf88c5f0d19789c408d77375bc
+=
+src/assets.py,2\d\2d3030b58ab0ef2a9ead8a4b9d70009945ebdda1

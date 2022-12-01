@@ -32,7 +32,7 @@ class TestAmbientTemperature(unittest.TestCase):
     def test_get_ambient_temperature_in_degree_celsius_by_data_strategy_UK(self):
         file_path = 'tests/src/data_strategy'
         yaml_file = 'uk_summer_no_flexibility.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         number_of_energy_management_time_intervals_per_day = 96
         result = get_ambient_temperature_in_degree_celsius_by_data_strategy(
             case_data=case_data,
@@ -44,7 +44,7 @@ class TestAmbientTemperature(unittest.TestCase):
     def test_get_ambient_temperature_in_degree_celsius_by_data_strategy_MeteoNavarra(self):
         file_path = 'tests/src/data_strategy'
         yaml_file = 'pamplona_meteo_navarra.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         number_of_energy_management_time_intervals_per_day = 96
         ambient_temperature_in_degree_celsius = get_ambient_temperature_in_degree_celsius_by_data_strategy(
             case_data=case_data,
@@ -56,7 +56,7 @@ class TestAmbientTemperature(unittest.TestCase):
     def test_get_ambient_temperature_in_degree_celsius_by_data_strategy_ValueError(self):
         file_path = 'tests/src/data_strategy'
         yaml_file = 'value_error.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         number_of_energy_management_time_intervals_per_day = 96
         with self.assertRaises(ValueError):
             get_ambient_temperature_in_degree_celsius_by_data_strategy(
@@ -89,7 +89,7 @@ class TestBuildingElectricLoads(unittest.TestCase):  # TODO: would it make sense
     def test_get_building_electric_loads_by_data_strategy_UK(self):
         file_path = 'tests/src/data_strategy'
         yaml_file = 'uk_summer_no_flexibility.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         building_electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data)
         building_electric_loads_random_slice = building_electric_loads[750:760]
         result = np.round(building_electric_loads_random_slice, 3)
@@ -100,7 +100,7 @@ class TestBuildingElectricLoads(unittest.TestCase):  # TODO: would it make sense
         # TODO: adapt from ambient temperature to building electric loads
         file_path = 'tests/src/data_strategy'
         yaml_file = 'pamplona_meteo_navarra.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         number_of_energy_management_time_intervals_per_day = 96
         ambient_temperature_in_degree_celsius = get_ambient_temperature_in_degree_celsius_by_data_strategy(
             case_data=case_data,
@@ -112,7 +112,7 @@ class TestBuildingElectricLoads(unittest.TestCase):  # TODO: would it make sense
     def test_get_building_electric_loads_by_data_strategy_ValueError(self):
         file_path = 'tests/src/data_strategy'
         yaml_file = 'value_error.yaml'
-        case_data = read_case_data_from_yaml_file(file_path=file_path, file_name=yaml_file)
+        case_data = read_case_data_from_yaml_file(cases_file_path=file_path, file_name=yaml_file)
         number_of_energy_management_time_intervals_per_day = 96
         with self.assertRaises(ValueError):
             get_ambient_temperature_in_degree_celsius_by_data_strategy(

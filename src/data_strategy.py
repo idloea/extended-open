@@ -88,12 +88,12 @@ def get_building_electric_loads_by_data_strategy(case_data: dict) -> np.ndarray:
     data_strategy = case_data["data_strategy"]
     if data_strategy == 'UK':
         data = UKData()
-        file_path = case_data["electric_load_data_file"]
+        file_path = case_data["electric_load_data_file_path"]
         building_electric_loads = data.get_building_electric_loads_per_minute(file_path=file_path)
 
     elif data_strategy == 'MeteoNavarra':
         data = MeteoNavarraData()
-        file_path = case_data["electric_load_data_file"]
+        file_path = case_data["electric_load_data_file_path"]
         month = case_data["month"]
         building_electric_loads = data.get_building_electric_loads_per_minute(file_path=file_path, month=month)
     else:
