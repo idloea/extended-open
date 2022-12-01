@@ -112,6 +112,8 @@ if __name__ == "__main__":
                   '11.yaml',
                   '12.yaml'
                   ]
+    electric_load_data_file_path = 'data/electric_load'
+
     current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_path = Path(f'results/{current_time}')
     results_path.mkdir(parents=True, exist_ok=True)
@@ -124,4 +126,5 @@ if __name__ == "__main__":
     for electric_load_file in electric_load_file_list:
         print(f'RUNNING {electric_load_file} ELECTRIC LOAD')
         run(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
-            results_path=results_path, electric_load_file=electric_load_file)
+            results_path=results_path, electric_load_file=electric_load_file,
+            electric_load_data_file_path=electric_load_data_file_path)

@@ -1,5 +1,4 @@
 photovoltaic_generation_data_file_path: "data/solar_radiation/pamplona/1_min/2021-01-11_pamplona.csv"  # TODO: change with Spanish PV generation
-electric_load_data_file_path: 'data/electric_load/Industrial-Pharmaceutical.csv'
 month: 11
 
 import_periods: {'P2': [9, 10, 11, 12 ,13, 18, 19, 20, 21],

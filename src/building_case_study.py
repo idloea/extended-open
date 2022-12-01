@@ -19,7 +19,7 @@ from src.data_strategy import get_ambient_temperature_in_degree_celsius_by_data_
 
 
 def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: Path,
-        electric_load_file: str) -> None:
+        electric_load_file: str, electric_load_data_file_path: str) -> None:
     for yaml_file in yaml_files:
         print('YAML FILE:', yaml_file)
         case_data = read_case_data_from_yaml_file(cases_file_path=cases_file_path, file_name=yaml_file)
@@ -29,6 +29,8 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
         photovoltaic_generation_data_file = case_data["photovoltaic_generation_data_file_path"]
         photovoltaic_generation_data = read_open_csv_files(csv_file_path=photovoltaic_generation_data_file)
         electric_loads = get_building_electric_loads_by_data_strategy(case_data=case_data,
+                                                                      electric_load_data_file_path=
+                                                                      electric_load_data_file_path,
                                                                       electric_load_file=electric_load_file)
 
         # Photovoltaic generation
@@ -301,7 +303,7 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
                                  plots_path=plots_path)
 
         general_case_data['photovoltaic_generation_data_file_path'] = case_data['photovoltaic_generation_data_file_path']
-        general_case_data['electric_load_data_file_path'] = case_data['electric_load_data_file_path']
+        general_case_data['electric_load_data_file_path'] = electric_load_data_file_path
         general_case_data['data_strategy'] = case_data['data_strategy']
         general_case_data['ambient_temperature_file_path'] = case_data['ambient_temperature_file_path']
         general_case_data['market'] = case_data['market']

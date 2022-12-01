@@ -1,5 +1,4 @@
 photovoltaic_generation_data_file_path: "data/solar_radiation/pamplona/1_min/2022-01-01_pamplona.csv"
-electric_load_data_file_path: 'data/electric_load'
 month: 1
 
 import_periods: {'P1': [9, 10, 11, 12 ,13, 18, 19, 20, 21],

@@ -1,5 +1,4 @@
-08: "data/solar_radiation/pamplona/1_min/2021-01-08_pamplona.csv"
-electric_load_data_file_path: 'data/electric_load/Industrial-Pharmaceutical.csv'
+photovoltaic_generation_data_file_path: "data/solar_radiation/pamplona/1_min/2021-01-08_pamplona.csv"
 month: 8
 
 import_periods: {'P3': [9, 10, 11, 12 ,13, 18, 19, 20, 21],
