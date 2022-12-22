@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 import numpy as np
 from src import assets, energy_system
+from src.buildings import Building
 from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
 from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
@@ -18,8 +19,8 @@ from src.data_strategy import get_ambient_temperature_in_degree_celsius_by_data_
     get_building_electric_loads_by_data_strategy
 
 
-def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: Path,
-        electric_load_file: str, electric_load_data_file_path: str) -> None:
+def run_case(cases_file_path: str, yaml_files: List[str], general_case_data: dict, results_path: Path,
+             electric_load_file: str, electric_load_data_file_path: str, building_type: Building) -> None:
     for yaml_file in yaml_files:
         print('YAML FILE:', yaml_file)
         case_data = read_case_data_from_yaml_file(cases_file_path=cases_file_path, file_name=yaml_file)
@@ -32,6 +33,7 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
                                                                       electric_load_data_file_path=
                                                                       electric_load_data_file_path,
                                                                       electric_load_file=electric_load_file)
+        hvac_electric_loads = electric_loads * building_type.hvac_percentage_of_electric_load
 
         # Photovoltaic generation
         sum_of_photovoltaic_generation_in_per_unit = np.sum(photovoltaic_generation_data, 1)
@@ -136,7 +138,8 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
         high_voltage_bus = bus_1
         low_voltage_bus = bus_2
 
-        transformer_apparent_power_in_mega_volt_ampere = general_case_data["transformer_apparent_power_in_mega_volt_ampere"]
+        transformer_apparent_power_in_mega_volt_ampere = general_case_data[
+            "transformer_apparent_power_in_mega_volt_ampere"]
         trafo_std_type = f"{transformer_apparent_power_in_mega_volt_ampere} MVA {grid_1_voltage_level_in_kilo_volts}" \
                          f"/{grid_2_voltage_level_in_kilo_volts} kV"
         trafo = pp.create_transformer(network, hv_bus=high_voltage_bus, lv_bus=low_voltage_bus, std_type=trafo_std_type,
@@ -162,7 +165,7 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
             reactive_power_in_kilovolt_ampere_reactive=photovoltaic_reactive_power_in_kilovolt_ampere)
         non_distpachable_assets.append(non_dispatchable_photovoltaic_asset)
 
-        electric_load_active_power_in_kilowatts = np.array(electric_loads)
+        electric_load_active_power_in_kilowatts = np.array(hvac_electric_loads)
         electric_load_reactive_power_in_kilovolt_ampere_reactive = np.zeros(number_of_time_intervals_per_day)
         non_dispatchable_electric_load_at_bus_3 = assets.NonDispatchableAsset(
             simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
@@ -302,7 +305,8 @@ def run(cases_file_path: str, yaml_files: List[str], general_case_data: dict, re
                                  import_periods=import_periods, case=electric_load_file, current_time=current_time,
                                  plots_path=plots_path)
 
-        general_case_data['photovoltaic_generation_data_file_path'] = case_data['photovoltaic_generation_data_file_path']
+        general_case_data['photovoltaic_generation_data_file_path'] = case_data[
+            'photovoltaic_generation_data_file_path']
         general_case_data['electric_load_data_file_path'] = electric_load_data_file_path
         general_case_data['data_strategy'] = case_data['data_strategy']
         general_case_data['ambient_temperature_file_path'] = case_data['ambient_temperature_file_path']

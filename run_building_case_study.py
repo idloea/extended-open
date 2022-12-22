@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from src.building_case_study import run
+from src.building_case_study import run_case
+from src.read import get_building_type
 
 if __name__ == "__main__":
     # Photovoltaic generation
@@ -125,6 +126,7 @@ if __name__ == "__main__":
 
     for electric_load_file in electric_load_file_list:
         print(f'RUNNING {electric_load_file} ELECTRIC LOAD')
-        run(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
-            results_path=results_path, electric_load_file=electric_load_file,
-            electric_load_data_file_path=electric_load_data_file_path)
+        building_type = get_building_type(file=electric_load_file)
+        run_case(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
+                 results_path=results_path, electric_load_file=electric_load_file,
+                 electric_load_data_file_path=electric_load_data_file_path, building_type=building_type)

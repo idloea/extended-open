@@ -3,6 +3,8 @@ import pandas as pd
 import os
 import yaml
 
+from src.buildings import Building, Hospital, Office, Hotel
+
 
 def read_open_csv_files(csv_file_path: str) -> pd.DataFrame:
     return pd.read_csv(csv_file_path, index_col=0, parse_dates=True).values
@@ -60,3 +62,18 @@ def get_import_period_prices_from_yaml(case_data: dict) -> List[dict]:
 
 def get_specific_import_price(import_period_prices: dict, import_period: str) -> float:
     return import_period_prices[import_period]
+
+
+def get_building_type(file: str) -> Building:
+    building_type_string = file.split('.')[0].split()[-1].lower()
+    if building_type_string == 'hospital':
+        building_type = Hospital()
+    elif building_type_string == 'office':
+        building_type = Office()
+    elif building_type_string == 'hotel':
+        building_type = Hotel()
+    else:
+        raise ValueError('It was not possible to match to a building type from the list'
+                         ': Hospital, Office, or Hotel')
+    return building_type
+

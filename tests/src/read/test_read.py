@@ -2,8 +2,10 @@ import unittest
 import numpy as np
 from datetime import datetime
 import pandas as pd
+
+from src.buildings import Hospital, Office
 from src.read import read_open_csv_files, read_preprocessing_meteo_navarra_ambient_temperature_csv_data, \
-    get_import_period_prices_from_yaml, read_case_data_from_yaml_file, get_specific_import_price
+    get_import_period_prices_from_yaml, read_case_data_from_yaml_file, get_specific_import_price, get_building_type
 
 
 class TestRead(unittest.TestCase):
@@ -54,3 +56,29 @@ class TestRead(unittest.TestCase):
         result = get_specific_import_price(import_period_prices=import_period_prices, import_period=period)
         expected_result = 0.1110
         self.assertEqual(expected_result, result)
+
+    def test_get_building_type_hospital(self) -> None:
+        file = 'get building type Hospital.csv'
+        result = get_building_type(file=file)
+        expected_result = Hospital()
+        self.assertEqual(expected_result, result)
+
+    def test_get_building_type_office(self) -> None:
+        file = 'get building type OFFICE.csv'
+        result = get_building_type(file=file)
+        expected_result = Office()
+        self.assertEqual(expected_result, result)
+
+    def test_get_building_type_hotel(self) -> None:
+        file = 'get building type Hotel.csv'
+        result = get_building_type(file=file)
+        expected_result = Office()
+        self.assertEqual(expected_result, result)
+
+    def test_get_building_type_value_error(self) -> None:
+        file = 'get building type Hotel123.csv'
+        with self.assertRaises(ValueError) as exc:
+            get_building_type(file=file)
+        self.assertEquals(str(exc.exception),
+                          'It was not possible to match to a building type from the list'
+                          ': Hospital, Office, or Hotel')

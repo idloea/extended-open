@@ -73,8 +73,6 @@ g
 7tests/building_case_study/test_building_case_studies.py,9\4\94d5d38995e01ca19f960fbe7b7e7393ffebde33
 X
 (tests/src/data_strategy/value_error.yaml,7\8\786061edb2d07321e382b66877e1e7d7cf609f69
-c
-3tests/src/data_strategy/pamplona_meteo_navarra.yaml,1\e\1e104b987ee039e862828832360aaa81505e2d16
 e
 5tests/src/data_strategy/uk_summer_no_flexibility.yaml,0\a\0a0587f80e9ea346773c8e256db16ed1babc364f
 Q
@@ -87,20 +85,10 @@ b
 2data/electric_load/Commercial-450-bed Hospital.csv,5\c\5cd04160356cf6083e2c1e0bc97ae5b57c006977
 X
 (data/cases/uk_summer_no_flexibility.yaml,9\6\969685f9abf2324cbaa8cb2025ed32e9dfc86294
-K
-tests/src/read/test_read.py,1\4\1466c5bd3b93af79e3238671241a2358eaf0f031
-;
-src/read.py,e\c\ec9e6150721976cacf3a708d5d63863dc899dec3
-]
--tests/src/data_strategy/test_data_strategy.py,7\2\727a5b012f65c4ea4b7f16d87714014c02924db5
 B
 data/cases/02.yaml,5\f\5fb97b27023f7037a27277c9046d72f3a1c92a6f
-D
-src/data_strategy.py,3\9\39992790cc0586d53fe6e1bba2a070a3a3c08cb1
 B
 data/cases/04.yaml,2\b\2bc33fbfd8aeb7a58f7d6ad8cbeee6c10773cdf3
-J
-src/building_case_study.py,3\c\3c7301a193fc2a2a8a5a0487d0d1e8b4139a2f9f
 B
 data/cases/03.yaml,5\f\5fb0cb30aef18ce2c8ee0e31dcbd0979dd7030c2
 B
