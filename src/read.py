@@ -65,12 +65,12 @@ def get_specific_import_price(import_period_prices: dict, import_period: str) ->
 
 
 def get_building_type(file: str) -> Building:
-    building_type_string = file.split('.')[0].split()[-1].lower()
-    if building_type_string == 'hospital':
+    file_name = file.split('.')[0].lower()
+    if 'hospital' in file_name:
         building_type = Hospital()
-    elif building_type_string == 'office':
+    elif 'office' in file_name:
         building_type = Office()
-    elif building_type_string == 'hotel':
+    elif 'hotel' in file_name:
         building_type = Hotel()
     else:
         raise ValueError('It was not possible to match to a building type from the list'

@@ -64,7 +64,7 @@ class TestRead(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_get_building_type_office(self) -> None:
-        file = 'get building type OFFICE.csv'
+        file = 'get building type-OFFICE.csv'
         result = get_building_type(file=file)
         expected_result = Office()
         self.assertEqual(expected_result, result)
@@ -76,7 +76,7 @@ class TestRead(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     def test_get_building_type_value_error(self) -> None:
-        file = 'get building type Hotel123.csv'
+        file = 'get building type 123.csv'
         with self.assertRaises(ValueError) as exc:
             get_building_type(file=file)
         self.assertEquals(str(exc.exception),
