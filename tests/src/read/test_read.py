@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 import pandas as pd
 
-from src.buildings import Hospital, Office
+from src.buildings import Hospital, Office, Hotel
 from src.read import read_open_csv_files, read_preprocessing_meteo_navarra_ambient_temperature_csv_data, \
     get_import_period_prices_from_yaml, read_case_data_from_yaml_file, get_specific_import_price, get_building_type
 
@@ -72,7 +72,7 @@ class TestRead(unittest.TestCase):
     def test_get_building_type_hotel(self) -> None:
         file = 'get building type Hotel.csv'
         result = get_building_type(file=file)
-        expected_result = Office()
+        expected_result = Hotel()
         self.assertEqual(expected_result, result)
 
     def test_get_building_type_value_error(self) -> None:
