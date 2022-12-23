@@ -113,13 +113,13 @@ if __name__ == "__main__":
                   '11.yaml',
                   '12.yaml'
                   ]
-    electric_load_data_file_path = 'data/electric_loads'
+    electric_load_data_file_path = 'data/electric_loads/considered_building_types'
 
     current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_path = Path(f'results/{current_time}')
     results_path.mkdir(parents=True, exist_ok=True)
 
-    path = Path('data/electric_loads')
+    path = Path(electric_load_data_file_path)
     electric_load_file_list = []
     for entry in path.iterdir():
         electric_load_file_list.append(entry.name)
