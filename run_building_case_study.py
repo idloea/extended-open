@@ -60,7 +60,7 @@ if __name__ == "__main__":
     transformer_apparent_power_in_mega_volt_ampere = 0.4
     length_from_bus_2_to_bus_3_in_km = 0.1
 
-    general_case_data = {
+    input_case_data = {
         'rated_photovoltaic_kilowatts': rated_photovoltaic_kilowatts,
         'simulation_time_series_resolution_in_minutes': simulation_time_series_resolution_in_minutes,
         'energy_management_system_time_series_resolution_in_minutes':
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         'grid_2_voltage_level_in_kilo_volts': grid_2_voltage_level_in_kilo_volts,
         'grid_3_voltage_level_in_kilo_volts': grid_3_voltage_level_in_kilo_volts,
         'transformer_apparent_power_in_mega_volt_ampere': transformer_apparent_power_in_mega_volt_ampere,
-        'length_from_bus_2_to_bus_3_in_km': length_from_bus_2_to_bus_3_in_km
+        'length_from_bus_2_to_bus_3_in_km': length_from_bus_2_to_bus_3_in_km,
 
     }
     cases_file_path = 'data/cases'
@@ -127,6 +127,6 @@ if __name__ == "__main__":
     for electric_load_file in electric_load_file_list:
         print(f'RUNNING {electric_load_file} ELECTRIC LOAD')
         building_type = get_building_type(file=electric_load_file)
-        run_case(cases_file_path=cases_file_path, yaml_files=yaml_files, general_case_data=general_case_data,
+        run_case(cases_file_path=cases_file_path, yaml_files=yaml_files, input_case_data=input_case_data,
                  results_path=results_path, electric_load_file=electric_load_file,
                  electric_load_data_file_path=electric_load_data_file_path, building_type=building_type)
