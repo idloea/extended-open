@@ -76,7 +76,7 @@ class TestBuildingElectricLoads(unittest.TestCase):  # TODO: would it make sense
         np.testing.assert_equal(expected_result, result)
 
     def test_MeteoNavarraData_get_building_electric_loads(self):
-        file_path = 'data/electric_loads/Commercial-Office.csv'
+        file_path = 'data/electric_loads/considered_building_types/Commercial-Office.csv'
         month = 1
         meteo_navarra_data = MeteoNavarraData()
         building_electric_loads = meteo_navarra_data.get_building_electric_loads_per_minute(file_path=file_path,
