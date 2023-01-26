@@ -257,7 +257,9 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         print('Revenue in euros:', revenue)
 
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-        plots_path = f'{results_path}/{current_time}_{electric_load_file}'
+        case_file_name = electric_load_file.split('.')[0]
+        month = case_data['month']
+        plots_path = f'{results_path}/{current_time}_{month}_{case_file_name}'
         os.mkdir(path=plots_path)
         save_plot_demand_base_and_total_imported_power(
             simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,

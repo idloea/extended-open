@@ -61,10 +61,6 @@ B
 data/cases/12.yaml,8\6\86c1b279860abe6f2303d2f12c7319ef86c35b16
 B
 data/cases/11.yaml,c\5\c5d8cf98c575191d03b272cb9de185e46c89023e
-B
-data/cases/01.yaml,c\1\c1d7cf95dee45d4789ee1d600471e3b08ed64bbe
-g
-7research_notes/hvac_electric_load_per_building_type.txt,b\5\b5e8e0a5161e196ff1e798040a9d43e41ccc10fc
 c
 3tests/src/data_strategy/pamplona_meteo_navarra.yaml,1\e\1e104b987ee039e862828832360aaa81505e2d16
 t
@@ -103,25 +99,37 @@ q
 Adata/electric_loads/out_of_scope_buildings/Commercial-College.csv,e\e\ee255dc595ade8432aceab8a0762a3903314edfd
 v
 Fdata/electric_loads/out_of_scope_buildings/Commercial-Fire Station.csv,a\6\a6a4e6a4e67f5edc015961294a8f8272adb06b97
-]
--tests/src/data_strategy/test_data_strategy.py,7\2\727a5b012f65c4ea4b7f16d87714014c02924db5
-c
-3data/electric_loads/Commercial-450-bed Hospital.csv,d\9\d99ec9d40a70f2cc151974369682978440b97c7b
-Y
-)data/electric_loads/Commercial-Office.csv,f\7\f7679a624564c9e51ea56f5c6209d8b8c112c0e5
-X
-(data/electric_loads/Reference-Office.csv,5\6\56d73386edbe1de6982f0c07b5b4983f73c2d7fb
-Z
-*data/electric_loads/Reference-Hospital.csv,c\8\c8c231e9a1a9f77cb6e5d684d624336c50aae510
-W
-'data/electric_loads/Reference-Hotel.csv,b\5\b52a42b551db59d828535f5841e8fdcff27d3fea
-c
-3data/electric_loads/Commercial-275-bed Hospital.csv,e\9\e9fd65b69d0611682c4a4caff969cfc4ac4c2176
-j
-:data/electric_loads/hvac_percentage_per_building_type.yaml,8\5\85fdd2cee8bc11729d94140ee31b9544f506a887
 Q
 !tests/src/test_data_conversion.py,7\b\7bb1ead7da468738000cfda88d8d74779c4a2a22
 D
 src/data_strategy.py,3\9\39992790cc0586d53fe6e1bba2a070a3a3c08cb1
 ]
 -tests/src/read/get building type Hospital.csv,4\5\45977396f2464d27c4e996c585ac3045d1f48da0
+}
+Mdata/electric_loads/considered_building_types/Commercial-450-bed Hospital.csv,7\b\7bd9fdc654097e4a8db1782db43c48dbbd44cd0f
+t
+Ddata/electric_loads/considered_building_types/Reference-Hospital.csv,c\7\c7783931f8980290df66787a551b7fa7981572c0
+q
+Adata/electric_loads/considered_building_types/Reference-Hotel.csv,e\c\ec2f754b95cb2a9e2b5f2fe9a2325f8e848f0f25
+r
+Bdata/electric_loads/considered_building_types/Reference-Office.csv,3\a\3afe521058304780721cc4a45b02fd4b3a3c1af3
+s
+Cdata/electric_loads/considered_building_types/Commercial-Office.csv,0\9\094e3bd46519e37182178bc7047556c87941fdb3
+]
+-tests/src/data_strategy/test_data_strategy.py,7\2\727a5b012f65c4ea4b7f16d87714014c02924db5
+>
+src/markets.py,2\4\243a3fc71b2675ccb7310e1696d31a6028ccff47
+;
+src/hvac.py,1\0\10e52292edc1b7ae2899bff2d959ab8d80a5b616
+g
+7research_notes/hvac_electric_load_per_building_type.txt,b\5\b5e8e0a5161e196ff1e798040a9d43e41ccc10fc
+j
+:data/electric_loads/hvac_percentage_per_building_type.yaml,8\5\85fdd2cee8bc11729d94140ee31b9544f506a887
+K
+tests/src/test_buildings.py,7\7\772e16fe4d3d19b46452a7ff0fb455fc71ddee56
+;
+src/read.py,e\c\ec9e6150721976cacf3a708d5d63863dc899dec3
+B
+data/cases/01.yaml,c\1\c1d7cf95dee45d4789ee1d600471e3b08ed64bbe
+}
+Mdata/electric_loads/considered_building_types/Commercial-275-bed Hospital.csv,5\e\5e478fde734f1e66cb8e1e9ab82a898aeb4a7ec6
