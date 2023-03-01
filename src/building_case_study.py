@@ -6,7 +6,6 @@ from typing import List
 import numpy as np
 from src import assets, energy_system
 from src.buildings import Building
-from src.electric_vehicles import ElectricVehicleFleet
 from src.markets import get_market
 from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
     save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods
@@ -55,36 +54,6 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             energy_management_system_time_series_resolution_in_minutes / 60
         number_of_energy_management_time_intervals_per_day = int(hours_per_day /
                                                                  energy_management_system_time_series_resolution_in_hours)
-
-        # Electric Vehicle (EV) parameters
-        seed = 1000  # Used by OPEN originally
-        random_seed = np.random.seed(seed)
-        number_of_electric_vehicles = input_case_data["number_of_electric_vehicles"]
-        max_battery_capacity_in_kilowatts_per_hour = input_case_data["max_battery_capacity_in_kilowatts_per_hour"]
-        max_battery_charging_power_in_kilowatts = input_case_data["max_battery_charging_power_in_kilowatts"]
-        electric_vehicle_arrival_time_start = input_case_data["electric_vehicle_arrival_time_start"]
-        electric_vehicle_arrival_time_end = input_case_data["electric_vehicle_arrival_time_end"]
-        electric_vehicle_departure_time_start = input_case_data["electric_vehicle_departure_time_start"]
-        electric_vehicle_departure_time_end = input_case_data["electric_vehicle_departure_time_end"]
-        electric_vehicle_fleet = ElectricVehicleFleet(random_seed=random_seed,
-                                                      number_of_electric_vehicles=number_of_electric_vehicles,
-                                                      max_battery_capacity_in_kilowatts_per_hour=
-                                                      max_battery_capacity_in_kilowatts_per_hour,
-                                                      max_electric_vehicle_charging_power=
-                                                      max_battery_charging_power_in_kilowatts,
-                                                      electric_vehicle_arrival_time_start=
-                                                      electric_vehicle_arrival_time_start,
-                                                      electric_vehicle_arrival_time_end=
-                                                      electric_vehicle_arrival_time_end,
-                                                      electric_vehicle_departure_time_start=
-                                                      electric_vehicle_departure_time_start,
-                                                      electric_vehicle_departure_time_end=
-                                                      electric_vehicle_departure_time_end
-                                                      )
-
-        electric_vehicle_fleet.check_electric_vehicle_fleet_charging_feasibility()
-        if not electric_vehicle_fleet.is_electric_vehicle_fleet_feasible_for_the_system:
-            raise ValueError('The electric vehicle fleet is not feasible for the system')
 
         # Building parameters
         max_inside_degree_celsius = input_case_data["max_inside_degree_celsius"]
@@ -149,16 +118,34 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         line = pp.create_line(network, from_bus=bus_2, to_bus=bus_3, length_km=length_from_bus_2_to_bus_3_in_km,
                               std_type="NAYY 4x50 SE", name="Line")
 
-        number_of_buses = network.bus['name'].size
 
         # STEP 3: setup the assets
         storage_assets = []
         building_assets = []
         non_distpachable_assets = []
 
+
+        storage_assets_bus_id = bus_3
+        storage_assets_battery_system = assets.StorageAsset(
+            max_energy_in_kilowatt_hour=np.full((number_of_time_intervals_per_day,), 400),
+            min_energy_in_kilowatt_hour=np.zeros(number_of_time_intervals_per_day),
+            max_active_power_in_kilowatts=np.full((number_of_time_intervals_per_day,), 400),
+            min_active_power_in_kilowatts=np.zeros(number_of_time_intervals_per_day),
+            initial_energy_level_in_kilowatt_hour=15,
+            required_terminal_energy_level_in_kilowatt_hour=200,
+            bus_id=storage_assets_bus_id,
+            simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
+            number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+            energy_management_system_time_series_resolution_in_seconds=energy_management_system_time_series_resolution_in_hours,
+            number_of_energy_management_system_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
+            absolute_active_power_in_kilowatts=None,
+            battery_degradation_ratio_in_euros_per_kilowatt_hour=None,
+            charging_efficiency=1,
+            charging_efficiency_for_the_optimizer=1)
+        storage_assets.append(storage_assets_battery_system)
+
         photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
         photovoltaic_reactive_power_in_kilovolt_ampere = np.zeros(number_of_time_intervals_per_day)
-
         non_dispatchable_photovoltaic_asset = assets.NonDispatchableAsset(
             simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours, bus_id=bus_3,
             active_power_in_kilowatts=photovoltaic_active_power_in_kilowatts,

@@ -11,14 +11,17 @@ if __name__ == "__main__":
     simulation_time_series_resolution_in_minutes = 1
     energy_management_system_time_series_resolution_in_minutes = 15
 
-    # Electric vehicle parameters
-    number_of_electric_vehicles = 120
-    max_battery_capacity_in_kilowatts_per_hour = 30
-    max_battery_charging_power_in_kilowatts = 7
-    electric_vehicle_arrival_time_start = 12
-    electric_vehicle_arrival_time_end = 22
-    electric_vehicle_departure_time_start = 5
-    electric_vehicle_departure_time_end = 8
+    # Battery system #TODO: to be added
+    max_energy_in_kilowatt_hour = 400
+    min_energy_in_kilowatt_hour = 0
+    max_active_power_in_kilowatts = 400
+    min_active_power_in_kilowatts = 0
+    initial_energy_level_percentage = 50
+    required_terminal_energy_level_percentage = 10
+    absolute_active_power_in_kilowatts = None
+    battery_degradation_ratio_in_euros_per_kilowatt_hour = None
+    charging_efficiency_percentage = 100
+    charging_efficiency_for_the_optimizer_percentage = 100
 
     # Building parameters
     max_inside_degree_celsius = 25  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
@@ -65,13 +68,16 @@ if __name__ == "__main__":
         'simulation_time_series_resolution_in_minutes': simulation_time_series_resolution_in_minutes,
         'energy_management_system_time_series_resolution_in_minutes':
             energy_management_system_time_series_resolution_in_minutes,
-        'number_of_electric_vehicles': number_of_electric_vehicles,
-        'max_battery_capacity_in_kilowatts_per_hour': max_battery_capacity_in_kilowatts_per_hour,
-        'max_battery_charging_power_in_kilowatts': max_battery_charging_power_in_kilowatts,
-        'electric_vehicle_arrival_time_start': electric_vehicle_arrival_time_start,
-        'electric_vehicle_arrival_time_end': electric_vehicle_arrival_time_end,
-        'electric_vehicle_departure_time_start': electric_vehicle_departure_time_start,
-        'electric_vehicle_departure_time_end': electric_vehicle_departure_time_end,
+        'max_energy_in_kilowatt_hour': max_energy_in_kilowatt_hour,
+        'min_energy_in_kilowatt_hour': min_energy_in_kilowatt_hour,
+        'max_active_power_in_kilowatts': max_active_power_in_kilowatts,
+        'min_active_power_in_kilowatts': min_active_power_in_kilowatts,
+        'initial_energy_level_percentage': initial_energy_level_percentage,
+        'required_terminal_energy_level_percentage': required_terminal_energy_level_percentage,
+        'absolute_active_power_in_kilowatts': absolute_active_power_in_kilowatts,
+        'battery_degradation_ratio_in_euros_per_kilowatt_hour': battery_degradation_ratio_in_euros_per_kilowatt_hour,
+        'charging_efficiency_percentage': charging_efficiency_percentage,
+        'charging_efficiency_for_the_optimizer_percentage': charging_efficiency_for_the_optimizer_percentage,
         'max_inside_degree_celsius': max_inside_degree_celsius,
         'min_inside_degree_celsius': min_inside_degree_celsius,
         'initial_inside_degree_celsius': initial_inside_degree_celsius,

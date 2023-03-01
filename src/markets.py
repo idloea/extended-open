@@ -52,7 +52,7 @@ class Market(ABC):
         self.max_import_kilowatts = max_import_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
         self.max_export_kilowatts = max_export_kilowatts * np.ones(self.number_of_market_time_intervals_per_day)
 
-        self.frequency_response_price_in_euros_per_kilowatt_hour = offered_kilowatt_in_frequency_response
+        self.offered_kilowatt_in_frequency_response = offered_kilowatt_in_frequency_response
         self.frequency_response_active = self._is_frequency_response_active()
         self.max_frequency_response_state_of_charge = max_frequency_response_state_of_charge
         self.min_frequency_response_state_of_charge = min_frequency_response_state_of_charge
@@ -121,7 +121,7 @@ class Market(ABC):
     def _get_total_frequency_response_revenue(self):
         if self.frequency_response_active:
             total_frequency_response_revenue = self.frequency_response_price_in_euros_per_kWh * \
-                                               self.frequency_response_price_in_euros_per_kilowatt_hour * \
+                                               self.offered_kilowatt_in_frequency_response * \
                                                np.count_nonzero(self.frequency_response_active) * \
                                                self.market_time_series_resolution_in_minutes
         else:
@@ -137,7 +137,7 @@ class Market(ABC):
                self.market_time_series_resolution_in_minutes
 
     def _is_frequency_response_active(self):
-        if self.frequency_response_price_in_euros_per_kilowatt_hour > 0:
+        if self.offered_kilowatt_in_frequency_response > 0:
             frequency_response_active = True
         else:
             frequency_response_active = False

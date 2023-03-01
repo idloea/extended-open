@@ -122,12 +122,11 @@ class StorageAsset(Asset):
                  number_of_time_intervals_per_day: int,
                  energy_management_system_time_series_resolution_in_seconds: float,
                  number_of_energy_management_system_time_intervals_per_day: int,
-                 phases=[0, 1, 2],
                  absolute_active_power_in_kilowatts=None,
                  battery_degradation_ratio_in_euros_per_kilowatt_hour=None,
                  charging_efficiency=1,
                  charging_efficiency_for_the_optimizer=1):
-        Asset.__init__(self, bus_id, simulation_time_series_hour_resolution, number_of_time_intervals_per_day)
+        Asset.__init__(self, bus_id, simulation_time_series_hour_resolution)
         self.max_energy_in_kilowatt_hour = max_energy_in_kilowatt_hour
         self.min_energy_in_kilowatt_hour = min_energy_in_kilowatt_hour
         self.max_active_power_in_kilowatts = max_active_power_in_kilowatts
@@ -138,7 +137,8 @@ class StorageAsset(Asset):
             self.absolute_active_power_in_kilowatts = absolute_active_power_in_kilowatts
         self.initial_energy_level_in_kilowatt_hour = initial_energy_level_in_kilowatt_hour
         self.required_terminal_energy_level_in_kilowatt_hour = required_terminal_energy_level_in_kilowatt_hour
-        self.E = initial_energy_level_in_kilowatt_hour*np.ones(number_of_time_intervals_per_day + 1)
+        self.energy_level_in_kilowatt_hour = \
+            initial_energy_level_in_kilowatt_hour * np.ones(number_of_time_intervals_per_day + 1)
         self.energy_management_system_time_series_resolution_in_seconds = \
             energy_management_system_time_series_resolution_in_seconds
         self.number_of_energy_management_system_time_intervals_per_day = \
@@ -150,33 +150,32 @@ class StorageAsset(Asset):
         self.charging_efficiency = charging_efficiency * np.ones(100)
         self.charging_efficiency_for_the_optimizer = charging_efficiency_for_the_optimizer
 
-# NEEDED FOR OXEMF EV CASE
-    def update_control(self, Pnet):
+    def update_control(self, active_power_in_kilowatts):
         """
         Update the storage system power and energy profile
 
         Parameters
         ----------
-        Pnet : float
+        active_power_in_kilowatts : float
             input powers over the time series (kW)
 
         """
-        self.active_power_in_kilowatts = Pnet
-        self.E[0] = self.initial_energy_level_in_kilowatt_hour
-        t_ems = self.simulation_time_series_hour_resolution / self.energy_management_system_time_series_resolution_in_seconds
+        self.active_power_in_kilowatts = active_power_in_kilowatts
+        self.energy_level_in_kilowatt_hour[0] = self.initial_energy_level_in_kilowatt_hour
+        energy_management_system_time = self.simulation_time_series_hour_resolution / self.energy_management_system_time_series_resolution_in_seconds
         for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100 * (abs(self.active_power_in_kilowatts[t] / self.absolute_active_power_in_kilowatts)))
-            P_eff = self.eff[P_ratio-1]
+            P_eff = self.charging_efficiency[P_ratio-1]
             if self.active_power_in_kilowatts[t] < 0:
-                if self.E[t] <= self.min_energy_in_kilowatt_hour[int(t * t_ems)]:
-                    self.E[t] = self.min_energy_in_kilowatt_hour[int(t * t_ems)]
+                if self.energy_level_in_kilowatt_hour[t] <= self.min_energy_in_kilowatt_hour[int(t * energy_management_system_time)]:
+                    self.energy_level_in_kilowatt_hour[t] = self.min_energy_in_kilowatt_hour[int(t * energy_management_system_time)]
                     self.active_power_in_kilowatts[t] = 0
-                self.E[t+1] = self.E[t] + (1/P_eff) * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
+                self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + (1 / P_eff) * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
             elif self.active_power_in_kilowatts[t] >= 0:
-                if self.E[t] >= self.max_energy_in_kilowatt_hour[int(t * t_ems)]:
-                    self.E[t] = self.max_energy_in_kilowatt_hour[int(t * t_ems)]
+                if self.energy_level_in_kilowatt_hour[t] >= self.max_energy_in_kilowatt_hour[int(t * energy_management_system_time)]:
+                    self.energy_level_in_kilowatt_hour[t] = self.max_energy_in_kilowatt_hour[int(t * energy_management_system_time)]
                     self.active_power_in_kilowatts[t] = 0
-                self.E[t+1] = self.E[t] + P_eff * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
+                self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + P_eff * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
 # NEEDED FOR OXEMF EV CASE
     def update_control_t(self, Pnet_t, t):
         """
@@ -191,20 +190,20 @@ class StorageAsset(Asset):
 
         """
         self.active_power_in_kilowatts[t] = Pnet_t
-        self.E[0] = self.initial_energy_level_in_kilowatt_hour
+        self.energy_level_in_kilowatt_hour[0] = self.initial_energy_level_in_kilowatt_hour
         t_ems = self.simulation_time_series_hour_resolution / self.energy_management_system_time_series_resolution_in_seconds
         P_ratio = int(100 * (abs(self.active_power_in_kilowatts[t] / self.absolute_active_power_in_kilowatts)))
         P_eff = self.eff[P_ratio-1]
         if self.active_power_in_kilowatts[t] < 0:
-            if self.E[t] <= self.min_energy_in_kilowatt_hour[int(t * t_ems)]:
-                self.E[t] = self.min_energy_in_kilowatt_hour[int(t * t_ems)]
+            if self.energy_level_in_kilowatt_hour[t] <= self.min_energy_in_kilowatt_hour[int(t * t_ems)]:
+                self.energy_level_in_kilowatt_hour[t] = self.min_energy_in_kilowatt_hour[int(t * t_ems)]
                 self.active_power_in_kilowatts[t] = 0
-            self.E[t+1] = self.E[t] + (1/P_eff) * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
+            self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + (1 / P_eff) * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
         elif self.active_power_in_kilowatts[t] >= 0:
-            if self.E[t] >= self.max_energy_in_kilowatt_hour[int(t * t_ems)]:
-                self.E[t] = self.max_energy_in_kilowatt_hour[int(t * t_ems)]
+            if self.energy_level_in_kilowatt_hour[t] >= self.max_energy_in_kilowatt_hour[int(t * t_ems)]:
+                self.energy_level_in_kilowatt_hour[t] = self.max_energy_in_kilowatt_hour[int(t * t_ems)]
                 self.active_power_in_kilowatts[t] = 0
-            self.E[t+1] = self.E[t] + P_eff * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
+            self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + P_eff * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
 
 
 class NonDispatchableAsset(Asset):

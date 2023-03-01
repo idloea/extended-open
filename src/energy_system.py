@@ -300,13 +300,13 @@ class EnergySystem:
         # STEP 1: solve the optimisation
         energy_management_system_output = self.run_single_copper_plate_network_optimization_model()
 
-        number_of_electric_vehicles = len(self.storage_assets)
+        number_of_storage_assets = len(self.storage_assets)
         number_of_buildings = len(self.building_assets)
         number_of_non_dispatchable_assets = len(self.non_dispatchable_assets)
 
         imported_active_power_in_kilowatts = energy_management_system_output['active_power_imports_in_kilowatts']
         exported_active_power_in_kilowatts = energy_management_system_output['active_power_exports_in_kilowatts']
-        if number_of_electric_vehicles > 0:
+        if number_of_storage_assets > 0:
             storage_asset_charge_or_discharge_power_in_kilowatts = \
                 energy_management_system_output['charge_discharge_power_for_storage_assets_in_kilowatts']
         if number_of_buildings > 0:
@@ -315,10 +315,10 @@ class EnergySystem:
         active_power_demand_in_kilowatts = \
             energy_management_system_output['active_power_in_kilowatts_at_energy_management_resolution']
         # convert P_ES and P_BLDG signals to system time-series scale
-        if number_of_electric_vehicles > 0:
+        if number_of_storage_assets > 0:
             electric_vehicle_fleet_active_power_in_kilowatts = \
                 self._get_asset_active_power_in_kilowatts(
-                    number_of_assets=number_of_electric_vehicles,
+                    number_of_assets=number_of_storage_assets,
                     active_power_in_kilowatts=
                     storage_asset_charge_or_discharge_power_in_kilowatts)
         if number_of_buildings > 0:
@@ -328,8 +328,8 @@ class EnergySystem:
                     active_power_in_kilowatts=building_power_consumption_in_kilowatts)
 
         # STEP 2: update the controllable assets
-        if number_of_electric_vehicles > 0:
-            for i in range(number_of_electric_vehicles):
+        if number_of_storage_assets > 0:
+            for i in range(number_of_storage_assets):
                 self.storage_assets[i].update_control(electric_vehicle_fleet_active_power_in_kilowatts[:, i])
         if number_of_buildings > 0:
             for i in range(number_of_buildings):
@@ -340,27 +340,26 @@ class EnergySystem:
         active_power_bus_demand_in_kilowatts = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
         reactive_power_bus_demand_in_kilovolt_ampere_reactive = \
             np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
-        if number_of_electric_vehicles > 0:
+        if number_of_storage_assets > 0:
             # calculate the total real and reactive power demand at each bus
-            for i in range(number_of_electric_vehicles):
-                network_bus_id = self.storage_assets[i].network_bus_id
-                active_power_bus_demand_in_kilowatts[:, network_bus_id] += self.storage_assets[
-                    i].active_power_in_kilowatts
-                reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, network_bus_id] += self.storage_assets[
-                    i].reactive_power
+            for i in range(number_of_storage_assets):
+                non_dispatchable_assets_bus_id = self.storage_assets[i].bus_id
+                active_power_bus_demand_in_kilowatts[:, non_dispatchable_assets_bus_id] += \
+                    self.storage_assets[i].active_power_in_kilowatts
         if number_of_buildings > 0:
             # calculate the total real and reactive power demand at each bus
             for i in range(number_of_buildings):
-                bus_id = self.building_assets[i].bus_id
-                active_power_bus_demand_in_kilowatts[:, bus_id] += self.building_assets[i].active_power_in_kilowatts
-                reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, bus_id] += self.building_assets[
+                building_bus_id = self.building_assets[i].bus_id
+                active_power_bus_demand_in_kilowatts[:, building_bus_id] += \
+                    self.building_assets[i].active_power_in_kilowatts
+                reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, building_bus_id] += self.building_assets[
                     i].reactive_power
         for i in range(number_of_non_dispatchable_assets):
-            network_bus_id = self.non_dispatchable_assets[i].bus_id
-            active_power_bus_demand_in_kilowatts[:, network_bus_id] += self.non_dispatchable_assets[
-                i].active_power_in_kilowatts
-            reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, network_bus_id] += self.non_dispatchable_assets[
-                i].reactive_power
+            non_dispatchable_assets_bus_id = self.non_dispatchable_assets[i].bus_id
+            active_power_bus_demand_in_kilowatts[:, non_dispatchable_assets_bus_id] += \
+                self.non_dispatchable_assets[i].active_power_in_kilowatts
+            reactive_power_bus_demand_in_kilovolt_ampere_reactive[:, non_dispatchable_assets_bus_id] += \
+                self.non_dispatchable_assets[i].reactive_power
 
         buses_voltage_in_per_unit = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
         buses_voltage_angle_in_degrees = np.zeros([self.number_of_time_intervals_per_day, number_of_buses])
@@ -376,14 +375,14 @@ class EnergySystem:
             # for each time interval:
             # set up a copy of the network for simulation interval number_of_time_interval_per_day
             network_copy = copy.deepcopy(self.network)
-            for network_bus_id in range(number_of_buses):
+            for non_dispatchable_assets_bus_id in range(number_of_buses):
                 specific_active_power_bus_demand_in_kilowatts = \
-                    active_power_bus_demand_in_kilowatts[number_of_time_interval_per_day, network_bus_id]
+                    active_power_bus_demand_in_kilowatts[number_of_time_interval_per_day, non_dispatchable_assets_bus_id]
                 specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive = \
                     reactive_power_bus_demand_in_kilovolt_ampere_reactive[number_of_time_interval_per_day,
-                                                                          network_bus_id]
+                                                                          non_dispatchable_assets_bus_id]
                 # add P,Q loads to the network copy
-                pp.create_load(network_copy, network_bus_id, specific_active_power_bus_demand_in_kilowatts / 1e3,
+                pp.create_load(network_copy, non_dispatchable_assets_bus_id, specific_active_power_bus_demand_in_kilowatts / 1e3,
                                specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive / 1e3)
             # run the power flow simulation
             max_iteration = 100
@@ -411,7 +410,7 @@ class EnergySystem:
         simulation_time = simulation_end_time - simulation_start_time
         print('*** SIMULATION TIME: ', simulation_time, '***')
 
-        if number_of_electric_vehicles > 0 and number_of_buildings > 0:
+        if number_of_storage_assets > 0 and number_of_buildings > 0:
             output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
                       'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
                       'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
@@ -426,7 +425,7 @@ class EnergySystem:
                       'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
                       'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,
                       'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts}
-        elif number_of_electric_vehicles == 0 and number_of_buildings > 0:
+        elif number_of_storage_assets == 0 and number_of_buildings > 0:
             output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
                       'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
                       'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
@@ -439,7 +438,7 @@ class EnergySystem:
                       'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
                       'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,
                       'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts}
-        elif number_of_electric_vehicles > 0 and number_of_buildings == 0:
+        elif number_of_storage_assets > 0 and number_of_buildings == 0:
             output = {'buses_voltage_in_per_unit': buses_voltage_in_per_unit,
                       'buses_voltage_angle_in_degrees': buses_voltage_angle_in_degrees,
                       'buses_active_power_in_kilowatts': buses_active_power_in_kilowatts,
@@ -1071,143 +1070,7 @@ class EnergySystem:
                     active_power_in_kilowatts_at_energy_management_resolution,
                 'PF_networks_lin': PF_networks_lin}
 
-    # NEEDED FOR OXEMF EV CASE
-    def simulate_network_mpc_3phPF(self, ems_type='3ph',
-                                   i_unconstrained_lines=[],
-                                   v_unconstrained_buses=[]):
-        """
-        Run the Energy Management src using Model Predictive Control (MPC)
-        and simulate an IEEE 13 bus network either copper plate or 3ph
 
-        Parameters
-        ----------
-        self : EnergySystem object
-            Object containing information on assets, market, network and time
-            resolution.
-        ems_type : string
-            Identifies whether the system is copper plate or 3ph. Default 3ph
-        i_unconstrained_lines : list
-            List of network lines which have unconstrained current
-        v_unconstrained_buses : list
-            List of buses at which the voltage is not constrained
-
-        Returns
-        -------
-        Output : dictionary
-                PF_network_res : Network power flow results stored as a list of
-                    objects
-                P_ES_ems : Charge/discharge power for storage assets at energy
-                    management time resolution (kW)
-                P_import_ems :Power imported from central grid at energy
-                    management time resolution (kW)
-                P_export_ems :Power exported to central grid at energy
-                    management time resolution(kW)
-                P_demand_ems :src power demand at energy management time
-                    resolution (kW)
-
-        """
-
-        #######################################
-        ### STEP 0: setup variables
-        #######################################
-        N_ESs = len(self.storage_assets)  # number of EVs
-        N_nondispatch = len(self.non_dispatchable_assets)  # number of EVs
-        P_import_ems = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
-        P_export_ems = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
-        P_ES_ems = np.zeros([self.number_of_energy_management_system_time_intervals_per_day, N_ESs])
-        if ems_type == 'copper_plate':
-            P_demand_ems = np.zeros(self.number_of_energy_management_system_time_intervals_per_day)
-        else:
-            P_demand_ems = np.zeros([self.number_of_energy_management_system_time_intervals_per_day, N_nondispatch])
-        N_buses = self.network.N_buses
-        N_phases = self.network.N_phases
-        P_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses, N_phases])
-        Q_demand_buses = np.zeros([self.number_of_time_intervals_per_day, N_buses, N_phases])
-        PF_network_res = []
-        #######################################
-        ### STEP 1: MPC Loop
-        #######################################
-        print('*** MPC SIMULATION START ***')
-        for t_mpc in range(self.number_of_energy_management_system_time_intervals_per_day):
-            print('************************')
-            print('MPC Interval ' + str(t_mpc) + ' of ' + str(
-                self.number_of_energy_management_system_time_intervals_per_day))
-            print('************************')
-            #######################################
-            ### STEP 1.1: Optimisation
-            #######################################
-            if ems_type == 'copper_plate':
-                output_ems = self.EMS_copper_plate_t0_c1deg(t_mpc)
-                P_demand_ems[t_mpc] = output_ems['active_power_in_kilowatts_at_energy_management_resolution'][0]
-            else:
-                output_ems = self.EMS_3ph_linear_t0(t_mpc,
-                                                    i_unconstrained_lines,
-                                                    v_unconstrained_buses)
-                P_demand_ems[t_mpc, :] = output_ems['active_power_in_kilowatts_at_energy_management_resolution'][0, :]
-            P_import_ems[t_mpc] = output_ems['active_power_imports_in_kilowatts'][0]
-            P_export_ems[t_mpc] = output_ems['active_power_exports_in_kilowatts'][0]
-            P_ES_ems[t_mpc, :] = output_ems['P_ES_val'][0, :]
-            # convert P_EV signals to system time-series scale
-            T_interval = int(
-                self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours)
-            P_ESs = np.zeros([T_interval, N_ESs])
-            for t in range(T_interval):
-                P_ESs[t, :] = P_ES_ems[t_mpc, :]
-            #######################################
-            ### STEP 1.2: update the controllable assets
-            #######################################
-            t0 = int(t_mpc * (
-                    self.energy_management_system_time_series_resolution_in_hours / self.simulation_time_series_resolution_in_hours))
-            # get the simulation time intervals within each EMS time interval
-            # and implement the ES system control for them
-            t_range = np.arange(t0, t0 + T_interval)
-            for i in range(N_ESs):
-                for t_index in range(T_interval):
-                    t = t_range[t_index]
-                    self.storage_assets[i].update_control_t(P_ESs[t_index, i], t)
-            #######################################
-            ### STEP 1.3: simulate the network
-            #######################################
-            # total real and reactive power demand at each bus phase
-            for t_index in range(T_interval):
-                t = t_range[t_index]
-                for i in range(N_ESs):
-                    bus_id = self.storage_assets[i].network_bus_id
-                    phases_i = self.storage_assets[i].phases
-                    N_phases_i = np.size(phases_i)
-                    for ph_i in phases_i:
-                        P_demand_buses[t, bus_id, ph_i] += \
-                            self.storage_assets[i].active_power_in_kilowatts[t] / N_phases_i
-                        Q_demand_buses[t, bus_id, ph_i] += \
-                            self.storage_assets[i].reactive_power[t] / N_phases_i
-                for i in range(N_nondispatch):
-                    bus_id = self.non_dispatchable_assets[i].network_bus_id
-                    phases_i = self.non_dispatchable_assets[i].phases
-                    N_phases_i = np.size(phases_i)
-                    for ph_i in np.nditer(phases_i):
-                        P_demand_buses[t, bus_id, ph_i] += \
-                            self.non_dispatchable_assets[i].active_power_in_kilowatts[t] / N_phases_i
-                        Q_demand_buses[t, bus_id, ph_i] += \
-                            self.non_dispatchable_assets[i].reactive_power[t] / N_phases_i
-                # set up a copy of the network for simulation interval t
-                network_t = copy.deepcopy(self.network)
-                network_t.clear_loads()
-                for bus_id in range(N_buses):
-                    for ph_i in range(N_phases):
-                        Pph_t = P_demand_buses[t, bus_id, ph_i]
-                        Qph_t = Q_demand_buses[t, bus_id, ph_i]
-                        # add P,Q loads to the network copy
-                        network_t.set_load(bus_id, ph_i, Pph_t, Qph_t)
-                # run the power flow simulation
-                network_t.zbus_pf()
-                # store power flow results as a list of network objects
-                PF_network_res.append(network_t)
-        print('*** MPC SIMULATION COMPLETE ***')
-        return {'PF_network_res': PF_network_res,
-                'P_ES_ems': P_ES_ems,
-                'P_import_ems': P_import_ems,
-                'P_export_ems': P_export_ems,
-                'P_demand_ems': P_demand_ems}
 
     def add_linear_building_thermal_model_constraints_to_the_problem(
             self, number_of_buildings: int, problem: pic.Problem, heating_active_power_in_kilowatts: float,
@@ -1313,27 +1176,29 @@ class EnergySystem:
             # maximum power constraint
             problem.add_constraint(
                 controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
-                <= self.storage_assets[number_of_storage_asset].max_import_kilowatts)
+                <= float(self.storage_assets[number_of_storage_asset].max_active_power_in_kilowatts[0]))
             # minimum power constraint
             problem.add_constraint(
                 controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
-                >= self.storage_assets[number_of_storage_asset].max_export_kilowatts)
+                >= float(self.storage_assets[number_of_storage_asset].min_active_power_in_kilowatts[0]))
             # maximum energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * asum *
                 controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
-                <= self.storage_assets[number_of_storage_asset].max_energy_in_kilowatt_hour
+                <= float(self.storage_assets[number_of_storage_asset].max_active_power_in_kilowatts[0])
                 - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
             # minimum energy constraint
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours * asum
                 * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset] >=
-                self.storage_assets[number_of_storage_asset].min_energy_in_kilowatt_hour
+                float(self.storage_assets[number_of_storage_asset].min_energy_in_kilowatt_hour[0])
                 - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
             # final energy constraint
+            number_energy_management_system_time_series_resolution_in_hours = \
+                24 / self.energy_management_system_time_series_resolution_in_hours
             problem.add_constraint(
                 self.energy_management_system_time_series_resolution_in_hours *
-                asum[self.energy_management_system_time_series_resolution_in_hours - 1, :]
+                asum[self.number_of_energy_management_system_time_intervals_per_day - 1, :]
                 * controllable_assets_active_power_in_kilowatts[:, number_of_buildings + number_of_storage_asset]
                 == self.storage_assets[number_of_storage_asset].required_terminal_energy_level_in_kilowatt_hour
                 - self.storage_assets[number_of_storage_asset].initial_energy_level_in_kilowatt_hour)
