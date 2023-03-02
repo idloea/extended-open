@@ -13,6 +13,7 @@ with a particular set of real and reactive power profiles over the simulation
 time-series.
 
 """
+import array
 from typing import List, Union
 import numpy as np
 from abc import ABC, abstractmethod
@@ -119,6 +120,10 @@ class Market(ABC):
         return revenues
 
     def _get_total_frequency_response_revenue(self):
+        """"
+        I think that Frequency Response is not considered in the original OPEN paper, or it is considered
+        but without simulating a disconnection in the grid. Hence, only availability is paid
+        """
         if self.frequency_response_active:
             total_frequency_response_revenue = self.frequency_response_price_in_euros_per_kWh * \
                                                self.offered_kilowatt_in_frequency_response * \
@@ -150,7 +155,7 @@ class Market(ABC):
 
 class OPENMarket(Market):
 
-    def get_import_costs_in_euros_per_day_and_period(self) -> List:
+    def get_import_costs_in_euros_per_day_and_period(self) -> np.ndarray:
         import_period_cost_in_euros_per_day_list = []
         for import_period in self.import_periods:
             import_period_values = list(import_period.values())[0]
@@ -181,7 +186,7 @@ class SpanishMarket(Market):
                          offered_kilowatt_in_frequency_response, max_frequency_response_state_of_charge,
                          min_frequency_response_state_of_charge, frequency_response_price_in_euros_per_kilowatt_hour)
 
-    def get_import_costs_in_euros_per_day_and_period(self) -> List:
+    def get_import_costs_in_euros_per_day_and_period(self) -> np.ndarray:
         hours_per_day = 24
         hour_array = np.ones(hours_per_day)
         import_period_price_per_hour_list = []
