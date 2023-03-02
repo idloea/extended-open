@@ -118,30 +118,48 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         line = pp.create_line(network, from_bus=bus_2, to_bus=bus_3, length_km=length_from_bus_2_to_bus_3_in_km,
                               std_type="NAYY 4x50 SE", name="Line")
 
-
         # STEP 3: setup the assets
         storage_assets = []
         building_assets = []
         non_distpachable_assets = []
 
-
+        max_energy_in_kilowatt_hour = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['max_energy_in_kilowatt_hour'])
+        min_energy_in_kilowatt_hour = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['min_energy_in_kilowatt_hour'])
+        max_active_power_in_kilowatts = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['max_active_power_in_kilowatts'])
+        min_active_power_in_kilowatts = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['min_active_power_in_kilowatts'])
+        initial_energy_level_in_kilowatt_hour = \
+            input_case_data['initial_energy_level_percentage'] / 100 * input_case_data['max_energy_in_kilowatt_hour']
+        required_terminal_energy_level_in_kilowatt_hour = \
+            input_case_data['required_terminal_energy_level_percentage'] / 100 * \
+            input_case_data['max_energy_in_kilowatt_hour']
+        absolute_active_power_in_kilowatts = input_case_data['absolute_active_power_in_kilowatts']
+        battery_degradation_ratio_in_euros_per_kilowatt_hour = \
+            input_case_data['battery_degradation_ratio_in_euros_per_kilowatt_hour']
+        charging_efficiency = input_case_data['charging_efficiency_percentage'] / 100
+        charging_efficiency_for_the_optimizer = \
+            input_case_data['charging_efficiency_for_the_optimizer_percentage'] / 100
         storage_assets_bus_id = bus_3
         storage_assets_battery_system = assets.StorageAsset(
-            max_energy_in_kilowatt_hour=np.full((number_of_time_intervals_per_day,), 400),
-            min_energy_in_kilowatt_hour=np.zeros(number_of_time_intervals_per_day),
-            max_active_power_in_kilowatts=np.full((number_of_time_intervals_per_day,), 400),
-            min_active_power_in_kilowatts=np.zeros(number_of_time_intervals_per_day),
-            initial_energy_level_in_kilowatt_hour=15,
-            required_terminal_energy_level_in_kilowatt_hour=200,
+            max_energy_in_kilowatt_hour=max_energy_in_kilowatt_hour,
+            min_energy_in_kilowatt_hour=min_energy_in_kilowatt_hour,
+            max_active_power_in_kilowatts=max_active_power_in_kilowatts,
+            min_active_power_in_kilowatts=min_active_power_in_kilowatts,
+            initial_energy_level_in_kilowatt_hour=initial_energy_level_in_kilowatt_hour,
+            required_terminal_energy_level_in_kilowatt_hour=required_terminal_energy_level_in_kilowatt_hour,
             bus_id=storage_assets_bus_id,
             simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-            energy_management_system_time_series_resolution_in_seconds=energy_management_system_time_series_resolution_in_hours,
+            energy_management_system_time_series_resolution_in_seconds=
+            energy_management_system_time_series_resolution_in_hours,
             number_of_energy_management_system_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-            absolute_active_power_in_kilowatts=None,
-            battery_degradation_ratio_in_euros_per_kilowatt_hour=None,
-            charging_efficiency=1,
-            charging_efficiency_for_the_optimizer=1)
+            absolute_active_power_in_kilowatts=absolute_active_power_in_kilowatts,
+            battery_degradation_ratio_in_euros_per_kilowatt_hour=battery_degradation_ratio_in_euros_per_kilowatt_hour,
+            charging_efficiency=charging_efficiency,
+            charging_efficiency_for_the_optimizer=charging_efficiency_for_the_optimizer)
         storage_assets.append(storage_assets_battery_system)
 
         photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy

@@ -16,8 +16,8 @@ if __name__ == "__main__":
     min_energy_in_kilowatt_hour = 0
     max_active_power_in_kilowatts = 400
     min_active_power_in_kilowatts = 0
-    initial_energy_level_percentage = 50
-    required_terminal_energy_level_percentage = 10
+    initial_energy_level_percentage = 4
+    required_terminal_energy_level_percentage = 50
     absolute_active_power_in_kilowatts = None
     battery_degradation_ratio_in_euros_per_kilowatt_hour = None
     charging_efficiency_percentage = 100
