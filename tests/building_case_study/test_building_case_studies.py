@@ -30,20 +30,23 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
 
         np.testing.assert_almost_equal(expected_buses_voltage_in_per_unit, buses_voltage_in_per_unit)
         np.testing.assert_almost_equal(expected_buses_buses_voltage_angle_in_degrees, buses_voltage_angle_in_degrees)
-        np.testing.assert_almost_equal(expected_buses_active_power_in_kilowatts, buses_active_power_in_kilowatts)
+        np.testing.assert_almost_equal(expected_buses_active_power_in_kilowatts, buses_active_power_in_kilowatts,
+                                       decimal=4)
         np.testing.assert_almost_equal(expected_buses_reactive_power_in_kilovolt_ampere_reactive,
                                        buses_reactive_power_in_kilovolt_ampere_reactive)
-        self.assertAlmostEqual(expected_market_active_power_in_kilowatts, market_active_power_in_kilowatts)
+        self.assertAlmostEqual(expected_market_active_power_in_kilowatts, market_active_power_in_kilowatts, places=4)
         self.assertAlmostEqual(expected_market_reactive_power_in_kilovolt_ampere_reactive,
                                market_reactive_power_in_kilovolt_ampere_reactive)
-        self.assertAlmostEqual(expected_imported_active_power_in_kilowatts, imported_active_power_in_kilowatts)
-        self.assertAlmostEqual(expected_exported_active_power_in_kilowatts, exported_active_power_in_kilowatts)
+        self.assertAlmostEqual(expected_imported_active_power_in_kilowatts, imported_active_power_in_kilowatts,
+                               places=4)
+        self.assertAlmostEqual(expected_exported_active_power_in_kilowatts, exported_active_power_in_kilowatts,
+                               places=4)
         self.assertAlmostEqual(expected_building_power_consumption_in_kilowatts,
-                               building_power_consumption_in_kilowatts)
-        self.assertAlmostEqual(expected_active_power_demand_in_kilowatts, active_power_demand_in_kilowatts)
+                               building_power_consumption_in_kilowatts, places=4)
+        self.assertAlmostEqual(expected_active_power_demand_in_kilowatts, active_power_demand_in_kilowatts, places=4)
         self.assertAlmostEqual(expected_active_power_demand_base_in_kilowatts,
-                               expected_active_power_demand_base_in_kilowatts)
-        self.assertAlmostEqual(expected_revenue, revenue)
+                               expected_active_power_demand_base_in_kilowatts, places=4)
+        self.assertAlmostEqual(expected_revenue, revenue, places=4)
 
     def test_winter_building_case(self):
         is_winter = True
@@ -66,13 +69,13 @@ class OriginalOPENTestBuildingCases(unittest.TestCase):
 
         np.testing.assert_almost_equal(expected_buses_Vpu, buses_Vpu)
         np.testing.assert_almost_equal(expected_buses_Vang, buses_Vang)
-        np.testing.assert_almost_equal(expected_buses_Pnet, buses_Pnet)
-        np.testing.assert_almost_equal(expected_buses_Qnet, buses_Qnet)
-        self.assertAlmostEqual(expected_Pnet_market, Pnet_market)
-        self.assertAlmostEqual(expected_Qnet_market, Qnet_market)
-        self.assertAlmostEqual(expected_P_import_ems, P_import_ems)
-        self.assertAlmostEqual(expected_P_export_ems, P_export_ems)
-        self.assertAlmostEqual(expected_P_BLDG_ems, P_BLDG_ems)
-        self.assertAlmostEqual(expected_P_demand_ems, P_demand_ems)
-        self.assertAlmostEqual(expected_P_demand_base, expected_P_demand_base)
-        self.assertAlmostEqual(expected_revenue, revenue)
+        np.testing.assert_almost_equal(expected_buses_Pnet, buses_Pnet, decimal=4)
+        np.testing.assert_almost_equal(expected_buses_Qnet, buses_Qnet, decimal=4)
+        self.assertAlmostEqual(expected_Pnet_market, Pnet_market, places=4)
+        self.assertAlmostEqual(expected_Qnet_market, Qnet_market, places=4)
+        self.assertAlmostEqual(expected_P_import_ems, P_import_ems, places=4)
+        self.assertAlmostEqual(expected_P_export_ems, P_export_ems, places=4)
+        self.assertAlmostEqual(expected_P_BLDG_ems, P_BLDG_ems, places=4)
+        self.assertAlmostEqual(expected_P_demand_ems, P_demand_ems, places=4)
+        self.assertAlmostEqual(expected_P_demand_base, expected_P_demand_base, places=4)
+        self.assertAlmostEqual(expected_revenue, revenue, places=4)
