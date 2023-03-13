@@ -119,7 +119,7 @@ class EnergySystem:
                 P_BLDG_val :Builfing power consumption (kW)
                 active_power_imports_in_kilowatts :Power imported from central grid (kW)
                 active_power_exports_in_kilowatts :Power exported to central grid (kW)
-                active_power_in_kilowatts_at_energy_management_resolution :src power demand at energy management time
+                resampled_non_dispatchable_assets_active_power_in_kilowatts :src power demand at energy management time
                               resolution
 
         """
@@ -134,7 +134,7 @@ class EnergySystem:
 
         non_dispatchable_assets_active_power_in_kilowatts = \
             self._get_non_dispatchable_assets_active_power_in_kilowatts()
-        active_power_in_kilowatts_at_energy_management_resolution = \
+        resampled_non_dispatchable_assets_active_power_in_kilowatts = \
             self._resample_non_dispatchable_assets_active_power_in_kilowatts(
                 non_dispatchable_assets_active_power_in_kilowatts=non_dispatchable_assets_active_power_in_kilowatts)
 
@@ -143,27 +143,29 @@ class EnergySystem:
             name='controllable_assets_active_power_in_kilowatts',
             shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_dispatchable_assets),
             lower=0)
-        if number_of_buildings > 0:
+        for number_of_building in np.arange(0, number_of_buildings):
             cooling_active_power_in_kilowatts = RealVariable(
                 name='cooling_active_power_in_kilowatts',
                 shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings),
-                lower=0)  # TODO: need to add max?
+                lower=0, upper=self.building_assets[number_of_building].max_consumed_electric_cooling_kilowatts)
             heating_active_power_in_kilowatts = RealVariable(
                 name='heating_active_power_in_kilowatts',
                 shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings),
-                lower=0)  # TODO: need to add max?
+                lower=0, upper=self.building_assets[number_of_building].max_consumed_electric_heating_kilowatts)
             building_internal_temperature_in_celsius_degrees = RealVariable(
                 name='building_internal_temperature_in_celsius_degrees',
-                shape=(self.number_of_energy_management_system_time_intervals_per_day,
-                       number_of_buildings))  # TODO: add temperature constraint here as lower and upper
+                shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings),
+                lower=self.building_assets[number_of_building].min_inside_degree_celsius,
+                upper=self.building_assets[number_of_building].max_inside_degree_celsius)
+
         active_power_imports_in_kilowatts = RealVariable(
             name='active_power_imports_in_kilowatts',
             shape=(self.number_of_energy_management_system_time_intervals_per_day, 1),
-            lower=0)
+            lower=0, upper=self.market.max_import_kilowatts)
         active_power_exports_in_kilowatts = RealVariable(
             name='active_power_exports_in_kilowatts',
             shape=(self.number_of_energy_management_system_time_intervals_per_day, 1),
-            lower=0)
+            lower=0, upper=self.market.max_import_kilowatts)
         # (positive) maximum demand dummy variable
         max_active_power_demand_in_kilowatts = RealVariable(
             name='max_active_power_demand_in_kilowatts', shape=1, lower=0)
@@ -189,7 +191,7 @@ class EnergySystem:
             problem=problem,
             controllable_assets_active_power_in_kilowatts=controllable_assets_active_power_in_kilowatts,
             active_power_in_kilowatts_at_energy_management_resolution=
-            active_power_in_kilowatts_at_energy_management_resolution,
+            resampled_non_dispatchable_assets_active_power_in_kilowatts,
             active_power_imports_in_kilowatts=active_power_imports_in_kilowatts,
             active_power_exports_in_kilowatts=active_power_exports_in_kilowatts,
             max_active_power_demand_in_kilowatts=max_active_power_demand_in_kilowatts)
@@ -225,8 +227,8 @@ class EnergySystem:
         controllable_assets_active_power_in_kilowatts = controllable_assets_active_power_in_kilowatts.value
         active_power_imports_in_kilowatts = active_power_imports_in_kilowatts.value
         active_power_exports_in_kilowatts = active_power_exports_in_kilowatts.value
-        active_power_in_kilowatts_at_energy_management_resolution = \
-            active_power_in_kilowatts_at_energy_management_resolution
+        resampled_non_dispatchable_assets_active_power_in_kilowatts = \
+            resampled_non_dispatchable_assets_active_power_in_kilowatts
 
         if number_of_buildings > 0:
             # Store internal temperature inside object
@@ -246,23 +248,23 @@ class EnergySystem:
                     :, number_of_buildings:number_of_storage_assets + number_of_buildings],
                 'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                 'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                'active_power_in_kilowatts_at_energy_management_resolution':
-                    active_power_in_kilowatts_at_energy_management_resolution}
+                'resampled_non_dispatchable_assets_active_power_in_kilowatts':
+                    resampled_non_dispatchable_assets_active_power_in_kilowatts}
         elif number_of_storage_assets == 0 and number_of_buildings > 0:
             output = {'active_power_consumed_by_the_buildings_in_kilowatts':
                           active_power_consumed_by_the_buildings_in_kilowatts,
                       'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                       'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                      'active_power_in_kilowatts_at_energy_management_resolution':
-                          active_power_in_kilowatts_at_energy_management_resolution}
+                      'resampled_non_dispatchable_assets_active_power_in_kilowatts':
+                          resampled_non_dispatchable_assets_active_power_in_kilowatts}
         elif number_of_storage_assets > 0 and number_of_buildings == 0:
             output = {
                 'charge_discharge_power_for_storage_assets_in_kilowatts': controllable_assets_active_power_in_kilowatts[
                                                                           :, :number_of_storage_assets],
                 'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
                 'active_power_exports_in_kilowatts': active_power_exports_in_kilowatts,
-                'active_power_in_kilowatts_at_energy_management_resolution':
-                    active_power_in_kilowatts_at_energy_management_resolution}
+                'resampled_non_dispatchable_assets_active_power_in_kilowatts':
+                    resampled_non_dispatchable_assets_active_power_in_kilowatts}
         else:
             raise ValueError('No dispatchable assets.')
 
@@ -317,7 +319,7 @@ class EnergySystem:
             building_power_consumption_in_kilowatts = \
                 energy_management_system_output['active_power_consumed_by_the_buildings_in_kilowatts']
         active_power_demand_in_kilowatts = \
-            energy_management_system_output['active_power_in_kilowatts_at_energy_management_resolution']
+            energy_management_system_output['resampled_non_dispatchable_assets_active_power_in_kilowatts']
         # convert P_ES and P_BLDG signals to system time-series scale
         if number_of_storage_assets > 0:
             electric_vehicle_fleet_active_power_in_kilowatts = \
