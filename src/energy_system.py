@@ -190,7 +190,7 @@ class EnergySystem:
         self.add_import_and_export_constraints_to_the_problem(
             problem=problem,
             controllable_assets_active_power_in_kilowatts=controllable_assets_active_power_in_kilowatts,
-            active_power_in_kilowatts_at_energy_management_resolution=
+            resampled_non_dispatchable_assets_active_power_in_kilowatts=
             resampled_non_dispatchable_assets_active_power_in_kilowatts,
             active_power_imports_in_kilowatts=active_power_imports_in_kilowatts,
             active_power_exports_in_kilowatts=active_power_exports_in_kilowatts,
@@ -612,14 +612,15 @@ class EnergySystem:
 
     def add_import_and_export_constraints_to_the_problem(
             self, problem: pic.Problem, controllable_assets_active_power_in_kilowatts: float,
-            active_power_in_kilowatts_at_energy_management_resolution: float, active_power_imports_in_kilowatts: float,
+            resampled_non_dispatchable_assets_active_power_in_kilowatts: float,
+            active_power_imports_in_kilowatts: float,
             active_power_exports_in_kilowatts: float, max_active_power_demand_in_kilowatts: float):
 
         for number_of_energy_management_system_time_interval_per_day in range(
                 self.number_of_energy_management_system_time_intervals_per_day):
             power_balance_constraint = sum(controllable_assets_active_power_in_kilowatts[
                                            number_of_energy_management_system_time_interval_per_day, :]) + \
-                                       active_power_in_kilowatts_at_energy_management_resolution[
+                                       resampled_non_dispatchable_assets_active_power_in_kilowatts[
                                            number_of_energy_management_system_time_interval_per_day] == \
                                        active_power_imports_in_kilowatts[
                                            number_of_energy_management_system_time_interval_per_day] - \
