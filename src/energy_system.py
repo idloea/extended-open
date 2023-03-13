@@ -154,7 +154,8 @@ class EnergySystem:
                 lower=0)  # TODO: need to add max?
             building_internal_temperature_in_celsius_degrees = RealVariable(
                 name='building_internal_temperature_in_celsius_degrees',
-                shape=(self.number_of_energy_management_system_time_intervals_per_day, number_of_buildings))  # TODO: add temperature constraint here as lower and upper
+                shape=(self.number_of_energy_management_system_time_intervals_per_day,
+                       number_of_buildings))  # TODO: add temperature constraint here as lower and upper
         active_power_imports_in_kilowatts = RealVariable(
             name='active_power_imports_in_kilowatts',
             shape=(self.number_of_energy_management_system_time_intervals_per_day, 1),
@@ -612,6 +613,17 @@ class EnergySystem:
             active_power_in_kilowatts_at_energy_management_resolution: float, active_power_imports_in_kilowatts: float,
             active_power_exports_in_kilowatts: float, max_active_power_demand_in_kilowatts: float):
 
+        energy_management_system_time_intervals_per_day_shape = \
+            (self.number_of_energy_management_system_time_intervals_per_day,)
+
+        max_import_kilowatts_array = np.full(shape=energy_management_system_time_intervals_per_day_shape,
+                                             fill_value=self.market.max_import_kilowatts)
+        problem.add_constraint(active_power_imports_in_kilowatts <= max_import_kilowatts_array)
+
+        max_export_constraint_array = np.full(shape=energy_management_system_time_intervals_per_day_shape,
+                                              fill_value=-self.market.max_export_kilowatts)
+        problem.add_constraint(active_power_exports_in_kilowatts <= max_export_constraint_array)
+
         for number_of_energy_management_system_time_interval_per_day in range(
                 self.number_of_energy_management_system_time_intervals_per_day):
             power_balance_constraint = sum(controllable_assets_active_power_in_kilowatts[
@@ -623,17 +635,6 @@ class EnergySystem:
                                        active_power_exports_in_kilowatts[
                                            number_of_energy_management_system_time_interval_per_day]
             problem.add_constraint(power_balance_constraint)
-
-            max_import_constraint = \
-                active_power_imports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] <= \
-                self.market.max_import_kilowatts[number_of_energy_management_system_time_interval_per_day]
-            problem.add_constraint(max_import_constraint)
-
-
-            # maximum import constraint
-            constraint = active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] <= \
-                         - self.market.max_export_kilowatts[number_of_energy_management_system_time_interval_per_day]
-            problem.add_constraint(constraint)
 
             # maximum demand dummy variable constraint
             dummy_constraint = \
