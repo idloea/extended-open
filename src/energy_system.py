@@ -616,8 +616,38 @@ class EnergySystem:
             active_power_imports_in_kilowatts: float,
             active_power_exports_in_kilowatts: float, max_active_power_demand_in_kilowatts: float):
 
-        for number_of_energy_management_system_time_interval_per_day in range(
-                self.number_of_energy_management_system_time_intervals_per_day):
+        for number_of_energy_management_system_time_interval_per_day in range(0, 40):
+            power_balance_constraint = sum(controllable_assets_active_power_in_kilowatts[
+                                           number_of_energy_management_system_time_interval_per_day, :]) + \
+                                       resampled_non_dispatchable_assets_active_power_in_kilowatts[
+                                           number_of_energy_management_system_time_interval_per_day] == \
+                                       active_power_imports_in_kilowatts[
+                                           number_of_energy_management_system_time_interval_per_day] - \
+                                       active_power_exports_in_kilowatts[
+                                           number_of_energy_management_system_time_interval_per_day]
+            problem.add_constraint(power_balance_constraint)
+
+            # maximum demand dummy variable constraint
+            dummy_constraint = \
+                max_active_power_demand_in_kilowatts >= active_power_imports_in_kilowatts[
+                    number_of_energy_management_system_time_interval_per_day] - \
+                active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day]
+            problem.add_constraint(dummy_constraint)
+
+        # Blackout
+        for number_of_energy_management_system_time_interval_per_day in range(40, 50):
+            problem.add_constraint(controllable_assets_active_power_in_kilowatts[number_of_energy_management_system_time_interval_per_day] == 0)
+            problem.add_constraint(active_power_imports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] == 0)
+            problem.add_constraint(active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day] == 0)
+
+            # # maximum demand dummy variable constraint
+            # dummy_constraint = \
+            #     max_active_power_demand_in_kilowatts >= active_power_imports_in_kilowatts[
+            #         number_of_energy_management_system_time_interval_per_day] - \
+            #     active_power_exports_in_kilowatts[number_of_energy_management_system_time_interval_per_day]
+            # problem.add_constraint(dummy_constraint)
+
+        for number_of_energy_management_system_time_interval_per_day in range(50, 96):
             power_balance_constraint = sum(controllable_assets_active_power_in_kilowatts[
                                            number_of_energy_management_system_time_interval_per_day, :]) + \
                                        resampled_non_dispatchable_assets_active_power_in_kilowatts[
