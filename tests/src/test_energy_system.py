@@ -141,7 +141,9 @@ def _create_a_test_energy_system(non_dispatchable_asset: List[NonDispatchableAss
                                  simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
                                  energy_management_system_time_series_resolution_in_hours=
                                  energy_management_system_time_series_resolution_in_hours,
-                                 building_assets=building_assets)
+                                 building_assets=building_assets,
+                                 blackout_start_time_in_hours=11,
+                                 blackout_stop_time_in_hours=11)
 
     return energy_system
 

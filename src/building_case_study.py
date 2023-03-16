@@ -230,7 +230,12 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
                                                         simulation_time_series_resolution_in_hours,
                                                         energy_management_system_time_series_resolution_in_hours=
                                                         energy_management_system_time_series_resolution_in_hours,
-                                                        building_assets=building_assets)
+                                                        building_assets=building_assets,
+                                                        blackout_start_time_in_hours=
+                                                        input_case_data['blackout_start_time_in_hours'],
+                                                        blackout_stop_time_in_hours=
+                                                        input_case_data['blackout_stop_time_in_hours']
+                                                        )
 
         # STEP 6: simulate the energy system:
         output = case_energy_system.simulate_network()

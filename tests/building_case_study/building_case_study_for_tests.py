@@ -222,7 +222,9 @@ def get_building_case_original_results(is_winter: bool):
                                               simulation_time_series_resolution_in_hours,
                                               energy_management_system_time_series_resolution_in_hours=
                                               energy_management_system_time_series_hour_resolution,
-                                              building_assets=building_assets)
+                                              building_assets=building_assets,
+                                              blackout_start_time_in_hours=11,
+                                              blackout_stop_time_in_hours=11)
     #######################################
     ### STEP 6: simulate the energy system:
     #######################################

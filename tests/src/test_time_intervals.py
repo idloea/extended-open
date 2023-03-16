@@ -1,7 +1,11 @@
+import datetime
 import unittest
+
+import numpy as np
+
 from src.time_intervals import get_number_of_time_intervals_per_day, \
     check_sum_of_daily_periods_in_hours_equals_twenty_four, check_unique_hours_of_daily_periods, \
-    check_all_hours_of_daily_periods
+    check_all_hours_of_daily_periods, get_range_array_from_between_hours
 
 
 class TimeIntervals(unittest.TestCase):
@@ -32,3 +36,13 @@ class TimeIntervals(unittest.TestCase):
                    'P6': [0, 1, 2, 3, 4, 5, 6]}
         with self.assertRaises(ValueError):
             check_all_hours_of_daily_periods(periods=periods)
+
+    def test_get_range_array_from_between_hours(self) -> None:
+        start_time_in_hours = 11
+        stop_time_in_hours = 12.5
+        step_in_minutes = 15
+        result = get_range_array_from_between_hours(start_time_in_hours=start_time_in_hours,
+                                                    stop_time_in_hours=stop_time_in_hours,
+                                                    step_in_minutes=step_in_minutes)
+        expected_result = np.arange(44, 50, 1)
+        np.testing.assert_array_equal(expected_result, result)

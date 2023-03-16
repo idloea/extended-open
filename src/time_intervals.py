@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 
 
@@ -38,3 +40,11 @@ def check_all_hours_of_daily_periods(periods: dict) -> None:
     length_hours_list = len(hours_list)
     if length_hours_list != length_sorted_period_hours_list:
         raise ValueError('There is at least one missing hour in the import period')
+
+
+def get_range_array_from_between_hours(start_time_in_hours: float, stop_time_in_hours: float,
+                                       step_in_minutes: int) -> np.ndarray:
+
+    start_interval = int(start_time_in_hours * 60 / step_in_minutes)
+    stop_interval = int(stop_time_in_hours * 60 / step_in_minutes)
+    return np.arange(start=start_interval, stop=stop_interval)
