@@ -8,7 +8,8 @@ from src import assets, energy_system
 from src.buildings import Building
 from src.markets import get_market
 from src.plot.plots import save_plot_demand_base_and_total_imported_power, save_plot_building_internal_temperature, \
-    save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods
+    save_plot_hvac_consumed_active_power_in_kilowatts, save_plot_ambient_temperature, save_plot_import_periods, \
+    save_plot_storage_asset_used_power_in_kilowatts
 from src.read import read_open_csv_files, read_case_data_from_yaml_file
 import pandapower as pp
 from src.temperatures import check_initial_inside_degree_celsius
@@ -123,43 +124,48 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         building_assets = []
         non_distpachable_assets = []
 
-        max_energy_in_kilowatt_hour = \
-            np.full((number_of_time_intervals_per_day,), input_case_data['max_energy_in_kilowatt_hour'])
-        min_energy_in_kilowatt_hour = \
-            np.full((number_of_time_intervals_per_day,), input_case_data['min_energy_in_kilowatt_hour'])
-        max_active_power_in_kilowatts = \
-            np.full((number_of_time_intervals_per_day,), input_case_data['max_active_power_in_kilowatts'])
-        min_active_power_in_kilowatts = \
-            np.full((number_of_time_intervals_per_day,), input_case_data['min_active_power_in_kilowatts'])
-        initial_energy_level_in_kilowatt_hour = \
-            input_case_data['initial_energy_level_percentage'] / 100 * input_case_data['max_energy_in_kilowatt_hour']
-        required_terminal_energy_level_in_kilowatt_hour = \
-            input_case_data['required_terminal_energy_level_percentage'] / 100 * \
-            input_case_data['max_energy_in_kilowatt_hour']
-        absolute_active_power_in_kilowatts = input_case_data['absolute_active_power_in_kilowatts']
-        battery_degradation_ratio_in_euros_per_kilowatt_hour = \
-            input_case_data['battery_degradation_ratio_in_euros_per_kilowatt_hour']
-        charging_efficiency = input_case_data['charging_efficiency_percentage'] / 100
-        charging_efficiency_for_the_optimizer = \
-            input_case_data['charging_efficiency_for_the_optimizer_percentage'] / 100
+        max_storage_asset_energy_in_kilowatt_hour = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['max_storage_asset_energy_in_kilowatt_hour'])
+        min_storage_asset_energy_in_kilowatt_hour = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['min_storage_asset_energy_in_kilowatt_hour'])
+        max_storage_asset_active_power_in_kilowatts = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['max_storage_asset_active_power_in_kilowatts'])
+        min_storage_asset_active_power_in_kilowatts = \
+            np.full((number_of_time_intervals_per_day,), input_case_data['min_storage_asset_active_power_in_kilowatts'])
+        initial_storage_asset_energy_level_in_kilowatt_hour = \
+            input_case_data['initial_storage_asset_energy_level_percentage'] / 100 * input_case_data[
+                'max_storage_asset_energy_in_kilowatt_hour']
+        required_storage_asset_terminal_energy_level_in_kilowatt_hour = \
+            input_case_data['required_storage_asset_terminal_energy_level_percentage'] / 100 * \
+            input_case_data['max_storage_asset_energy_in_kilowatt_hour']
+        storage_asset_absolute_active_power_in_kilowatts = \
+            input_case_data['storage_asset_absolute_active_power_in_kilowatts']
+        storage_asset_battery_degradation_ratio_in_euros_per_kilowatt_hour = \
+            input_case_data['storage_asset_degradation_ratio_in_euros_per_kilowatt_hour']
+        storage_asset_charging_efficiency = input_case_data['storage_asset_charging_efficiency_percentage'] / 100
+        storage_asset_charging_efficiency_for_the_optimizer = \
+            input_case_data['storage_asset_charging_efficiency_for_the_optimizer_percentage'] / 100
         storage_assets_bus_id = bus_3
         storage_assets_battery_system = assets.StorageAsset(
-            max_energy_in_kilowatt_hour=max_energy_in_kilowatt_hour,
-            min_energy_in_kilowatt_hour=min_energy_in_kilowatt_hour,
-            max_active_power_in_kilowatts=max_active_power_in_kilowatts,
-            min_active_power_in_kilowatts=min_active_power_in_kilowatts,
-            initial_energy_level_in_kilowatt_hour=initial_energy_level_in_kilowatt_hour,
-            required_terminal_energy_level_in_kilowatt_hour=required_terminal_energy_level_in_kilowatt_hour,
+            max_energy_in_kilowatt_hour=max_storage_asset_energy_in_kilowatt_hour,
+            min_energy_in_kilowatt_hour=min_storage_asset_energy_in_kilowatt_hour,
+            max_active_power_in_kilowatts=max_storage_asset_active_power_in_kilowatts,
+            min_active_power_in_kilowatts=min_storage_asset_active_power_in_kilowatts,
+            initial_energy_level_in_kilowatt_hour=initial_storage_asset_energy_level_in_kilowatt_hour,
+            required_terminal_energy_level_in_kilowatt_hour=
+            required_storage_asset_terminal_energy_level_in_kilowatt_hour,
             bus_id=storage_assets_bus_id,
             simulation_time_series_hour_resolution=simulation_time_series_resolution_in_hours,
             number_of_time_intervals_per_day=number_of_time_intervals_per_day,
             energy_management_system_time_series_resolution_in_seconds=
             energy_management_system_time_series_resolution_in_hours,
-            number_of_energy_management_system_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-            absolute_active_power_in_kilowatts=absolute_active_power_in_kilowatts,
-            battery_degradation_ratio_in_euros_per_kilowatt_hour=battery_degradation_ratio_in_euros_per_kilowatt_hour,
-            charging_efficiency=charging_efficiency,
-            charging_efficiency_for_the_optimizer=charging_efficiency_for_the_optimizer)
+            number_of_energy_management_system_time_intervals_per_day=
+            number_of_energy_management_time_intervals_per_day,
+            absolute_active_power_in_kilowatts=storage_asset_absolute_active_power_in_kilowatts,
+            battery_degradation_ratio_in_euros_per_kilowatt_hour=
+            storage_asset_battery_degradation_ratio_in_euros_per_kilowatt_hour,
+            charging_efficiency=storage_asset_charging_efficiency,
+            charging_efficiency_for_the_optimizer=storage_asset_charging_efficiency_for_the_optimizer)
         storage_assets.append(storage_assets_battery_system)
 
         photovoltaic_active_power_in_kilowatts = -photovoltaic_generation_per_unit * rated_photovoltaic_kilowatts  # Negative as it generates energy
@@ -254,6 +260,8 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         active_power_demand_in_kilowatts = \
             output['active_power_demand_in_kilowatts']
         active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
+        storage_asset_accumulated_power_in_kilowatts = \
+            output['storage_asset_accumulated_power_in_kilowatts']
 
         for non_dispatchable_asset in range(len(non_distpachable_assets)):
             bus_id = non_distpachable_assets[non_dispatchable_asset].bus_id
@@ -317,6 +325,15 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
                                  number_of_energy_management_time_intervals_per_day,
                                  import_periods=import_periods, case=electric_load_file, current_time=current_time,
                                  plots_path=plots_path)
+
+        save_plot_storage_asset_used_power_in_kilowatts(energy_management_system_time_series_resolution_in_hours=
+                                                        energy_management_system_time_series_resolution_in_hours,
+                                                        number_of_energy_management_time_intervals_per_day=
+                                                        number_of_energy_management_time_intervals_per_day,
+                                                        storage_asset_accumulated_power_in_kilowatts=
+                                                        storage_asset_accumulated_power_in_kilowatts,
+                                                        case=electric_load_file, current_time=current_time,
+                                                        plots_path=plots_path)
 
         input_case_data['photovoltaic_generation_data_file_path'] = case_data[
             'photovoltaic_generation_data_file_path']

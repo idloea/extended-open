@@ -246,10 +246,13 @@ class EnergySystem:
         active_power_consumed_by_the_buildings_in_kilowatts = \
             controllable_assets_active_power_in_kilowatts[:, :number_of_buildings]
         if number_of_storage_assets > 0 and number_of_buildings > 0:
+            storage_asset_accumulated_power_in_kilowatts = \
+                np.array(controllable_assets_active_power_in_kilowatts)[:, 0]
             output = {
                 'active_power_consumed_by_the_buildings_in_kilowatts':
                     active_power_consumed_by_the_buildings_in_kilowatts,
-                'charge_discharge_power_for_storage_assets_in_kilowatts':
+                'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts,
+                'charge_discharge_power_for_storage_assets_in_kilowatts':  # TODO: this might not be OK, but is not used
                     controllable_assets_active_power_in_kilowatts[
                     :, number_of_buildings:number_of_storage_assets + number_of_buildings],
                 'active_power_imports_in_kilowatts': active_power_imports_in_kilowatts,
@@ -319,6 +322,8 @@ class EnergySystem:
         imported_active_power_in_kilowatts = energy_management_system_output['active_power_imports_in_kilowatts']
         exported_active_power_in_kilowatts = energy_management_system_output['active_power_exports_in_kilowatts']
         if number_of_storage_assets > 0:
+            storage_asset_accumulated_power_in_kilowatts = \
+                energy_management_system_output['storage_asset_accumulated_power_in_kilowatts']
             storage_asset_charge_or_discharge_power_in_kilowatts = \
                 energy_management_system_output['charge_discharge_power_for_storage_assets_in_kilowatts']
         if number_of_buildings > 0:
@@ -435,6 +440,7 @@ class EnergySystem:
                           market_reactive_power_in_kilovolt_ampere_reactive,
                       'storage_asset_charge_or_discharge_power_in_kilowatts':
                           storage_asset_charge_or_discharge_power_in_kilowatts,
+                      'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts,
                       'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts,
                       'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts,
                       'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts,

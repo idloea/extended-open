@@ -117,8 +117,8 @@ Asum = pic.new_param('Asum',np.tril(np.ones([T_mpc,T_mpc]))) #lower triangle mat
 for i in range(N_ES):
     prob.add_constraint(P_ES[:,i] <= storage_assets[i].max_import_kilowatts[T_range]) #maximum power constraint
     prob.add_constraint(P_ES[:,i] >= storage_assets[i].max_export_kilowatts[T_range]) #minimum power constraint
-    prob.add_constraint(dt_ems * Asum *P_ES[:,i] <= storage_assets[i].max_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #maximum energy constraint
-    prob.add_constraint(dt_ems * Asum *P_ES[:,i] >= storage_assets[i].min_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #minimum energy constraint
+    prob.add_constraint(dt_ems * Asum *P_ES[:,i] <= storage_assets[i].max_storage_asset_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #maximum energy constraint
+    prob.add_constraint(dt_ems * Asum *P_ES[:,i] >= storage_assets[i].min_storage_asset_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #minimum energy constraint
     prob.add_constraint(dt_ems *Asum[T_mpc-1,:] *P_ES[:,i] + E_T_min >= storage_assets[i].required_terminal_energy_level_in_kilowatt_hour - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #final energy constraint
 #import/export constraints
 for t in range(T_mpc):

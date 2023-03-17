@@ -100,9 +100,8 @@ def save_plot_building_internal_temperature(number_of_buildings: int,
     plt.xticks(np.arange(0, max_time, step=1))
     plt.ylabel('Temperature ($^{o}C$)')
     plt.xlabel('Time (hh:mm)')
-    plt.grid(True, alpha=0.5)
     plt.legend(loc='center right')
-    plt.grid(alpha=0.5)
+    plt.grid(True, alpha=0.5)
     plt.tight_layout()
     figure.savefig(f'{plots_path}/{current_time}_{case}_building_internal_temperature.png')
 
@@ -145,9 +144,8 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
     plt.xticks(np.arange(0, max_time, step=1))
     plt.xlabel('Time (hh:mm)')
     plt.ylim(0, hvac_consumed_electric_active_power_in_kilowatts_value * 1.5)
-    plt.grid(True, alpha=0.5)
     plt.legend(loc='upper right')
-    plt.grid(alpha=0.5)
+    plt.grid(True, alpha=0.5)
     plt.tight_layout()
     figure.savefig(f'{plots_path}\\{current_time}_{case}_hvac_consumed_active_power_in_kilowatts.png')
 
@@ -168,7 +166,30 @@ def save_plot_import_periods(energy_management_system_time_series_resolution_in_
     plt.xlabel('Time [h]')
     plt.xlim(0, max_time)
     plt.xticks(np.arange(0, max_time, step=1))
-    plt.grid(True, alpha=0.5)
     plt.legend(loc='upper right')
+    plt.grid(True, alpha=0.5)
     plt.tight_layout()
     figure.savefig(f'{plots_path}\\{current_time}_{case}_import_periods.png')
+
+
+def save_plot_storage_asset_used_power_in_kilowatts(energy_management_system_time_series_resolution_in_hours: float,
+                                                    number_of_energy_management_time_intervals_per_day: int,
+                                                    storage_asset_accumulated_power_in_kilowatts: np.ndarray,
+                                                    case: str, current_time: str,
+                                                    plots_path: str) -> None:
+    figure = plt.figure(num=None, figsize=(6, 2.5), dpi=80, facecolor='w', edgecolor='k')
+    energy_management_system_hours = energy_management_system_time_series_resolution_in_hours * np.arange(
+        number_of_energy_management_time_intervals_per_day)
+    plt.plot(energy_management_system_hours, storage_asset_accumulated_power_in_kilowatts, color='C0')
+
+    plt.suptitle('Battery Usage')
+    subtitle = 'Case: ' + str(case)
+    plt.title(subtitle)
+    max_time = max(energy_management_system_hours)
+    plt.xlim(0, max_time)
+    plt.xticks(np.arange(0, max_time, step=1))
+    plt.ylabel('Power [kW]')
+    plt.xlabel('Time (hh:mm)')
+    plt.grid(True, alpha=0.5)
+    plt.tight_layout()
+    figure.savefig(f'{plots_path}/{current_time}_{case}_storage_asset_used_power_in_kilowatts.png')
