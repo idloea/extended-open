@@ -252,11 +252,11 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         market_reactive_power_in_kilovolt_ampere_reactive = output['market_reactive_power_in_kilovolt_ampere_reactive']
         buses_voltage_in_per_unit = output['buses_voltage_in_per_unit']
         imported_active_power_in_kilowatts = \
-            output['imported_active_power_in_kilowatts']
+            np.array(output['imported_active_power_in_kilowatts'])
         exported_active_power_in_kilowatts = \
-            output['exported_active_power_in_kilowatts']
+            np.array(output['exported_active_power_in_kilowatts'])
         building_power_consumption_in_kilowatts = \
-            output['building_power_consumption_in_kilowatts']
+            np.array(output['building_power_consumption_in_kilowatts'])
         active_power_demand_in_kilowatts = \
             output['active_power_demand_in_kilowatts']
         active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
@@ -279,61 +279,64 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         month = case_data['month']
         plots_path = f'{results_path}/{current_time}_{month}_{case_file_name}'
         os.mkdir(path=plots_path)
-        save_plot_demand_base_and_total_imported_power(
-            simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
-            number_of_time_intervals_per_day=number_of_time_intervals_per_day,
-            active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
-            market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=electric_load_file, revenue=revenue,
-            current_time=current_time, plots_path=plots_path)
 
-        save_plot_ambient_temperature(
-            energy_management_system_time_series_resolution_in_hours=
-            energy_management_system_time_series_resolution_in_hours,
-            number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
-            ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=electric_load_file,
-            current_time=current_time, plots_path=plots_path)
+        save_plots = input_case_data['save_plots']
+        if save_plots:
+            save_plot_demand_base_and_total_imported_power(
+                simulation_time_series_resolution_in_hours=simulation_time_series_resolution_in_hours,
+                number_of_time_intervals_per_day=number_of_time_intervals_per_day,
+                active_power_demand_base_in_kilowatts=active_power_demand_base_in_kilowatts,
+                market_active_power_in_kilowatts=market_active_power_in_kilowatts, case=electric_load_file, revenue=revenue,
+                current_time=current_time, plots_path=plots_path)
 
-        number_of_buildings = len(building_assets)
-        save_plot_building_internal_temperature(number_of_buildings=number_of_buildings,
-                                                energy_management_system_time_series_resolution_in_hours=
-                                                energy_management_system_time_series_resolution_in_hours,
-                                                number_of_energy_management_time_intervals_per_day=
-                                                number_of_energy_management_time_intervals_per_day,
-                                                building_assets=building_assets, case=electric_load_file,
-                                                current_time=current_time,
-                                                plots_path=plots_path)
+            save_plot_ambient_temperature(
+                energy_management_system_time_series_resolution_in_hours=
+                energy_management_system_time_series_resolution_in_hours,
+                number_of_energy_management_time_intervals_per_day=number_of_energy_management_time_intervals_per_day,
+                ambient_temperature_in_degree_celsius=ambient_temperature_in_degree_celsius, case=electric_load_file,
+                current_time=current_time, plots_path=plots_path)
 
-        save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
-                                                          simulation_time_series_resolution_in_hours=
-                                                          simulation_time_series_resolution_in_hours,
-                                                          number_of_time_intervals_per_day=
-                                                          number_of_time_intervals_per_day,
-                                                          energy_management_system_time_series_resolution_in_hours=
-                                                          energy_management_system_time_series_resolution_in_hours,
-                                                          number_of_energy_management_time_intervals_per_day=
-                                                          number_of_energy_management_time_intervals_per_day,
-                                                          building_assets=building_assets,
-                                                          max_consumed_electric_heating_kilowatts=None,
-                                                          max_consumed_electric_cooling_kilowatts=
-                                                          max_consumed_electric_cooling_kilowatts,
-                                                          case=electric_load_file,
-                                                          current_time=current_time, plots_path=plots_path)
+            number_of_buildings = len(building_assets)
+            save_plot_building_internal_temperature(number_of_buildings=number_of_buildings,
+                                                    energy_management_system_time_series_resolution_in_hours=
+                                                    energy_management_system_time_series_resolution_in_hours,
+                                                    number_of_energy_management_time_intervals_per_day=
+                                                    number_of_energy_management_time_intervals_per_day,
+                                                    building_assets=building_assets, case=electric_load_file,
+                                                    current_time=current_time,
+                                                    plots_path=plots_path)
 
-        save_plot_import_periods(energy_management_system_time_series_resolution_in_hours=
-                                 energy_management_system_time_series_resolution_in_hours,
-                                 number_of_energy_management_time_intervals_per_day=
-                                 number_of_energy_management_time_intervals_per_day,
-                                 import_periods=import_periods, case=electric_load_file, current_time=current_time,
-                                 plots_path=plots_path)
+            save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings=number_of_buildings,
+                                                              simulation_time_series_resolution_in_hours=
+                                                              simulation_time_series_resolution_in_hours,
+                                                              number_of_time_intervals_per_day=
+                                                              number_of_time_intervals_per_day,
+                                                              energy_management_system_time_series_resolution_in_hours=
+                                                              energy_management_system_time_series_resolution_in_hours,
+                                                              number_of_energy_management_time_intervals_per_day=
+                                                              number_of_energy_management_time_intervals_per_day,
+                                                              building_assets=building_assets,
+                                                              max_consumed_electric_heating_kilowatts=None,
+                                                              max_consumed_electric_cooling_kilowatts=
+                                                              max_consumed_electric_cooling_kilowatts,
+                                                              case=electric_load_file,
+                                                              current_time=current_time, plots_path=plots_path)
 
-        save_plot_storage_asset_used_power_in_kilowatts(energy_management_system_time_series_resolution_in_hours=
-                                                        energy_management_system_time_series_resolution_in_hours,
-                                                        number_of_energy_management_time_intervals_per_day=
-                                                        number_of_energy_management_time_intervals_per_day,
-                                                        storage_asset_accumulated_power_in_kilowatts=
-                                                        storage_asset_accumulated_power_in_kilowatts,
-                                                        case=electric_load_file, current_time=current_time,
-                                                        plots_path=plots_path)
+            save_plot_import_periods(energy_management_system_time_series_resolution_in_hours=
+                                     energy_management_system_time_series_resolution_in_hours,
+                                     number_of_energy_management_time_intervals_per_day=
+                                     number_of_energy_management_time_intervals_per_day,
+                                     import_periods=import_periods, case=electric_load_file, current_time=current_time,
+                                     plots_path=plots_path)
+
+            save_plot_storage_asset_used_power_in_kilowatts(energy_management_system_time_series_resolution_in_hours=
+                                                            energy_management_system_time_series_resolution_in_hours,
+                                                            number_of_energy_management_time_intervals_per_day=
+                                                            number_of_energy_management_time_intervals_per_day,
+                                                            storage_asset_accumulated_power_in_kilowatts=
+                                                            storage_asset_accumulated_power_in_kilowatts,
+                                                            case=electric_load_file, current_time=current_time,
+                                                            plots_path=plots_path)
 
         input_case_data['photovoltaic_generation_data_file_path'] = case_data[
             'photovoltaic_generation_data_file_path']
@@ -354,7 +357,10 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             'buses_voltage_in_per_unit': buses_voltage_in_per_unit.tolist(),
             'active_power_demand_in_kilowatts': active_power_demand_in_kilowatts.tolist(),
             'revenue': revenue,
-            'active_power_demand_base_in_kilowatts': active_power_demand_base_in_kilowatts.tolist()
+            'active_power_demand_base_in_kilowatts': active_power_demand_base_in_kilowatts.tolist(),
+            'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts.tolist(),
+            'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts.tolist(),
+            'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts.tolist()
         }
 
         with open(f"{plots_path}/output_case_data.json", "w") as outfile:

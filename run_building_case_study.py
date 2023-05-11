@@ -67,6 +67,8 @@ if __name__ == "__main__":
     blackout_start_time_in_hours = 11
     blackout_stop_time_in_hours = 12.5
 
+    save_plots = False
+
     input_case_data = {
         'rated_photovoltaic_kilowatts': rated_photovoltaic_kilowatts,
         'simulation_time_series_resolution_in_minutes': simulation_time_series_resolution_in_minutes,
@@ -108,7 +110,8 @@ if __name__ == "__main__":
         'transformer_apparent_power_in_mega_volt_ampere': transformer_apparent_power_in_mega_volt_ampere,
         'length_from_bus_2_to_bus_3_in_km': length_from_bus_2_to_bus_3_in_km,
         'blackout_start_time_in_hours': blackout_start_time_in_hours,
-        'blackout_stop_time_in_hours': blackout_stop_time_in_hours
+        'blackout_stop_time_in_hours': blackout_stop_time_in_hours,
+        'save_plots': save_plots
 
     }
     cases_file_path = 'data/cases'
