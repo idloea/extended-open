@@ -122,7 +122,7 @@ def save_plot_hvac_consumed_active_power_in_kilowatts(number_of_buildings: int,
                                                              max_consumed_electric_heating_kilowatts,
                                                              max_consumed_electric_cooling_kilowatts=
                                                              max_consumed_electric_cooling_kilowatts)
-
+    # TODO: the next lines do not work
     hvac_consumed_electric_active_power_in_kilowatts_value = \
         list(hvac_consumed_electric_active_power_in_kilowatts.values())[0]
     for number_of_building in range(number_of_buildings):

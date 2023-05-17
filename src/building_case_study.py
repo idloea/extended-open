@@ -360,7 +360,14 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             'active_power_demand_base_in_kilowatts': active_power_demand_base_in_kilowatts.tolist(),
             'imported_active_power_in_kilowatts': imported_active_power_in_kilowatts.tolist(),
             'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts.tolist(),
-            'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts.tolist()
+            'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts.tolist(),
+            'ambient_temperature_in_degree_celsius': ambient_temperature_in_degree_celsius.tolist(),
+            'building_internal_temperature_in_celsius_degrees': np.array(building_assets[0].building_internal_temperature_in_celsius_degrees).flatten().tolist(),
+            'hvac_active_power_in_kilowatts': building_assets[0].active_power_in_kilowatts.tolist(),
+            'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts.tolist(),
+
+
+
         }
 
         with open(f"{plots_path}/output_case_data.json", "w") as outfile:
