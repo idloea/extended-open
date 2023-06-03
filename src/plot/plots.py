@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import numpy as np
 from matplotlib import pyplot as plt
 from src.assets import BuildingAsset
