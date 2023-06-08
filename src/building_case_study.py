@@ -364,10 +364,12 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             'exported_active_power_in_kilowatts': exported_active_power_in_kilowatts.tolist(),
             'building_power_consumption_in_kilowatts': building_power_consumption_in_kilowatts.tolist(),
             'ambient_temperature_in_degree_celsius': ambient_temperature_in_degree_celsius.tolist(),
-            'building_internal_temperature_in_celsius_degrees': np.array(building_assets[0].building_internal_temperature_in_celsius_degrees).flatten().tolist(),
+            'building_internal_temperature_in_celsius_degrees':
+                np.array(building_assets[0].building_internal_temperature_in_celsius_degrees).flatten().tolist(),
             'hvac_active_power_in_kilowatts': building_assets[0].active_power_in_kilowatts.tolist(),
             'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts.tolist(),
-            'storage_asset_charge_or_discharge_power_in_kilowatts': storage_asset_charge_or_discharge_power_in_kilowatts.tolist()
+            'storage_asset_charge_or_discharge_power_in_kilowatts':
+                storage_asset_charge_or_discharge_power_in_kilowatts.flatten().tolist()
 
         }
 

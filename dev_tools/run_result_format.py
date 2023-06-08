@@ -2,7 +2,7 @@ from pathlib import Path
 from dev_tools.result_format import gather_all_input_and_output_results
 
 if __name__ == "__main__":
-    results_folder_name = '20230518-102651'
+    results_folder_name = '20230608-090451'
     directory_string = f'results/{results_folder_name}'
     directory = Path(directory_string)
     input_json_file_name = 'input_case_data.json'
