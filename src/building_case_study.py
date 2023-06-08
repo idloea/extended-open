@@ -262,6 +262,8 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
         active_power_demand_base_in_kilowatts = np.zeros(number_of_time_intervals_per_day)
         storage_asset_accumulated_power_in_kilowatts = \
             output['storage_asset_accumulated_power_in_kilowatts']
+        storage_asset_charge_or_discharge_power_in_kilowatts = \
+            np.array(output['storage_asset_charge_or_discharge_power_in_kilowatts'])
 
         for non_dispatchable_asset in range(len(non_distpachable_assets)):
             bus_id = non_distpachable_assets[non_dispatchable_asset].bus_id
@@ -365,8 +367,7 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             'building_internal_temperature_in_celsius_degrees': np.array(building_assets[0].building_internal_temperature_in_celsius_degrees).flatten().tolist(),
             'hvac_active_power_in_kilowatts': building_assets[0].active_power_in_kilowatts.tolist(),
             'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts.tolist(),
-
-
+            'storage_asset_charge_or_discharge_power_in_kilowatts': storage_asset_charge_or_discharge_power_in_kilowatts.tolist()
 
         }
 
