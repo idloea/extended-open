@@ -1,3 +1,6 @@
-hospital: 40
-office: 60
-hotel: 40
+hospital: 40  # https://www.researchgate.net/publication/332570949_Performance_Analysis_of_Loads_in_Hospital
+office: 60  # https://www.sciencedirect.com/science/article/pii/S0038092X18300963
+# https://www.sciencedirect.com/science/article/pii/S0378778819303640
+hotel: 40  # https://stce.huce.edu.vn/index.php/en/article/view/1218
+# https://www.sciencedirect.com/science/article/pii/S0196890413003798
+# https://academic.oup.com/ijlct/article/16/4/1264/6303530

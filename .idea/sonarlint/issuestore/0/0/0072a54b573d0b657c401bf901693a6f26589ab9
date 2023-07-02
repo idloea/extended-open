@@ -1,0 +1,27 @@
+
+Hpython:S1656Ï"/Remove or correct this useless self-assignment.(…ú ˚
+Lpython:S1135ˇ"4Complete the task associated to this "TODO" comment.(ˇ´Ω
+rpython:S3776ö"TRefactor this function to reduce its Cognitive Complexity from 31 to the 15 allowed.(◊®Óˆ˘ˇˇˇˇ
+™python:S5864£"ëFix this "__getitem__" operation; Previous type checks suggest that "building_internal_temperature_in_celsius_degrees" does not have this method.(∂Ü¨)
+™python:S5864¨"ëFix this "__getitem__" operation; Previous type checks suggest that "building_internal_temperature_in_celsius_degrees" does not have this method.(∂Ü¨)
+úpython:S5864±"ÇFix this "__getitem__" operation; Previous type checks suggest that "cooling_active_power_in_kilowatts" does not have this method.(·‘–Ï
+°python:S5864∂"ÇFix this "__getitem__" operation; Previous type checks suggest that "heating_active_power_in_kilowatts" does not have this method.(Ûñàä˘ˇˇˇˇ
+™python:S5864»"ëFix this "__getitem__" operation; Previous type checks suggest that "building_internal_temperature_in_celsius_degrees" does not have this method.(∂Ü¨)
+∂python:S5864É"úFix this "__getitem__" operation; Previous type checks suggest that "resampled_non_dispatchable_assets_active_power_in_kilowatts" does not have this method.(’≈Ò’
+úpython:S5864Ö"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(ÖºÏÒ
+úpython:S5864á"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(¯ªê”
+úpython:S5864å"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(≈Ú—Û
+úpython:S5864é"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(‡‘µù
+®python:S5864í"éFix this "__getitem__" operation; Previous type checks suggest that "controllable_assets_active_power_in_kilowatts" does not have this method.(≤Ëœ©
+õpython:S5864î"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(•åè&
+°python:S5864ñ"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(ÃÍ˘¿˙ˇˇˇˇ
+∂python:S5864ú"úFix this "__getitem__" operation; Previous type checks suggest that "resampled_non_dispatchable_assets_active_power_in_kilowatts" does not have this method.(’≈Ò’
+úpython:S5864û"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(ÖºÏÒ
+úpython:S5864†"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(¯ªê”
+úpython:S5864•"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(≈Ú—Û
+úpython:S5864ß"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(‡‘µù
+∂python:S5864Æ"úFix this "__getitem__" operation; Previous type checks suggest that "resampled_non_dispatchable_assets_active_power_in_kilowatts" does not have this method.(’≈Ò’
+úpython:S5864∞"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(ÖºÏÒ
+úpython:S5864≤"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(¯ªê”
+úpython:S5864∑"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_imports_in_kilowatts" does not have this method.(≈Ú—Û
+úpython:S5864π"ÇFix this "__getitem__" operation; Previous type checks suggest that "active_power_exports_in_kilowatts" does not have this method.(‡‘µù

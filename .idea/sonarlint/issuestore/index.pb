@@ -23,8 +23,6 @@ Fnotebooks/20230608-090451/.ipynb_checkpoints/analysis-checkpoint.ipynb,0\a\0a1
 J
 dev_tools/result_format.py,6\8\6806a9e657127615d3023d94604d28e477175b9d
 J
-run_building_case_study.py,3\1\31562463251f65a85e31a08cdf2e0f6e063c13da
-J
 src/building_case_study.py,3\c\3c7301a193fc2a2a8a5a0487d0d1e8b4139a2f9f
 N
 dev_tools/run_result_format.py,7\8\78df6db6eeda7e222dbbffe9a24506b50ce0f751
