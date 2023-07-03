@@ -369,8 +369,10 @@ def run_case(cases_file_path: str, yaml_files: List[str], input_case_data: dict,
             'hvac_active_power_in_kilowatts': building_assets[0].active_power_in_kilowatts.tolist(),
             'storage_asset_accumulated_power_in_kilowatts': storage_asset_accumulated_power_in_kilowatts.tolist(),
             'storage_asset_charge_or_discharge_power_in_kilowatts':
-                storage_asset_charge_or_discharge_power_in_kilowatts.flatten().tolist()
-
+                storage_asset_charge_or_discharge_power_in_kilowatts.flatten().tolist(),
+            'storage_asset_active_power_in_kilowatts': storage_assets_battery_system.active_power_in_kilowatts.tolist(),
+            'storage_asset_energy_level_in_kilowatt_hour':
+                storage_assets_battery_system.energy_level_in_kilowatt_hour.tolist()
         }
 
         with open(f"{plots_path}/output_case_data.json", "w") as outfile:

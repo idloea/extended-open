@@ -16,8 +16,8 @@ if __name__ == "__main__":
     min_storage_asset_energy_in_kilowatt_hour = 0
     max_storage_asset_active_power_in_kilowatts = 500
     min_storage_asset_active_power_in_kilowatts = 0
-    initial_storage_asset_energy_level_percentage = 4
-    required_storage_asset_terminal_energy_level_percentage = 50
+    initial_storage_asset_energy_level_percentage = 80
+    required_storage_asset_terminal_energy_level_percentage = 100
     storage_asset_absolute_active_power_in_kilowatts = None
     storage_asset_degradation_ratio_in_euros_per_kilowatt_hour = None
     storage_asset_charging_efficiency_percentage = 100
