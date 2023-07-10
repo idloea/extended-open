@@ -148,7 +148,7 @@ plt.show()
 # # net_ieee13.linear_model_setup(v_lin0,S_wye_lin0,S_del_lin0) #note that phases need to be 120degrees out for good results
 # # net_ieee13.linear_pf()
 
-# # pf_model =  copy.deepcopy(net_ieee13) 
+# # pf_model =  20230703-090301.deepcopy(net_ieee13)
 
 # # #Actual power flow solution
 # # P_ev_station = P_ev_station_lin + 100e3

@@ -390,7 +390,7 @@ class EnergySystem:
         print('*** SIMULATING THE NETWORK ***')
         for number_of_time_interval_per_day in range(self.number_of_time_intervals_per_day):
             # for each time interval:
-            # set up a copy of the network for simulation interval number_of_time_interval_per_day
+            # set up a 20230703-090301 of the network for simulation interval number_of_time_interval_per_day
             network_copy = copy.deepcopy(self.network)
             for non_dispatchable_assets_bus_id in range(number_of_buses):
                 specific_active_power_bus_demand_in_kilowatts = \
@@ -399,7 +399,7 @@ class EnergySystem:
                 specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive = \
                     reactive_power_bus_demand_in_kilovolt_ampere_reactive[number_of_time_interval_per_day,
                     non_dispatchable_assets_bus_id]
-                # add P,Q loads to the network copy
+                # add P,Q loads to the network 20230703-090301
                 pp.create_load(network_copy, non_dispatchable_assets_bus_id,
                                specific_active_power_bus_demand_in_kilowatts / 1e3,
                                specific_reactive_power_bus_demand_in_kilovolt_ampere_reactive / 1e3)

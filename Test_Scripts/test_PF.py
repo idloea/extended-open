@@ -93,14 +93,14 @@ for t in range(T_mpc):
             bus_ph_index = 3*bus_id + ph_i
             P_lin_buses[t,bus_id,ph_i] += (G_wye_nondispatch[bus_ph_index,i]+G_del_nondispatch[bus_ph_index,i])*P_demand[t,i]
             Q_lin_buses[t,bus_id,ph_i] += (G_wye_nondispatch[bus_ph_index,i]+G_del_nondispatch[bus_ph_index,i])*Q_demand[t,i]
-    #set up a copy of the network for MPC interval t
+    #set up a 20230703-090301 of the network for MPC interval t
     network_t = copy.deepcopy(network)
     network_t.clear_loads()
     for bus_id in range(N_buses):
         for ph_i in range(N_phases):
             Pph_t = P_lin_buses[t,bus_id,ph_i]
             Qph_t = Q_lin_buses[t,bus_id,ph_i]
-            #add P,Q loads to the network copy
+            #add P,Q loads to the network 20230703-090301
             network_t.set_load(bus_id,ph_i,Pph_t,Qph_t)
     network_t.zbus_pf()
     v_lin0 = network_t.v_net_res

@@ -1,0 +1,30 @@
+
+Lpython:S1135_"4Complete the task associated to this "TODO" comment.(¿¦‘¾
+ipython:S107q"MMethod "__init__" has 15 parameters, which is greater than the 13 authorized.(ÄÁšÃşÿÿÿÿ
+npython:S117¨"VRename this local variable "P_eff" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ø…×§
+ppython:S117§"XRename this local variable "P_ratio" to match the regular expression ^[_a-z][a-z0-9_]*$.(ıÒöÇ
+spython:S117Ä"VRename this local variable "P_eff" to match the regular expression ^[_a-z][a-z0-9_]*$.(›Ûéåÿÿÿÿÿ
+ppython:S117Ã"XRename this local variable "P_ratio" to match the regular expression ^[_a-z][a-z0-9_]*$.(ıÒöÇ
+jpython:S117´"RRename this parameter "Pnet_t" to match the regular expression ^[_a-z][a-z0-9_]*$.(¤çÎù
+{python:S101€"cRename class "Asset_3ph" to match the regular expression ^_?([A-Z_][a-zA-Z0-9]*|[a-z_][a-z0-9_]*)$.(Ÿ‰ûú
+‡python:S101"jRename class "StorageAsset_3ph" to match the regular expression ^_?([A-Z_][a-zA-Z0-9]*|[a-z_][a-z0-9_]*)$.(ºâöùıÿÿÿÿ
+fpython:S117Ó"NRename this parameter "E0" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+fpython:S117Ó"NRename this parameter "ET" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+hpython:S117Ó"PRename this parameter "Emax" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+hpython:S117Ó"PRename this parameter "Emin" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+hpython:S117Ó"PRename this parameter "Pmax" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+lpython:S117Ô"TRename this parameter "Pmax_abs" to match the regular expression ^[_a-z][a-z0-9_]*$.(€‘¢—
+hpython:S117Ó"PRename this parameter "Pmin" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ê¦ŒØ
+ipython:S117Ô"QRename this parameter "T_ems" to match the regular expression ^[_a-z][a-z0-9_]*$.(€‘¢—
+epython:S107Ó"MMethod "__init__" has 15 parameters, which is greater than the 13 authorized.(Ê¦ŒØ
+spython:S117û"VRename this local variable "P_eff" to match the regular expression ^[_a-z][a-z0-9_]*$.(›Ûéåÿÿÿÿÿ
+upython:S117ú"XRename this local variable "P_ratio" to match the regular expression ^[_a-z][a-z0-9_]*$.(­¿Òüÿÿÿÿ
+mpython:S117ì"PRename this parameter "Pnet" to match the regular expression ^[_a-z][a-z0-9_]*$.(ç¾ûÿÿÿÿ
+spython:S117—"VRename this local variable "P_eff" to match the regular expression ^[_a-z][a-z0-9_]*$.(›Ûéåÿÿÿÿÿ
+upython:S117–"XRename this local variable "P_ratio" to match the regular expression ^[_a-z][a-z0-9_]*$.(­¿Òüÿÿÿÿ
+jpython:S117‡"RRename this parameter "Pnet_t" to match the regular expression ^[_a-z][a-z0-9_]*$.(¤çÎù
+Špython:S101¤"rRename class "NondispatchableAsset_3ph" to match the regular expression ^_?([A-Z_][a-zA-Z0-9]*|[a-z_][a-z0-9_]*)$.(“î¤¥
+hpython:S117Å"PRename this parameter "Pnet" to match the regular expression ^[_a-z][a-z0-9_]*$.(İÏ§
+mpython:S117Å"URename this parameter "Pnet_pred" to match the regular expression ^[_a-z][a-z0-9_]*$.(İÏ§
+hpython:S117Å"PRename this parameter "Qnet" to match the regular expression ^[_a-z][a-z0-9_]*$.(İÏ§
+rpython:S117Æ"URename this parameter "Qnet_pred" to match the regular expression ^[_a-z][a-z0-9_]*$.(´Ë£øÿÿÿÿ
