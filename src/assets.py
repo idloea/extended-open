@@ -166,14 +166,15 @@ class StorageAsset(Asset):
         for t in range(self.number_of_time_intervals_per_day):
             P_ratio = int(100 * (abs(self.active_power_in_kilowatts[t] / self.absolute_active_power_in_kilowatts)))
             P_eff = self.charging_efficiency[P_ratio-1]
+            t_energy_management_system = int(t * energy_management_system_time)
             if self.active_power_in_kilowatts[t] < 0:
-                if self.energy_level_in_kilowatt_hour[t] <= self.min_energy_in_kilowatt_hour[int(t * energy_management_system_time)]:
-                    self.energy_level_in_kilowatt_hour[t] = self.min_energy_in_kilowatt_hour[int(t * energy_management_system_time)]
+                if self.energy_level_in_kilowatt_hour[t] <= self.min_energy_in_kilowatt_hour[t_energy_management_system]:
+                    self.energy_level_in_kilowatt_hour[t] = self.min_energy_in_kilowatt_hour[t_energy_management_system]
                     self.active_power_in_kilowatts[t] = 0
                 self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + (1 / P_eff) * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
             elif self.active_power_in_kilowatts[t] >= 0:
-                if self.energy_level_in_kilowatt_hour[t] >= self.max_energy_in_kilowatt_hour[int(t * energy_management_system_time)]:
-                    self.energy_level_in_kilowatt_hour[t] = self.max_energy_in_kilowatt_hour[int(t * energy_management_system_time)]
+                if self.energy_level_in_kilowatt_hour[t] >= self.max_energy_in_kilowatt_hour[t_energy_management_system]:
+                    self.energy_level_in_kilowatt_hour[t] = self.max_energy_in_kilowatt_hour[t_energy_management_system]
                     self.active_power_in_kilowatts[t] = 0
                 self.energy_level_in_kilowatt_hour[t + 1] = self.energy_level_in_kilowatt_hour[t] + P_eff * self.active_power_in_kilowatts[t] * self.simulation_time_series_hour_resolution
 # NEEDED FOR OXEMF EV CASE
