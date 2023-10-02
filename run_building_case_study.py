@@ -27,10 +27,12 @@ if __name__ == "__main__":
     max_inside_degree_celsius = 25  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
     min_inside_degree_celsius = 21  # RITE Tabla 1.4.1.1 Condiciones interiores de diseño (https://www.boe.es/buscar/act.php?id=BOE-A-2007-15820)
     initial_inside_degree_celsius = 21
-    max_consumed_electric_heating_kilowatts = 400
-    max_consumed_electric_cooling_kilowatts = 400
-    heat_pump_coefficient_of_performance = 3  # 1 electric kWh = 3 thermal kWh
-    chiller_coefficient_of_performance = 1
+    max_consumed_electric_heating_kilowatts = 450  # 3 units of Mitsubishi EAHV-M1500/1800YCL-N heat pump. Each unit provides 150 kW heating power
+    # https://les.mitsubishielectric.co.uk/products/commercial-heat-pumps-and-chillers/commercial-heat-pumps/eahv-r32-modular-air-source-heat-pump
+    max_consumed_electric_cooling_kilowatts = 450  # 3 units of Mitsubishi EAHV-M1500/1800YCL-N heat pump. Each unit provides 150 kW cooling power
+    # https://les.mitsubishielectric.co.uk/products/commercial-heat-pumps-and-chillers/commercial-heat-pumps/eahv-r32-modular-air-source-heat-pump
+    heat_pump_coefficient_of_performance = 3.52  # Mitsubishi EAHV-M1500/1800YCL-N heat pump
+    chiller_coefficient_of_performance = 3.35  # Mitsubishi EAHV-M1500/1800YCL-N heat pump
     building_thermal_capacitance_in_kilowatts_hour_per_degree_celsius = 500
     building_thermal_resistance_in_degree_celsius_per_kilowatts = 0.0337
 
