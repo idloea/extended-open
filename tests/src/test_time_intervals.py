@@ -44,5 +44,5 @@ class TimeIntervals(unittest.TestCase):
         result = get_range_array_from_between_hours(start_time_in_hours=start_time_in_hours,
                                                     stop_time_in_hours=stop_time_in_hours,
                                                     step_in_minutes=step_in_minutes)
-        expected_result = np.arange(44, 50, 1)
+        expected_result = np.arange(44, 51, 1)
         np.testing.assert_array_equal(expected_result, result)

@@ -47,4 +47,4 @@ def get_range_array_from_between_hours(start_time_in_hours: float, stop_time_in_
 
     start_interval = int(start_time_in_hours * 60 / step_in_minutes)
     stop_interval = int(stop_time_in_hours * 60 / step_in_minutes)
-    return np.arange(start=start_interval, stop=stop_interval)
+    return np.arange(start=start_interval, stop=stop_interval + 1)
