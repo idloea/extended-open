@@ -3,20 +3,20 @@ import sys, os
 
 # path = os.path.dirname(os.path.dirname(__file__)) 
 path = os.path.dirname(os.path.dirname(sys.argv[0]))
-sys.path.insert(0, os.path.join(path,'System'))
+sys.path.insert(0, os.path.join(path,'src'))
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-# from System.Network_3ph_pf import Network_3ph 
+# from src.Network_3ph_pf import Network_3ph
 from Network_3ph_pf import Network_3ph 
 import copy
 import time
 
 feeder = '13BusOxEmf'
 
-ntwxs = os.path.join(path,'Data','Networks')
+ntwxs = os.path.join(path,'data','Networks')
 dir0 = os.path.join(ntwxs,feeder+'_dss')
 sn0 = os.path.join(dir0,feeder)
 
@@ -43,19 +43,19 @@ bus_index = range(net_ieee13.N_buses)
 # #bus_df.iloc[12]={'name':'675','number':12, 'load_type':'PQ','connect':'Y','Pa':150,'Pb':150,'Pc':150,'Qa': 50,'Qb': 50,'Qc': 50}
 
 bus_df = pd.DataFrame(index = bus_index,columns = bus_columns)
-bus_df.iloc[0]= {'name':'650','number':0,'v_base':net_ieee13.Vslack_ph,  'load_type':'S', 'connect':'Y','Pa':  0,'Pb':  0,'Pc':  0,'Qa':  0,'Qb':  0,'Qc':  0}
-bus_df.iloc[1]= {'name':'632','number':1,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':  0,'Pc':  0,'Qa':  0,'Qb':  0,'Qc':  0}
-bus_df.iloc[2]= {'name':'645','number':2,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':150,'Pc':  0,'Qa':  0,'Qb': 50,'Qc':  0}
-bus_df.iloc[3]= {'name':'646','number':3,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'D','Pa':  0,'Pb':150,'Pc':  0,'Qa':  0,'Qb': 50,'Qc':  0}
-bus_df.iloc[4]= {'name':'633','number':4,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':  0,'Pc':  0,'Qa':  0,'Qb':  0,'Qc':  0}
-bus_df.iloc[5]= {'name':'634','number':5,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':200,'Pb':200,'Pc':200,'Qa': 50,'Qb': 50,'Qc': 50}
-bus_df.iloc[6]= {'name':'671','number':6,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'D','Pa':150,'Pb':150,'Pc':150,'Qa': 50,'Qb': 50,'Qc': 50}
-bus_df.iloc[7]= {'name':'680','number':7,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':  0,'Pc':  0,'Qa':  0,'Qb':  0,'Qc':  0}
-bus_df.iloc[8]= {'name':'684','number':8,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':  0,'Pc':  0,'Qa':  0,'Qb':  0,'Qc':  0}
-bus_df.iloc[9]= {'name':'611','number':9,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':  0,'Pb':  0,'Pc':0,'Qa':  0,'Qb':  0,'Qc': 0}
-bus_df.iloc[10]={'name':'652','number':10,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':0,'Pb':  0,'Pc':  0,'Qa': 0,'Qb':  0,'Qc':  0}
-bus_df.iloc[11]={'name':'692','number':11,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'D','Pa':  0,'Pb':  0,'Pc':0,'Qa':  0,'Qb':  0,'Qc': 0}
-bus_df.iloc[12]={'name':'675','number':12,'v_base':net_ieee13.Vslack_ph,  'load_type':'PQ','connect':'Y','Pa':150,'Pb':150,'Pc':150,'Qa': 50,'Qb': 50,'Qc': 50}
+bus_df.iloc[0]= {'name':'650','number':0,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'S', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':  0, 'Qa':  0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[1]= {'name':'632','number':1,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':  0, 'Qa':  0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[2]= {'name':'645','number':2,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':150, 'Pc':  0, 'Qa':  0, 'Qb': 50, 'Qc':  0}
+bus_df.iloc[3]= {'name':'646','number':3,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'D', 'Pa':  0, 'Pb':150, 'Pc':  0, 'Qa':  0, 'Qb': 50, 'Qc':  0}
+bus_df.iloc[4]= {'name':'633','number':4,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':  0, 'Qa':  0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[5]= {'name':'634','number':5,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':200, 'Pb':200, 'Pc':200, 'Qa': 50, 'Qb': 50, 'Qc': 50}
+bus_df.iloc[6]= {'name':'671','number':6,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'D', 'Pa':150, 'Pb':150, 'Pc':150, 'Qa': 50, 'Qb': 50, 'Qc': 50}
+bus_df.iloc[7]= {'name':'680','number':7,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':  0, 'Qa':  0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[8]= {'name':'684','number':8,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':  0, 'Qa':  0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[9]= {'name':'611','number':9,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':  0, 'Pb':  0, 'Pc':0, 'Qa':  0, 'Qb':  0, 'Qc': 0}
+bus_df.iloc[10]={'name':'652','number':10,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':0, 'Pb':  0, 'Pc':  0, 'Qa': 0, 'Qb':  0, 'Qc':  0}
+bus_df.iloc[11]={'name':'692','number':11,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'D', 'Pa':  0, 'Pb':  0, 'Pc':0, 'Qa':  0, 'Qb':  0, 'Qc': 0}
+bus_df.iloc[12]={'name':'675','number':12,'v_base':net_ieee13.slack_bus_phase_voltage_in_volts, 'load_type': 'PQ', 'connect': 'Y', 'Pa':150, 'Pb':150, 'Pc':150, 'Qa': 50, 'Qb': 50, 'Qc': 50}
 
 net_ieee13.bus_df=bus_df
 
@@ -148,7 +148,7 @@ plt.show()
 # # net_ieee13.linear_model_setup(v_lin0,S_wye_lin0,S_del_lin0) #note that phases need to be 120degrees out for good results
 # # net_ieee13.linear_pf()
 
-# # pf_model =  copy.deepcopy(net_ieee13) 
+# # pf_model =  20230703-090301.deepcopy(net_ieee13)
 
 # # #Actual power flow solution
 # # P_ev_station = P_ev_station_lin + 100e3

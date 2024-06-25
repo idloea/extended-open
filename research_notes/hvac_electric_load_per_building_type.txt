@@ -1,0 +1,38 @@
+1. HOSPITALS
+"In large and centrally air-conditioned hospitals, HVAC systems may consume 40% of total electricity
+consumption" Performance Analysis of Loads in Hospital
+https://www.researchgate.net/publication/332570949_Performance_Analysis_of_Loads_in_Hospital
+
+2. COLLEGE
+
+3. FIRE STATION
+
+4. MIDDLE SCHOOL
+
+5. OFFICES
+"For a typical air-conditioned office building in the tropics with central chiller plant, the amount of energy consumed
+by the chiller plant corresponds to 60–70% of the air conditioning energy use. "
+Using artificial neural networks to assess HVAC related energy saving in retrofitted office buildings
+https://www.sciencedirect.com/science/article/pii/S0038092X18300963
+
+"In tropical climates, the energy consumed by an HVAC system may exceed 50% "
+Energy consumption, indoor thermal comfort and air quality in a commercial office with retrofitted heat,
+ventilation and air conditioning (HVAC) system
+https://www.sciencedirect.com/science/article/pii/S0378778819303640
+
+
+6. SUPERMARKETS
+
+7. HOTELS
+"At the same time, the structure of end-use energy consumption was estimated, of which 54% for heating,
+ventilation and air conditioning (HVAC)," A study on energy consumption of hotel buildings in Vietnam
+https://stce.huce.edu.vn/index.php/en/article/view/1218
+
+" HVAC system, lighting, office equipment, lifts, special zones (including cooking, laundry, swimming pool,
+etc.) were 40%, 27%, 18%, 9%, 6%, respectively" Investigation and analysis on the energy consumption of starred hotel
+buildings in Hainan Province, the tropical region of China
+https://www.sciencedirect.com/science/article/pii/S0196890413003798
+
+"The most consuming service has been reported to be HVAC, with 29–51% of the total electricity consumption [22, 39, 40]."
+Energy use in hotels: a case study in Gran Canaria
+https://academic.oup.com/ijlct/article/16/4/1264/6303530

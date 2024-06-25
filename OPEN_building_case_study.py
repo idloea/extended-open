@@ -18,9 +18,9 @@ import picos as pic
 import matplotlib.pyplot as plt
 from datetime import date, timedelta
 
-import System.Assets as AS
-import System.Markets as MK
-import System.EnergySystem as ES
+import src.assets as AS
+import src.markets as MK
+import src.energy_system as ES
 
 import sys
 
@@ -43,7 +43,7 @@ if not os.path.isdir(path_string):
     os.makedirs(path_string)
 
 #######################################
-### STEP 0: Load Data
+### STEP 0: Load data
 #######################################
 
 choice = 0
@@ -54,14 +54,14 @@ if choice == '1':
 else:
     winterFlag = True
 
-PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2014JAN.csv")
+PV_data_path = os.path.join("data/Building/", "PVpu_1min_2014JAN.csv")
 PVpu_raw_wtr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2014JAN.csv")
+Loads_data_path = os.path.join("data/Building/", "Loads_1min_2014JAN.csv")
 Loads_raw_wtr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
 
-PV_data_path = os.path.join("Data/Building/", "PVpu_1min_2013JUN.csv")
+PV_data_path = os.path.join("data/Building/", "PVpu_1min_2013JUN.csv")
 PVpu_raw_smr = pd.read_csv(PV_data_path, index_col=0, parse_dates=True).values
-Loads_data_path = os.path.join("Data/Building/", "Loads_1min_2013JUN.csv")
+Loads_data_path = os.path.join("data/Building/", "Loads_1min_2013JUN.csv")
 Loads_raw_smr = pd.read_csv(Loads_data_path, index_col=0, parse_dates=True).values
 
 PVtotal_smr = np.sum(PVpu_raw_smr, 1)
@@ -147,13 +147,13 @@ nondispatch_assets = []
 # PV source at bus 3
 Pnet = -PVpu * Ppv_nom  # 100kW PV plant
 Qnet = np.zeros(T)
-PV_gen_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+PV_gen_bus3 = AS.NonDispatchableAsset(dt, bus3, Pnet, Qnet)
 nondispatch_assets.append(PV_gen_bus3)
 
 # Load at bus 3
 Pnet = np.sum(Loads, 1)  # summed load across 120 households
 Qnet = np.zeros(T)
-load_bus3 = AS.NondispatchableAsset(Pnet, Qnet, bus3, dt, T)
+load_bus3 = AS.NonDispatchableAsset(dt, bus3, Pnet, Qnet)
 nondispatch_assets.append(load_bus3)
 
 # Building asset at bus 3
@@ -181,15 +181,13 @@ N_BLDGs = len(building_assets)
 #######################################
 
 bus_id_market = bus1
-market = MK.Market(bus_id_market, prices_export, prices_import, demand_charge, Pmax_market, Pmin_market, dt_market,
-                   T_market)
+market = MK.Market(bus_id_market, prices_export, prices_import, 0.15, 17, 0.07, 7, Pmax_market, Pmin_market, dt_market,
+                   T_market),,
 
-#######################################
-# STEP 5: setup the energy system
-#######################################
-
-energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, dt, T, dt_ems, T_ems,
-                                building_assets)
+         #######################################
+         # STEP 5: setup the energy system
+         #####################################
+         energy_system = ES.EnergySystem(storage_assets, nondispatch_assets, network, market, dt, dt_ems)
 
 #######################################
 ### STEP 6: simulate the energy system: 
@@ -245,7 +243,7 @@ for t_ems in range(T_ems):
 
 plt.figure(figsize=(6, 12), dpi=80, facecolor='w')
 plt.subplot(4, 1, 1)
-plt.plot(time_ems, market.prices_import)
+plt.plot(time_ems, market.import_prices_in_pounds_per_kWh)
 plt.grid(True, alpha=0.5)
 plt.ylabel('Price (£/kWh)')
 plt.xlabel('Time (h)')

@@ -17,10 +17,10 @@ Q_demand_actual = np.zeros([T,N_nondispatch])
 Q_demand_pred = np.zeros([T,N_nondispatch])
 Q_demand = np.zeros([T_mpc,N_nondispatch])
 for i in range(N_nondispatch):
-    P_demand_actual[:,i] = nondispatch_assets[i].Pnet
-    P_demand_pred[:,i] = nondispatch_assets[i].Pnet_pred
-    Q_demand_actual[:,i] = nondispatch_assets[i].Qnet
-    Q_demand_pred[:,i] = nondispatch_assets[i].Qnet_pred
+    P_demand_actual[:,i] = nondispatch_assets[i].active_power_in_kilowatts
+    P_demand_pred[:,i] = nondispatch_assets[i].active_power_pred
+    Q_demand_actual[:,i] = nondispatch_assets[i].reactive_power
+    Q_demand_pred[:,i] = nondispatch_assets[i].reactive_power_pred
 #Assemble P_demand out of P actual and P predicted and convert to EMS time series scale
 for i in range(N_nondispatch):
     for t_ems in T_range:
@@ -34,7 +34,7 @@ for i in range(N_nondispatch):
 #get total ES system demand (before optimisation)
 Pnet_ES_sum = np.zeros(T)
 for i in range(N_nondispatch):
-    Pnet_ES_sum += storage_assets[i].Pnet  
+    Pnet_ES_sum += storage_assets[i].active_power_in_kilowatts
 #get the maximum (historical) demand before t0
 if t0 > 0:
     P_max_demand_pre_t0 = np.max(P_demand_actual[0:t0_dt]+Pnet_ES_sum[0:t0_dt]) 
@@ -45,7 +45,7 @@ G_wye_nondispatch = np.zeros([3*(N_buses-1),N_nondispatch])
 G_del_nondispatch = np.zeros([3*(N_buses-1),N_nondispatch])
 for i in range(N_nondispatch):
     asset_N_phases = nondispatch_assets[i].phases.size
-    bus_id = nondispatch_assets[i].bus_id
+    bus_id = nondispatch_assets[i].network_bus_id
     wye_flag = network.bus_df[network.bus_df['number']==bus_id]['connect'].values[0]=='Y' #check if Wye connected
     for ph in nondispatch_assets[i].phases:
         bus_ph_index = 3*bus_id + ph
@@ -58,7 +58,7 @@ G_wye_ES = np.zeros([3*(N_buses-1),N_ES])
 G_del_ES = np.zeros([3*(N_buses-1),N_ES])   
 for i in range(N_ES):
     asset_N_phases = storage_assets[i].phases.size
-    bus_id = storage_assets[i].bus_id
+    bus_id = storage_assets[i].network_bus_id
     wye_flag = network.bus_df[network.bus_df['number']==bus_id]['connect'].values[0]=='Y' #check if Wye connected
     for ph in storage_assets[i].phases:
         bus_ph_index = 3*bus_id + ph
@@ -87,20 +87,20 @@ Q_lin_buses = np.zeros([T_mpc,N_buses,N_phases])
 for t in range(T_mpc):
     #Setup linear power flow model:
     for i in range(N_nondispatch):
-        bus_id = nondispatch_assets[i].bus_id
+        bus_id = nondispatch_assets[i].network_bus_id
         phases_i = nondispatch_assets[i].phases
         for ph_i in phases_i:
             bus_ph_index = 3*bus_id + ph_i
             P_lin_buses[t,bus_id,ph_i] += (G_wye_nondispatch[bus_ph_index,i]+G_del_nondispatch[bus_ph_index,i])*P_demand[t,i]
             Q_lin_buses[t,bus_id,ph_i] += (G_wye_nondispatch[bus_ph_index,i]+G_del_nondispatch[bus_ph_index,i])*Q_demand[t,i]
-    #set up a copy of the network for MPC interval t
+    #set up a 20230703-090301 of the network for MPC interval t
     network_t = copy.deepcopy(network)
     network_t.clear_loads()
     for bus_id in range(N_buses):
         for ph_i in range(N_phases):
             Pph_t = P_lin_buses[t,bus_id,ph_i]
             Qph_t = Q_lin_buses[t,bus_id,ph_i]
-            #add P,Q loads to the network copy
+            #add P,Q loads to the network 20230703-090301
             network_t.set_load(bus_id,ph_i,Pph_t,Qph_t)
     network_t.zbus_pf()
     v_lin0 = network_t.v_net_res
@@ -115,16 +115,16 @@ for t in range(T_mpc):
 Asum = pic.new_param('Asum',np.tril(np.ones([T_mpc,T_mpc]))) #lower triangle matrix summing powers
 #linear battery model constraints
 for i in range(N_ES):
-    prob.add_constraint(P_ES[:,i] <= storage_assets[i].Pmax[T_range]) #maximum power constraint
-    prob.add_constraint(P_ES[:,i] >= storage_assets[i].Pmin[T_range]) #minimum power constraint
-    prob.add_constraint(dt_ems*Asum*P_ES[:,i] <= storage_assets[i].Emax[T_range]-storage_assets[i].E[t0_dt]) #maximum energy constraint
-    prob.add_constraint(dt_ems*Asum*P_ES[:,i] >= storage_assets[i].Emin[T_range]-storage_assets[i].E[t0_dt]) #minimum energy constraint
-    prob.add_constraint(dt_ems*Asum[T_mpc-1,:]*P_ES[:,i] + E_T_min >= storage_assets[i].ET-storage_assets[i].E[t0_dt]) #final energy constraint
+    prob.add_constraint(P_ES[:,i] <= storage_assets[i].max_import_kilowatts[T_range]) #maximum power constraint
+    prob.add_constraint(P_ES[:,i] >= storage_assets[i].max_export_kilowatts[T_range]) #minimum power constraint
+    prob.add_constraint(dt_ems * Asum *P_ES[:,i] <= storage_assets[i].max_storage_asset_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #maximum energy constraint
+    prob.add_constraint(dt_ems * Asum *P_ES[:,i] >= storage_assets[i].min_storage_asset_energy_in_kilowatt_hour[T_range] - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #minimum energy constraint
+    prob.add_constraint(dt_ems *Asum[T_mpc-1,:] *P_ES[:,i] + E_T_min >= storage_assets[i].required_terminal_energy_level_in_kilowatt_hour - storage_assets[i].initial_energy_level_in_kilowatt_hour[t0_dt]) #final energy constraint
 #import/export constraints
 for t in range(T_mpc):
-    prob.add_constraint(P_import[t] <= market.Pmax[t0+t]) #maximum import constraint
+    prob.add_constraint(P_import[t] <= market.max_import_kilowatts[t0 + t]) #maximum import constraint
     prob.add_constraint(P_import[t] >= 0) #maximum import constraint
-    prob.add_constraint(P_export[t] <= -market.Pmin[t0+t]) #maximum import constraint
+    prob.add_constraint(P_export[t] <= -market.max_export_kilowatts[t0 + t]) #maximum import constraint
     prob.add_constraint(P_export[t] >= 0) #maximum import constraint
     prob.add_constraint(P_max_demand + P_max_demand_pre_t0 >= P_import[t]-P_export[t]) #maximum demand dummy variable constraint
     prob.add_constraint(P_max_demand  >= 0) #maximum demand dummy variable constraint
@@ -136,11 +136,11 @@ for t in range(T_mpc):
     #Note that linear power flow matricies are in units of W (not kW)
     PQ0_wye = np.concatenate((np.real(network_t.S_PQloads_wye_res),np.imag(network_t.S_PQloads_wye_res)))*1e3
     PQ0_del = np.concatenate((np.real(network_t.S_PQloads_del_res),np.imag(network_t.S_PQloads_del_res)))*1e3
-    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M_wye)))),G_wye_ES_PQ)\
-                 + np.matmul(np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M_del)))),G_del_ES_PQ))
-    b_Pslack =   np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.matmul(np.conj(network_t.M_wye),PQ0_wye))))\
-                +np.real(np.matmul(network_t.vs.T,np.matmul(np.conj(network_t.Ysn),np.matmul(np.conj(network_t.M_del),PQ0_del))))\
-                +np.real(np.matmul(network_t.vs.T,(np.matmul(np.conj(network_t.Yss),np.conj(network_t.vs))+np.matmul(np.conj(network_t.Ysn),np.conj(network_t.M0)))))
+    A_Pslack = (np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_wye)))), G_wye_ES_PQ) \
+                + np.matmul(np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M_del)))), G_del_ES_PQ))
+    b_Pslack =   np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_wye), PQ0_wye))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, np.matmul(np.conj(network_t.Ysn), np.matmul(np.conj(network_t.M_del), PQ0_del))))\
+                +np.real(np.matmul(network_t.vs.number_of_time_intervals_per_day, (np.matmul(np.conj(network_t.Yss), np.conj(network_t.vs)) + np.matmul(np.conj(network_t.Ysn), np.conj(network_t.M0)))))
     prob.add_constraint(P_import[t]-P_export[t] == (np.sum(A_Pslack[i]*P_ES[t,i]*1e3 for i in range(N_ES)) + b_Pslack)/1e3) #net import variables
     #Voltage magnitude constraints
     A_vlim = np.matmul(network_t.K_wye,G_wye_ES_PQ) + np.matmul(network_t.K_del,G_del_ES_PQ)
@@ -164,10 +164,10 @@ for t in range(T_mpc):
 #######################################
 terminal_const = 1e12 #coeff for objective terminal soft constraint
 print(E_T_min)
-prob.set_objective('min',market.demand_charge*P_max_demand+\
-                   sum(market.prices_import[t]*P_import[t]+\
-                     -market.prices_export[t]*P_export[t]\
-                     for t in range(T_mpc)) + terminal_const*E_T_min)#terminal_const*sum(E_T_min[i] for i in range(N_ES)))
+prob.set_objective('min', market.max_demand_charge_in_pounds_per_kWh * P_max_demand + \
+                   sum(market.import_prices_in_pounds_per_kWh[t] * P_import[t] + \
+                       -market.export_price_time_series_in_pounds_per_kWh[t] * P_export[t] \
+                       for t in range(T_mpc)) + terminal_const * E_T_min)#terminal_const*sum(E_T_min[i] for i in range(N_ES)))
 #######################################
 ### STEP 5: solve the optimisation
 #######################################
